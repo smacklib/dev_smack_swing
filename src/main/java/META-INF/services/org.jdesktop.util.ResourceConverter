@@ -1,17 +1,17 @@
-org.jdesktop.util.converters.StringStringConverter
-org.jdesktop.util.converters.StringArrayRc
+org.smack.swing.util.converters.StringStringConverter
+org.smack.swing.util.converters.StringArrayRc
 
-org.jdesktop.util.converters.UrlStringConverter
-org.jdesktop.util.converters.UriStringConverter
+org.smack.swing.util.converters.UrlStringConverter
+org.smack.swing.util.converters.UriStringConverter
 
-org.jdesktop.util.converters.ColorStringConverter
-org.jdesktop.util.converters.DimensionStringConverter
-org.jdesktop.util.converters.EmptyBorderStringConverter
-org.jdesktop.util.converters.FontStringConverter
-org.jdesktop.util.converters.IconStringConverter
-org.jdesktop.util.converters.ImageStringConverter
-org.jdesktop.util.converters.InsetsStringConverter
-org.jdesktop.util.converters.KeyStrokeStringConverter
-org.jdesktop.util.converters.Point2dStringConverter
-org.jdesktop.util.converters.PointStringConverter
-org.jdesktop.util.converters.RectangleStringConverter
+org.smack.swing.util.converters.ColorStringConverter
+org.smack.swing.util.converters.DimensionStringConverter
+org.smack.swing.util.converters.EmptyBorderStringConverter
+org.smack.swing.util.converters.FontStringConverter
+org.smack.swing.util.converters.IconStringConverter
+org.smack.swing.util.converters.ImageStringConverter
+org.smack.swing.util.converters.InsetsStringConverter
+org.smack.swing.util.converters.KeyStrokeStringConverter
+org.smack.swing.util.converters.Point2dStringConverter
+org.smack.swing.util.converters.PointStringConverter
+org.smack.swing.util.converters.RectangleStringConverter
