@@ -11,8 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.smack.swing.application.ResourceManager.Resource;
-import org.smack.swing.smack.util.StringUtils;
 import org.smack.util.Pair;
+import org.smack.util.StringUtil;
 
 /**
  *
@@ -89,7 +89,7 @@ public class ResourceManager
 
             String name = r.name();
 
-            if ( StringUtils.isEmpty( name ) )
+            if ( StringUtil.isEmpty( name ) )
                 name = f.getName();
 
             String value = rb.get( name );
@@ -231,7 +231,7 @@ public class ResourceManager
         public Object parseString( String s, ResourceMap r )
                 throws Exception
         {
-            String[] split = StringUtils.splitQuoted( s );
+            String[] split = StringUtil.splitQuoted( s );
 
             Object result = Array.newInstance(
                     getType().getComponentType(), split.length );

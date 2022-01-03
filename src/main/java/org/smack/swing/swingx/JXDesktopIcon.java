@@ -36,9 +36,9 @@ import javax.swing.border.AbstractBorder;
 
 import org.smack.swing.application.Application;
 import org.smack.swing.application.ResourceManager.Resource;
-import org.smack.swing.smack.util.StringUtils;
 import org.smack.swing.swingx.action.AbstractActionExt;
 import org.smack.swing.swingx.util.ComponentDragHandler;
+import org.smack.util.StringUtil;
 
 /**
  * An icon that can be placed on a {@link JXDesktop} pane.
@@ -219,7 +219,7 @@ public abstract class JXDesktopIcon extends Box
                     null,
                     JXDesktopIcon.this.getText() );
 
-            if ( StringUtils.hasContent( s ) )
+            if ( StringUtil.hasContent( s ) )
             {
                 JXDesktopIcon.this.setText( s.trim() );
                 JXDesktopIcon.this.setSize( JXDesktopIcon.this.getPreferredSize() );

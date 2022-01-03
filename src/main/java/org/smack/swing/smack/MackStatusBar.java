@@ -26,7 +26,7 @@ import javax.swing.border.EmptyBorder;
 import org.smack.swing.application.Application;
 import org.smack.swing.application.ResourceManager.Resource;
 import org.smack.swing.application.TaskMonitor;
-import org.smack.swing.smack.util.StringUtils;
+import org.smack.util.StringUtil;
 
 
 
@@ -144,7 +144,7 @@ public class MackStatusBar extends JPanel implements PropertyChangeListener
     public void setMessage( String message )
     {
         if ( message == null )
-            message = StringUtils.EMPTY_STRING;
+            message = StringUtil.EMPTY_STRING;
 
         messageLabel.setText( message );
     }
@@ -198,7 +198,7 @@ public class MackStatusBar extends JPanel implements PropertyChangeListener
         @Override
         public void actionPerformed( ActionEvent e )
         {
-            messageLabel.setText( StringUtils.EMPTY_STRING );
+            messageLabel.setText( StringUtil.EMPTY_STRING );
         }
     }
 

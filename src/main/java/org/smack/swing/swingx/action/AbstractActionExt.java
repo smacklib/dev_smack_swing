@@ -30,7 +30,7 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.KeyStroke;
 
-import org.smack.swing.smack.util.StringUtils;
+import org.smack.util.StringUtil;
 
 /**
  * Extends the concept of the Action to include toggle or group states.
@@ -318,7 +318,7 @@ public abstract class AbstractActionExt extends AbstractAction
     }
 
     public void setMnemonic(String mnemonic) {
-        if ( StringUtils.hasContent( mnemonic ) ) {
+        if ( StringUtil.hasContent( mnemonic ) ) {
             putValue(Action.MNEMONIC_KEY, new Integer(mnemonic.charAt(0)));
         }
     }

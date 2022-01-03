@@ -6,7 +6,7 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.ResourceBundle.Control;
 
-import org.smack.swing.smack.util.StringUtils;
+import org.smack.util.StringUtil;
 
 /**
  * A map holding all resources defined in the resources for
@@ -29,8 +29,8 @@ public class ResourceMap extends HashMap<String, String>
 
         String pack =
                 cl.getPackage().getName();
-        if ( StringUtils.isEmpty( pack ) )
-            pack = StringUtils.EMPTY_STRING;
+        if ( StringUtil.isEmpty( pack ) )
+            pack = StringUtil.EMPTY_STRING;
 
         _bundleName =
                 String.format( "%s.resources.%s",

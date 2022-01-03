@@ -37,7 +37,6 @@ import javax.swing.JMenu;
 import org.smack.swing.application.ResourceMap.InjectFieldException;
 import org.smack.swing.application.ResourceMap.LookupException;
 import org.smack.swing.application.ResourceMap.PropertyInjectionException;
-import org.smack.swing.smack.util.StringUtils;
 import org.smack.swing.util.ReflectionUtil;
 import org.smack.util.Pair;
 import org.smack.util.StringUtil;
@@ -190,7 +189,7 @@ public final class ResourceManager
         int idx = bundleName.lastIndexOf( "." );
 
         return ( idx == -1 ) ?
-                StringUtils.EMPTY_STRING :
+                StringUtil.EMPTY_STRING :
                 bundleName.substring( 0, idx );
     }
 
@@ -467,7 +466,7 @@ public final class ResourceManager
 
         String resourcePackage = packge != null ?
                 packge.getName() + "." :
-                StringUtils.EMPTY_STRING;
+                StringUtil.EMPTY_STRING;
 
         resourcePackage += "resources.";
 
@@ -534,7 +533,7 @@ public final class ResourceManager
         {
             String key = field.right.name();
 
-            if ( ! StringUtils.hasContent( key ) )
+            if ( ! StringUtil.hasContent( key ) )
                 key = keyPrefix + field.left.getName();
 
             injectField( field.left, target, key, map );

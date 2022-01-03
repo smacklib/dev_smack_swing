@@ -41,7 +41,7 @@ import org.smack.swing.application.Application;
 import org.smack.swing.application.ResourceManager.Resource;
 import org.smack.swing.smack.FontResizer;
 import org.smack.swing.smack.util.FileUtils;
-import org.smack.swing.smack.util.OutputStreamForwarder;
+import org.smack.util.io.OutputStreamForwarder;
 
 /**
  * A console ui component. Connects stream oriented in- and output to a text component.

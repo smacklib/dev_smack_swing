@@ -1,8 +1,8 @@
 package org.smack.swing.util.converters;
 
-import org.smack.swing.smack.util.StringUtils;
 import org.smack.swing.util.ResourceConverter;
 import org.smack.swing.util.ResourceMap;
+import org.smack.util.StringUtil;
 
 /**
  *
@@ -18,10 +18,10 @@ public class StringStringConverter extends ResourceConverter {
     @Override
     public Object parseString( String s, ResourceMap r )
     {
-        String[] quotedParts = StringUtils.splitQuoted( s );
+        String[] quotedParts = StringUtil.splitQuoted( s );
 
-        return StringUtils.concatenate(
-                StringUtils.EMPTY_STRING,
+        return StringUtil.concatenate(
+                StringUtil.EMPTY_STRING,
                 quotedParts );
     }
 }

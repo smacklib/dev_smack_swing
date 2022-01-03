@@ -20,8 +20,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.smack.swing.application.ResourceManager;
-import org.smack.swing.smack.util.StringUtils;
 import org.smack.swing.util.ServiceManager;
+import org.smack.util.StringUtil;
 
 /**
  * Generic modal dialog that can display a user-defined UI component.
@@ -52,8 +52,8 @@ public class JXDialogExt extends JDialog
      */
     private final JXHeader _info =
         new JXHeader(
-            StringUtils.EMPTY_STRING,
-            StringUtils.EMPTY_STRING,
+            StringUtil.EMPTY_STRING,
+            StringUtil.EMPTY_STRING,
             GTools.ICON_INFO );
 
     /**
@@ -240,8 +240,8 @@ public class JXDialogExt extends JDialog
      */
     public void setMessage(String pMessage)
     {
-        if ( ! StringUtils.hasContent(pMessage)) {
-            _info.setDescription( StringUtils.EMPTY_STRING );
+        if ( ! StringUtil.hasContent(pMessage)) {
+            _info.setDescription( StringUtil.EMPTY_STRING );
             _info.setVisible( false );
             return;
         }

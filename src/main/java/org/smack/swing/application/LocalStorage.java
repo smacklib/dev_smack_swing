@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 import org.smack.swing.application.util.AppHelper;
 import org.smack.swing.application.util.PlatformType;
 import org.smack.swing.beans.AbstractBeanEdt;
-import org.smack.swing.smack.util.StringUtils;
+import org.smack.util.StringUtil;
 
 /**
  * Access to per application, per user, local file storage. The
@@ -60,9 +60,9 @@ public final class LocalStorage extends AbstractBeanEdt {
         String vendorId = a.getVendorId();
         String applicationId = a.getId();
 
-        if ( StringUtils.isEmpty( vendorId ) )
+        if ( StringUtil.isEmpty( vendorId ) )
             throw new IllegalArgumentException("Empty vendorId");
-        if ( StringUtils.isEmpty( applicationId ) )
+        if ( StringUtil.isEmpty( applicationId ) )
             throw new IllegalArgumentException("Empty applicationId");
 
         _vendorId =

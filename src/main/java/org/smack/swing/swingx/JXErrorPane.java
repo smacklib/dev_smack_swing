@@ -32,12 +32,12 @@ import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.SwingUtilities;
 
-import org.smack.swing.smack.util.StringUtils;
 import org.smack.swing.swingx.error.ErrorInfo;
 import org.smack.swing.swingx.error.ErrorReporter;
 import org.smack.swing.swingx.plaf.ErrorPaneAddon;
 import org.smack.swing.swingx.plaf.ErrorPaneUI;
 import org.smack.swing.swingx.plaf.LookAndFeelAddons;
+import org.smack.util.StringUtil;
 
 /**
  * <p>JXErrorPane is a common error component suitable for displaying errors,
@@ -228,6 +228,7 @@ public class JXErrorPane extends JComponent
      *
      * @return the {@link ErrorPaneUI} object that renders this component
      */
+    @Override
     public ErrorPaneUI getUI() {
         return (ErrorPaneUI)ui;
     }
@@ -370,7 +371,7 @@ public class JXErrorPane extends JComponent
         String message = e.getMessage();
 
         // If there's no message...
-        if ( ! StringUtils.hasContent( message ) )
+        if ( ! StringUtil.hasContent( message ) )
             // ...we use the exception's class name.
             message = e.getClass().getSimpleName();
 

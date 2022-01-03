@@ -31,8 +31,8 @@ import org.smack.swing.application.ResourceManager.Resource;
 import org.smack.swing.application.util.AppHelper;
 import org.smack.swing.application.util.OSXAdapter;
 import org.smack.swing.application.util.PlatformType;
-import org.smack.swing.smack.util.StringUtils;
 import org.smack.swing.util.ServiceManager;
+import org.smack.util.StringUtil;
 
 /**
  * The base class for Swing applications.
@@ -285,7 +285,7 @@ public abstract class Application extends BaseApplication
         // isn't defined we default to "system".
         String lnf =
                 appResourceMap.getString(KEY_APPLICATION_LOOKANDFEEL);
-        if ( StringUtils.isEmpty( lnf ) )
+        if ( StringUtil.isEmpty( lnf ) )
             lnf = "system";
 
         // For default nothing to do.
@@ -306,7 +306,7 @@ public abstract class Application extends BaseApplication
                 break;
             }
 
-        if ( StringUtils.isEmpty( classname ) )
+        if ( StringUtil.isEmpty( classname ) )
         {
             LOG.warning(
                     "LookAndFeel not found: " +

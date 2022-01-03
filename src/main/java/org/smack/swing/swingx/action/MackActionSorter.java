@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.smack.swing.smack.util.StringUtils;
+import org.smack.util.StringUtil;
 
 
 /**
@@ -45,7 +45,7 @@ implements Comparator<MackAction>
         for ( MackAction c : actionCategory )
         {
             String cGroupName =
-                StringUtils.toString( c.getCategory() );
+                StringUtil.toString( c.getCategory() );
 
             if ( categoryName == null )
                 categoryName = cGroupName;

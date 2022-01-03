@@ -10,10 +10,10 @@ package org.smack.swing.swingx;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+
 import javax.swing.JSplitPane;
 
-import org.smack.swing.smack.util.MathExt;
-
+import org.smack.util.MathUtil;
 
 /**
  * A JSplitPane that allows setting the proportional divider location
@@ -60,6 +60,8 @@ public class JXSplitPane
      * @deprecated Use the constructor to set the proportional location.
      * @throws IllegalStateException In all cases.
      */
+    @Deprecated
+    @Override
     public void setDividerLocation( double proportionalLocation )
     {
         throw new IllegalStateException(
@@ -75,7 +77,7 @@ public class JXSplitPane
             removeComponentListener( this );
             _cl = null;
             setDividerLocation(
-                    MathExt.round( getWidth() * _proportionalLeftTopx ) );
+                    MathUtil.round( getWidth() * _proportionalLeftTopx ) );
         }
     };
 }
