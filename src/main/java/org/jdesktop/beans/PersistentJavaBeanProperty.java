@@ -11,8 +11,7 @@ import java.util.logging.Logger;
 import org.jdesktop.application.Application;
 import org.jdesktop.application.ApplicationProperties;
 import org.jdesktop.util.ServiceManager;
-
-import javafx.util.StringConverter;
+import org.smack.util.converters.StringConverter;
 
 /**
  * A JavaBean property that uses ApplicationProperties for persistence.
@@ -30,7 +29,7 @@ public class PersistentJavaBeanProperty<T,B> extends JavaBeanProperty<T,B>
 
     private Application _app;
 
-    private final StringConverter<T> _converter;
+    private final StringConverter _converter;
 
     /**
      * Create an instance.
@@ -44,7 +43,7 @@ public class PersistentJavaBeanProperty<T,B> extends JavaBeanProperty<T,B>
             B bean,
             T initialValue,
             String propertyName,
-            StringConverter<T> converter )
+            StringConverter converter )
     {
         super( bean, initialValue, propertyName );
 
@@ -73,7 +72,7 @@ public class PersistentJavaBeanProperty<T,B> extends JavaBeanProperty<T,B>
         {
             try
             {
-                super.set( converter.fromString( value ) );
+                super.set( _converter.convert( getType(), value ) );
                 // All worked, object is initialized, we're done.
                 return;
             }
@@ -98,7 +97,7 @@ public class PersistentJavaBeanProperty<T,B> extends JavaBeanProperty<T,B>
         getAps().put(
                 getBean().getClass(),
                 getName(),
-                _converter.toString( newValue ) );
+                "" ); // TODO _converter.toString( newValue ) );
 
         super.set( newValue );
     }
