@@ -11,8 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jdesktop.application.ResourceManager.Resource;
-import org.jdesktop.smack.util.Pair;
 import org.jdesktop.smack.util.StringUtils;
+import org.smack.util.Pair;
 
 /**
  *

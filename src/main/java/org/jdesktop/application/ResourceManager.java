@@ -37,9 +37,9 @@ import javax.swing.JMenu;
 import org.jdesktop.application.ResourceMap.InjectFieldException;
 import org.jdesktop.application.ResourceMap.LookupException;
 import org.jdesktop.application.ResourceMap.PropertyInjectionException;
-import org.jdesktop.smack.util.Pair;
 import org.jdesktop.smack.util.StringUtils;
 import org.jdesktop.util.ReflectionUtil;
+import org.smack.util.Pair;
 import org.smack.util.StringUtil;
 
 
