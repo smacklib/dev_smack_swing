@@ -16,8 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
-import org.smack.swing.smack.util.FileUtils;
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.FileUtil;
+import org.smack.util.ServiceManager;
 
 /**
  * An application service that offers a simple means to store short-term,
@@ -83,7 +83,7 @@ public class ApplicationProperties
         }
         finally
         {
-            FileUtils.forceClose( is );
+            FileUtil.forceClose( is );
         }
 
         _storage = localMap;
@@ -278,7 +278,7 @@ public class ApplicationProperties
         }
         finally
         {
-            FileUtils.forceClose( oos );
+            FileUtil.forceClose( oos );
         }
     }
 

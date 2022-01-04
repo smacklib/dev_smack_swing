@@ -36,7 +36,7 @@ import javax.swing.JToolBar;
 import org.smack.swing.application.ResourceManager;
 import org.smack.swing.swingx.action.ActionContainerFactory;
 import org.smack.swing.swingx.action.MackAction;
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 
 /**
  * An extended toolbar that offers a popup menu allowing to select whether

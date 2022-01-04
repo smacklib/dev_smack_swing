@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 import org.smack.swing.application.Application;
 import org.smack.swing.application.ApplicationProperties;
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 import org.smack.util.converters.StringConverter;
 
 /**

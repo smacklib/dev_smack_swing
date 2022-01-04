@@ -15,7 +15,7 @@ import javax.swing.JComponent;
 
 import org.smack.swing.application.util.AppHelper;
 import org.smack.swing.beans.AbstractBeanEdt;
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 
 /**
  * A singleton that manages shared objects, like actions, resources, and tasks,

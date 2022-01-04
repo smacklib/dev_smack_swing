@@ -27,7 +27,7 @@ import org.smack.swing.application.session.SplitPaneProperty;
 import org.smack.swing.application.session.TabbedPaneProperty;
 import org.smack.swing.application.session.TableProperty;
 import org.smack.swing.application.session.WindowProperty;
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 
 /**
  * Support for storing GUI state that persists between Application sessions.

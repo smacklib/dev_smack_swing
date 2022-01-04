@@ -37,8 +37,8 @@ import javax.swing.JMenu;
 import org.smack.swing.application.ResourceMap.InjectFieldException;
 import org.smack.swing.application.ResourceMap.LookupException;
 import org.smack.swing.application.ResourceMap.PropertyInjectionException;
-import org.smack.swing.util.ReflectionUtil;
 import org.smack.util.Pair;
+import org.smack.util.ReflectionUtil;
 import org.smack.util.StringUtil;
 
 
@@ -527,7 +527,7 @@ public final class ResourceManager
         String keyPrefix = targetType.getSimpleName() + ".";
 
         for ( Pair<Field,Resource> field :
-            ReflectionUtil.getAnnotatedFields(
+            org.jdesktop.util.ReflectionUtil.getAnnotatedFields(
                     targetType,
                     Resource.class ) )
         {

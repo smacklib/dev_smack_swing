@@ -8,7 +8,7 @@
 package org.smack.swing.application;
 
 import org.smack.swing.beans.AbstractBeanEdt;
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 
 /**
  * A raw base application.  Offers management of ApplicationServices.

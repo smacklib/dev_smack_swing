@@ -9,7 +9,7 @@ import java.awt.event.ActionEvent;
 import java.util.function.Consumer;
 
 import org.smack.swing.swingx.action.AbstractActionExt;
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 
 /**
 * An action taking a method reference as the action delegate.

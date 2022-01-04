@@ -11,7 +11,7 @@ import java.util.Objects;
 
 import javax.swing.ImageIcon;
 
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 
 /**
  * Application information.

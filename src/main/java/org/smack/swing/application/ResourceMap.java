@@ -41,8 +41,8 @@ import org.smack.swing.application.converters.Point2dStringConverter;
 import org.smack.swing.application.converters.PointStringConverter;
 import org.smack.swing.application.converters.RectangleStringConverter;
 import org.smack.swing.application.util.PlatformType;
-import org.smack.swing.smack.util.ResourceUtils;
-import org.smack.swing.util.ReflectionUtil;
+import org.smack.util.ReflectionUtil;
+import org.smack.util.ResourceUtil;
 import org.smack.util.StringUtil;
 
 /**
@@ -261,7 +261,7 @@ public class ResourceMap
      */
     private void populateResourceMap(String bundleName, Map<String, Object> bundlesMap) {
 
-        Map<String,String> ss = ResourceUtils.getPreprocessedResourceBundle( bundleName, _locale, _classLoader );
+        Map<String,String> ss = ResourceUtil.getPreprocessedResourceBundle( bundleName, _locale, _classLoader );
 
         if ( ss != null )
             bundlesMap.putAll( ss );

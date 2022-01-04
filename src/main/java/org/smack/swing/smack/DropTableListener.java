@@ -22,10 +22,7 @@ import java.util.logging.Logger;
 
 import javax.swing.JTable;
 
-import org.smack.swing.smack.util.Transformer;
-
-
-
+import org.smack.util.Transformer;
 
 /**
  * <p>A drag and drop listener that can be added to a table.  An example
@@ -66,6 +63,7 @@ public class DropTableListener implements DropTargetListener
     /*
      * Inherit javadoc.
      */
+    @Override
     public void dragEnter( DropTargetDragEvent dtde )
     {
     }
@@ -75,6 +73,7 @@ public class DropTableListener implements DropTargetListener
     /*
      * Inherit javadoc.
      */
+    @Override
     public void drop( DropTargetDropEvent dtde )
     {
         // Used on dnd protocol completion in 'finally' below.

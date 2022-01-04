@@ -40,7 +40,7 @@ import org.smack.swing.application.Action;
 import org.smack.swing.application.Application;
 import org.smack.swing.application.ResourceManager.Resource;
 import org.smack.swing.smack.FontResizer;
-import org.smack.swing.smack.util.FileUtils;
+import org.smack.util.FileUtil;
 import org.smack.util.io.OutputStreamForwarder;
 
 /**
@@ -848,7 +848,7 @@ public final class JXConsole extends JPanel implements KeyListener {
                 null, e.getLocalizedMessage(), "Writing failed.", JOptionPane.ERROR_MESSAGE, null);
         }
         finally {
-            FileUtils.forceClose(fw);
+            FileUtil.forceClose(fw);
         }
     }
 

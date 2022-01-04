@@ -9,7 +9,7 @@ package org.smack.swing.beans;
 import java.beans.PropertyChangeListener;
 import java.lang.reflect.Method;
 
-import org.smack.swing.smack.util.ReflectionUtils;
+import org.smack.util.ReflectionUtil;
 
 /**
  * Wraps an object that offers a property change listener interface.
@@ -17,7 +17,6 @@ import org.smack.swing.smack.util.ReflectionUtils;
  * {@code addPropertyChangeListener( PropertyChangeListener p )} and
  * {@code removePropertyChangeListener( PropertyChangeListener p )}.
  *
- * @version $Rev$
  * @author Michael Binz
  */
 public class PropertyAdapter
@@ -72,41 +71,41 @@ public class PropertyAdapter
 
         int found = 0;
 
-        _addPcl = ReflectionUtils.getMethod(
+        _addPcl = ReflectionUtil.getMethod(
                 beanClass,
                 "addPropertyChangeListener",
                 PropertyChangeListener.class );
         if ( _addPcl != null )
             found++;
 
-        _addPclNamed = ReflectionUtils.getMethod(
+        _addPclNamed = ReflectionUtil.getMethod(
                 beanClass,
                 "addPropertyChangeListener",
                 String.class, PropertyChangeListener.class );
         if ( _addPclNamed != null )
             found++;
 
-        _removePcl = ReflectionUtils.getMethod(
+        _removePcl = ReflectionUtil.getMethod(
                 beanClass,
                 "removePropertyChangeListener",
                 PropertyChangeListener.class );
         if ( _removePcl != null )
             found++;
 
-        _removePclNamed = ReflectionUtils.getMethod(
+        _removePclNamed = ReflectionUtil.getMethod(
                 beanClass,
                 "removePropertyChangeListener",
                 String.class, PropertyChangeListener.class );
         if ( _removePclNamed != null )
             found++;
 
-        _getPcls = ReflectionUtils.getMethod(
+        _getPcls = ReflectionUtil.getMethod(
                 beanClass,
                 "getPropertyChangeListeners" );
         if ( _getPcls != null )
             found++;
 
-        _getPclsNamed = ReflectionUtils.getMethod(
+        _getPclsNamed = ReflectionUtil.getMethod(
                 beanClass,
                 "getPropertyChangeListeners",
                 String.class );
@@ -130,7 +129,7 @@ public class PropertyAdapter
         if ( _addPcl == null )
             throw new NoSuchMethodError();
 
-        ReflectionUtils.invokeQuiet(
+        ReflectionUtil.invokeQuiet(
                 _addPcl,
                 _bean,
                 listener );
@@ -149,7 +148,7 @@ public class PropertyAdapter
         if ( _removePcl == null )
             throw new NoSuchMethodError();
 
-        ReflectionUtils.invokeQuiet(
+        ReflectionUtil.invokeQuiet(
                 _removePcl,
                 _bean,
                 listener );
@@ -169,7 +168,7 @@ public class PropertyAdapter
         if ( _addPclNamed == null )
             throw new NoSuchMethodError();
 
-        ReflectionUtils.invokeQuiet(
+        ReflectionUtil.invokeQuiet(
                 _addPclNamed,
                 _bean,
                 propertyName,
@@ -188,7 +187,7 @@ public class PropertyAdapter
         if ( _removePclNamed == null )
             throw new NoSuchMethodError();
 
-        ReflectionUtils.invokeQuiet(
+        ReflectionUtil.invokeQuiet(
                 _removePclNamed,
                 _bean,
                 propertyName,
@@ -200,7 +199,7 @@ public class PropertyAdapter
         if ( _getPclsNamed == null )
             throw new NoSuchMethodError();
 
-        return (PropertyChangeListener[])ReflectionUtils.invokeQuiet(
+        return (PropertyChangeListener[])ReflectionUtil.invokeQuiet(
                 _getPclsNamed,
                 _bean,
                 propertyName );
@@ -211,7 +210,7 @@ public class PropertyAdapter
         if ( _getPcls == null )
             throw new NoSuchMethodError();
 
-        return (PropertyChangeListener[])ReflectionUtils.invokeQuiet(
+        return (PropertyChangeListener[])ReflectionUtil.invokeQuiet(
                 _getPcls,
                 _bean );
     }

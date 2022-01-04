@@ -41,7 +41,7 @@ import javax.swing.Timer;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.MouseInputListener;
 
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 
 final class DefaultInputBlocker extends Task.InputBlocker {
 

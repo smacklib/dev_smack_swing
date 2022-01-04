@@ -4,7 +4,6 @@ module smack_swing
 //    exports org.smack.swing.swingx.plaf.synth;
     exports org.smack.swing.swingx.image;
     exports org.smack.swing.swingx.geom;
-    exports org.smack.swing.util.converters;
     exports org.smack.swing.swingx.tips;
     exports org.smack.swing.swingx.text;
     exports org.smack.swing.swingx.renderer;
@@ -13,7 +12,6 @@ module smack_swing
 //    exports org.smack.swing.swingx.hyperlink;
     exports org.smack.swing.swingx.sort;
     exports org.smack.swing.swingx.tree;
-    exports org.smack.swing.smack.util;
     exports org.smack.swing.swingx.decorator;
     exports org.smack.swing.swingx.graphics;
 //    exports org.smack.swing.swingx.plaf;
@@ -27,12 +25,10 @@ module smack_swing
     exports org.smack.swing.swingx.color;
 //    exports org.smack.swing.swingx.plaf.metal;
     exports org.smack.swing.swingx.treetable;
-    exports org.smack.swing.swingx.util;
+//    exports org.smack.swing.swingx.util;
     exports org.smack.swing.application.util;
     exports org.smack.swing.swingx.icon;
-    exports org.smack.swing.util;
     exports org.smack.swing.swingx.painter.effects;
-//    exports org.smack.swing.swingx.plaf.motif;
 //    exports org.smack.swing.swingx.autocomplete.workarounds;
     exports org.smack.swing.swingx.multisplitpane;
     exports org.smack.swing.swingx.combobox;

@@ -31,7 +31,7 @@ import org.smack.swing.application.ResourceManager.Resource;
 import org.smack.swing.application.util.AppHelper;
 import org.smack.swing.application.util.OSXAdapter;
 import org.smack.swing.application.util.PlatformType;
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 import org.smack.util.StringUtil;
 
 /**

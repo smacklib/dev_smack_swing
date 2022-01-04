@@ -31,7 +31,7 @@ import javax.swing.JWindow;
 import javax.swing.RootPaneContainer;
 
 import org.smack.swing.application.util.SwingHelper;
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 
 /**
  * An application base class for simple GUIs with one primary JFrame.

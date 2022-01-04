@@ -10,7 +10,7 @@ package org.smack.swing.beans;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 
-import org.smack.swing.smack.util.ReflectionUtils;
+import org.smack.util.ReflectionUtil;
 
 /**
  * An instance of this class represents a property on the target object
@@ -85,7 +85,7 @@ public class PropertyProxy<T,B> implements PropertyType<T,B>
     @SuppressWarnings("unchecked")
     public T get()
     {
-        return (T)ReflectionUtils.invokeQuiet(
+        return (T)ReflectionUtil.invokeQuiet(
                 _targetProperty.getReadMethod(),
                 _targetObject );
     }
@@ -98,7 +98,7 @@ public class PropertyProxy<T,B> implements PropertyType<T,B>
     @Override
     public void set( T value )
     {
-        ReflectionUtils.invokeQuiet(
+        ReflectionUtil.invokeQuiet(
                 _targetProperty.getWriteMethod(),
                 _targetObject,
                 value );

@@ -25,6 +25,7 @@ import java.util.logging.Logger;
 import org.smack.swing.application.util.AppHelper;
 import org.smack.swing.application.util.PlatformType;
 import org.smack.swing.beans.AbstractBeanEdt;
+import org.smack.util.ServiceManager;
 import org.smack.util.StringUtil;
 
 /**
@@ -55,7 +56,7 @@ public final class LocalStorage extends AbstractBeanEdt {
     LocalStorage()
     {
         ApplicationInfo a =
-                org.smack.swing.util.ServiceManager.getApplicationService( ApplicationInfo.class );
+                ServiceManager.getApplicationService( ApplicationInfo.class );
 
         String vendorId = a.getVendorId();
         String applicationId = a.getId();

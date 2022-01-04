@@ -18,7 +18,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.smack.swing.beans.AbstractBeanEdt;
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 
 /**
  * A type of {@link SwingWorker} that represents an application

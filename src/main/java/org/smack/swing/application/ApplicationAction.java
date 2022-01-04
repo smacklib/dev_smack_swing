@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
 import javax.swing.ActionMap;
 
 import org.smack.swing.swingx.action.MackAction;
-import org.smack.swing.util.ReflectionUtil;
+import org.smack.util.ReflectionUtil;
 import org.smack.util.StringUtil;
 
 

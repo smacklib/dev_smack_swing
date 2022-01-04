@@ -20,7 +20,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import org.smack.swing.application.ResourceManager;
-import org.smack.swing.util.ServiceManager;
+import org.smack.util.ServiceManager;
 import org.smack.util.StringUtil;
 
 /**
