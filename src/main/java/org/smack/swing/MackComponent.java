@@ -5,7 +5,7 @@
  * Released under Gnu Public License
  * Copyright © 2010 Michael G. Binz
  */
-package org.smack.swing.smack;
+package org.smack.swing;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;

@@ -5,7 +5,7 @@
  * Released under Gnu Public License
  * Copyright © 2012 Michael G. Binz
  */
-package org.smack.swing.smack;
+package org.smack.swing;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

@@ -5,7 +5,7 @@
  * Released under Gnu Public License
  * Copyright (c) 2009 Michael G. Binz
  */
-package org.smack.swing.smack;
+package org.smack.swing;
 
 import java.awt.event.KeyEvent;
 import java.util.EventObject;

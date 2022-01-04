@@ -5,11 +5,13 @@
  * Released under Gnu Public License
  * Copyright (c) 2003-2006 Michael G. Binz
  */
-package org.smack.swing.smack.actions;
+package org.smack.swing.actions;
 
-import javax.swing.table.*;
+import java.util.Enumeration;
+
 import javax.swing.event.TableModelListener;
-import java.util.*;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
 
 
@@ -59,7 +61,8 @@ final class SystemPropertiesTable implements TableModel
   /*
    * Inherit Javadoc.
    */
-  public int getRowCount()
+  @Override
+public int getRowCount()
   {
     return _dataDelegateModel.getRowCount();
   }
@@ -69,7 +72,8 @@ final class SystemPropertiesTable implements TableModel
   /*
    * Inherit Javadoc.
    */
-  public int getColumnCount()
+  @Override
+public int getColumnCount()
   {
     return _dataDelegateModel.getColumnCount();
   }
@@ -79,7 +83,8 @@ final class SystemPropertiesTable implements TableModel
   /*
    * Inherit Javadoc.
    */
-  public String getColumnName(int columnIndex)
+  @Override
+public String getColumnName(int columnIndex)
   {
     return _dataDelegateModel.getColumnName( columnIndex );
   }
@@ -89,7 +94,8 @@ final class SystemPropertiesTable implements TableModel
   /*
    * Inherit Javadoc.
    */
-  public Class getColumnClass(int columnIndex)
+  @Override
+public Class getColumnClass(int columnIndex)
   {
     return _dataDelegateModel.getColumnClass( columnIndex );
   }
@@ -97,14 +103,15 @@ final class SystemPropertiesTable implements TableModel
 
 
   /**
-   * Returns whether a cell is editable.  A model of this type is generally 
+   * Returns whether a cell is editable.  A model of this type is generally
    * <i>not</i> editable.
    *
    * @param rowIndex The index of the row.
    * @param columnIndex The index of the column.
    * @return Always <code>false</code>.
    */
-  public boolean isCellEditable(int rowIndex, int columnIndex)
+  @Override
+public boolean isCellEditable(int rowIndex, int columnIndex)
   {
     return false;
   }
@@ -114,7 +121,8 @@ final class SystemPropertiesTable implements TableModel
   /*
    * Inherit Javadoc.
    */
-  public Object getValueAt(int rowIndex, int columnIndex)
+  @Override
+public Object getValueAt(int rowIndex, int columnIndex)
   {
     return _dataDelegateModel.getValueAt( rowIndex, columnIndex );
   }
@@ -129,7 +137,8 @@ final class SystemPropertiesTable implements TableModel
    * @param columnIndex The cell's column.
    * @param aValue The cell's new content.
    */
-  public void setValueAt(Object aValue, int rowIndex, int columnIndex)
+  @Override
+public void setValueAt(Object aValue, int rowIndex, int columnIndex)
   {
     // No-op -- Set neither needed nor supported.
     return;
@@ -139,7 +148,8 @@ final class SystemPropertiesTable implements TableModel
   /*
    * Inherit Javadoc.
    */
-  public void addTableModelListener(TableModelListener l)
+  @Override
+public void addTableModelListener(TableModelListener l)
   {
     _dataDelegateModel.addTableModelListener( l );
   }
@@ -149,7 +159,8 @@ final class SystemPropertiesTable implements TableModel
   /*
    * Inherit Javadoc.
    */
-  public void removeTableModelListener(TableModelListener l)
+  @Override
+public void removeTableModelListener(TableModelListener l)
   {
     _dataDelegateModel.removeTableModelListener( l );
   }

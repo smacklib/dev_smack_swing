@@ -5,7 +5,7 @@
  * Released under Gnu Public License
  * Copyright © 2010 Michael G. Binz
  */
-package org.smack.swing.smack.actions;
+package org.smack.swing.actions;
 
 import java.awt.event.ActionEvent;
 import java.beans.BeanInfo;

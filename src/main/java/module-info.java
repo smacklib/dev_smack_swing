@@ -15,7 +15,7 @@ module smack_swing
     exports org.smack.swing.swingx.decorator;
     exports org.smack.swing.swingx.graphics;
 //    exports org.smack.swing.swingx.plaf;
-    exports org.smack.swing.smack.rendits;
+//    exports org.smack.swing.smack.rendits;
 //    exports org.smack.swing.swingx.plaf.basic;
     exports org.smack.swing.application.session;
     exports org.smack.swing.swingx.calendar;
@@ -41,14 +41,14 @@ module smack_swing
     exports org.smack.swing.application.converters;
     exports org.smack.swing.swingx.event;
 //    exports org.smack.swing.swingx.plaf.windows;
-    exports org.smack.swing.smack;
+//    exports org.smack.swing.smack;
 //    exports org.smack.swing.swingx.rollover;
 //    exports org.smack.swing.swingx.plaf.nimbus;
     exports org.smack.swing.swingx.painter;
 //    exports org.smack.swing.swingx.plaf.misc;
     exports org.smack.swing.swingx.action;
 //    exports org.smack.swing.swingx.plaf.macosx;
-    exports org.smack.swing.smack.actions;
+//    exports org.smack.swing.smack.actions;
 //    exports org.smack.swing.swingx.autocomplete;
 
     requires transitive framework.smack;

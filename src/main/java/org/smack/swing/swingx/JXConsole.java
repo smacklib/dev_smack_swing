@@ -36,10 +36,10 @@ import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import org.smack.swing.FontResizer;
 import org.smack.swing.application.Action;
 import org.smack.swing.application.Application;
 import org.smack.swing.application.ResourceManager.Resource;
-import org.smack.swing.smack.FontResizer;
 import org.smack.util.FileUtil;
 import org.smack.util.io.OutputStreamForwarder;
 

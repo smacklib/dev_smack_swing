@@ -5,7 +5,7 @@
  * Released under Gnu Public License
  * Copyright (c) 2008 Michael G. Binz
  */
-package org.smack.swing.smack;
+package org.smack.swing;
 
 
 

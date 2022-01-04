@@ -5,7 +5,7 @@
  * Released under Gnu Public License
  * Copyright © 2008-2010 Michael G. Binz
  */
-package org.smack.swing.smack;
+package org.smack.swing;
 
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;

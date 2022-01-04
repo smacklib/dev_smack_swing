@@ -5,7 +5,7 @@
  * Released under Gnu Public License
  * Copyright (c) 2008 Michael G. Binz
  */
-package org.smack.swing.smack.rendits;
+package org.smack.swing.rendits;
 
 import java.awt.Component;
 import java.lang.reflect.Array;

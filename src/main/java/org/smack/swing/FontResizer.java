@@ -1,4 +1,4 @@
-package org.smack.swing.smack;
+package org.smack.swing;
 
 import java.awt.Component;
 import java.awt.event.InputEvent;
