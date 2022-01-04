@@ -1,4 +1,4 @@
-module smack_swing
+module framework.smack_swing
 {
     exports org.smack.swing.swingx.border;
 //    exports org.smack.swing.swingx.plaf.synth;
