@@ -15,7 +15,6 @@ module smack_swing
     exports org.smack.swing.swingx.decorator;
     exports org.smack.swing.swingx.graphics;
 //    exports org.smack.swing.swingx.plaf;
-    exports org.smack.swing.smack.swing;
     exports org.smack.swing.smack.rendits;
 //    exports org.smack.swing.swingx.plaf.basic;
     exports org.smack.swing.application.session;
