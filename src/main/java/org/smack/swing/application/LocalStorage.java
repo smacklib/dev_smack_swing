@@ -22,8 +22,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Logger;
 
+import org.jdesktop.util.PlatformType;
 import org.smack.swing.application.util.AppHelper;
-import org.smack.swing.application.util.PlatformType;
 import org.smack.swing.beans.AbstractBeanEdt;
 import org.smack.util.ServiceManager;
 import org.smack.util.StringUtil;

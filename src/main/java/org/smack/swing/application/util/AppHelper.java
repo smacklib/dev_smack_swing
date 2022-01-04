@@ -6,11 +6,9 @@
  */
 package org.smack.swing.application.util;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 import javax.swing.Action;
 
+import org.jdesktop.util.PlatformType;
 import org.smack.swing.application.Application;
 import org.smack.swing.application.ResourceManager;
 import org.smack.swing.application.ResourceMap;
@@ -23,8 +21,6 @@ import org.smack.swing.swingx.GTools;
  * @author Vity
  */
 public final class AppHelper {
-
-    private static PlatformType activePlatformType = null;
 
     private AppHelper() {
         throw new AssertionError();
@@ -82,28 +78,6 @@ public final class AppHelper {
 	 * @return current platform type
      */
     public static PlatformType getPlatform() {
-        if (activePlatformType != null)
-            return activePlatformType;
-        activePlatformType = PlatformType.DEFAULT;
-        PrivilegedAction<String> doGetOSName = new PrivilegedAction<String>() {
-
-            @Override
-            public String run() {
-                return System.getProperty("os.name");
-            }
-        };
-
-        String osName = AccessController.doPrivileged(doGetOSName);
-        if (osName != null) {
-            osName = osName.toLowerCase();
-            for (PlatformType platformType : PlatformType.values()) {
-                for (String pattern : platformType.getPatterns()) {
-                    if (osName.startsWith(pattern)) {
-                        return activePlatformType = platformType;
-                    }
-                }
-            }
-        }
-        return activePlatformType = PlatformType.DEFAULT;
+        return PlatformType.getPlatform();
     }
 }

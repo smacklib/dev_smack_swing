@@ -28,6 +28,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.KeyStroke;
 
+import org.jdesktop.util.PlatformType;
 import org.smack.swing.application.ResourceConverter.ResourceConverterException;
 import org.smack.swing.application.converters.ColorStringConverter;
 import org.smack.swing.application.converters.DimensionStringConverter;
@@ -40,7 +41,6 @@ import org.smack.swing.application.converters.KeyStrokeStringConverter;
 import org.smack.swing.application.converters.Point2dStringConverter;
 import org.smack.swing.application.converters.PointStringConverter;
 import org.smack.swing.application.converters.RectangleStringConverter;
-import org.smack.swing.application.util.PlatformType;
 import org.smack.util.ReflectionUtil;
 import org.smack.util.ResourceUtil;
 import org.smack.util.StringUtil;
@@ -240,7 +240,7 @@ public class ResourceMap
      */
     private synchronized Map<String, Object> getBundlesMap() {
         if (_bundlesMap == null) {
-            String resourceSuffix = getPlatform().getResourceSuffix();
+            String resourceSuffix = getPlatform().resourceSuffix;
             Map<String, Object> bundlesMap = new ConcurrentHashMap<String, Object>();
             for (int i = _bundleNames.size() - 1; i >= 0; i--) {
                 populateResourceMap(_bundleNames.get(i), bundlesMap);
