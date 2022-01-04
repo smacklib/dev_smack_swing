@@ -31,6 +31,7 @@ import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
+import org.smack.swing.GTools;
 import org.smack.swing.application.Action;
 import org.smack.swing.beans.JavaBeanProperty;
 import org.smack.swing.beans.PropertyLink;

@@ -4,7 +4,7 @@
  *
  * Copyright © 2005-2012 Michael G. Binz
  */
-package org.smack.swing.swingx;
+package org.smack.swing;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -63,7 +63,7 @@ public class GTools
      * @param a
      *            the action to add
      */
-    static void registerDoubleClick(Component c, final Action a) {
+    public static void registerDoubleClick(Component c, final Action a) {
         c.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent ev) {
@@ -107,7 +107,7 @@ public class GTools
      * @param pDialog
      * @param pEscAction
      */
-    static void registerEsc(
+    public static void registerEsc(
             final JDialog pDialog,
             final Action pEscAction)
     {
@@ -126,7 +126,7 @@ public class GTools
      *            the action to fire when the dialog closes. This is usualiy the
      *            same action as in the {@link #registerEsc(JDialog, Action)}.
      */
-    static void registerWindowClosing(
+    public static void registerWindowClosing(
             final JDialog pDialog,
             final Action pCancelAction)
     {
@@ -267,59 +267,15 @@ public class GTools
     }
 
     /**
-     * Recursively localizes the given component and all its child components
-     * using the resource map of the component's class.
-     *
-     * @param pComponent
-     *            the component to localize.
-     * @see ResourceMap#injectComponents(Component)
-     */
-//    public static void injectComponents(Component pComponent)
-//    {
-//        injectComponents(pComponent.getClass(), pComponent);
-//    }
-
-    /**
-     * Recursively localizes the given component using the resource map of the
-     * given class.
-     *
-     * @param pResourceClass
-     *            the resource map of the class will be used for the
-     *            localization.
-     * @param pComponent
-     *            the component to localize.
-     * @see ResourceMap#injectComponents(Component)
-     */
-//    private static void injectComponents(
-//        Class<?> pResourceClass,
-//        Component pComponent)
-//    {
-//        getResourceMap(pResourceClass).injectComponents(pComponent);
-//    }
-
-    /**
      * The standard gap between the components.
      */
-    static final int GAP = 10;
+    public static final int GAP = 10;
 
     /**
      * Empty border with GAP space on all sides.
      */
-    static final Border GAP_BORDER = BorderFactory.createEmptyBorder(
+    public static final Border GAP_BORDER = BorderFactory.createEmptyBorder(
             GAP, GAP, GAP, GAP);
-
-//    /**
-//     * Returns the resource map for the given class.
-//     *
-//     * @param pClass The target class.
-//     * @return The associated ResourceMap
-//     * @deprecated Use {@link AppHelper#getResourceMap(Application, Class)}
-//     */
-//    @Deprecated
-//    private static ResourceMap getResourceMap(Class<?> pClass)
-//    {
-//        return Application.getResourceManager().getResourceMap(pClass);
-//    }
 
     /**
      * This is a library and cannot be instantiated.

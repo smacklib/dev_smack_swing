@@ -9,10 +9,10 @@ package org.smack.swing.application.util;
 import javax.swing.Action;
 
 import org.jdesktop.util.PlatformType;
+import org.smack.swing.GTools;
 import org.smack.swing.application.Application;
 import org.smack.swing.application.ResourceManager;
 import org.smack.swing.application.ResourceMap;
-import org.smack.swing.swingx.GTools;
 
 /**
  * Help methods on application level.

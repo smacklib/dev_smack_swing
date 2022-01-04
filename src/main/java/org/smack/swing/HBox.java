@@ -1,4 +1,4 @@
-package org.smack.swing.swingx;
+package org.smack.swing;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -11,7 +11,7 @@ import javax.swing.JButton;
  * @author daskalot
  * @version $Revision$
  */
-class HBox extends Box
+public class HBox extends Box
 {
     private static final long serialVersionUID = 1L;
 

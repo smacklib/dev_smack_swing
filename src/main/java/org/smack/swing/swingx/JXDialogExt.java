@@ -19,6 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import org.smack.swing.GTools;
+import org.smack.swing.HBox;
 import org.smack.swing.application.ResourceManager;
 import org.smack.util.ServiceManager;
 import org.smack.util.StringUtil;

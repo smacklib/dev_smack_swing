@@ -34,6 +34,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.border.AbstractBorder;
 
+import org.smack.swing.GTools;
 import org.smack.swing.application.Application;
 import org.smack.swing.application.ResourceManager.Resource;
 import org.smack.swing.swingx.action.AbstractActionExt;
