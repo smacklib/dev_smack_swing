@@ -16,6 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
+import org.smack.application.ApplicationInfo;
+import org.smack.application.LocalStorage;
 import org.smack.util.FileUtil;
 import org.smack.util.ServiceManager;
 
@@ -31,12 +33,11 @@ import org.smack.util.ServiceManager;
  * file system. This class is not intended as a transactional high volume
  * storage.
  *
- * @version $Rev$
  * @author Michael Binz
  */
 public class ApplicationProperties
 {
-    private static final Logger L =
+    private static final Logger LOG =
             Logger.getLogger( ApplicationProperties.class.getName() );
 
     private final LocalStorage _localStorage;
@@ -52,11 +53,6 @@ public class ApplicationProperties
     @SuppressWarnings("unchecked")
     ApplicationProperties()
     {
-//        Application application = Application.getInstance();
-//
-//        _fileName =
-//                new File( application.getId() + "_" + application.getVendorId() + ".aps" );
-
         ApplicationInfo info =
                 ServiceManager.getApplicationService( ApplicationInfo.class );
 
@@ -188,7 +184,7 @@ public class ApplicationProperties
             }
             catch ( Exception ignore )
             {
-                L.warning( "Unexpected content: " + content );
+                LOG.warning( "Unexpected content: " + content );
             }
         }
 
@@ -234,7 +230,7 @@ public class ApplicationProperties
             }
             catch ( Exception ignore )
             {
-                L.warning( "Unexpected content: " + content );
+                LOG.warning( "Unexpected content: " + content );
             }
         }
 
@@ -274,7 +270,7 @@ public class ApplicationProperties
         }
         catch ( IOException e )
         {
-            L.log( Level.WARNING, "Storing application properties failed.", e );
+            LOG.log( Level.WARNING, "Storing application properties failed.", e );
         }
         finally
         {

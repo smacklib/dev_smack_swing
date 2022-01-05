@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>micbinz</groupId>
 	<artifactId>smack_swing</artifactId>
-	<version>11.2</version>
+	<version>11.3-SNAPSHOT</version>
 	<name>SmackSwing</name>
 	<description>Smack Swing-specific parts.</description>
 
@@ -69,7 +69,7 @@
 		<dependency>
 			<groupId>micbinz</groupId>
 			<artifactId>smack</artifactId>
-			<version>11.404</version>
+			<version>11.405-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

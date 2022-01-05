@@ -57,4 +57,6 @@ module framework.smack_swing
     requires java.logging;
     requires java.naming;
     requires java.prefs;
+
+    opens org.smack.swing.application to framework.smack;
 }

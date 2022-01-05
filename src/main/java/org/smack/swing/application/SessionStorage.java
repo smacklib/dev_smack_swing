@@ -1,11 +1,9 @@
-
 /*
  * Copyright (C) 2006 Sun Microsystems, Inc. All rights reserved.
  * Use is subject to license terms.
  */
 package org.smack.swing.application;
 
-import java.applet.Applet;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Window;
@@ -22,6 +20,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
+import org.smack.application.LocalStorage;
 import org.smack.swing.application.session.PropertySupport;
 import org.smack.swing.application.session.SplitPaneProperty;
 import org.smack.swing.application.session.TabbedPaneProperty;
@@ -198,13 +197,20 @@ public final class SessionStorage
      * all AWT components lazily compute a name.  If we hadn't assigned the
      * JFrame a name, it's name would have been "frame0".
      */
-    private String getComponentPathname(Component c) {
+    private String getComponentPathname(Component c)
+    {
         String name = getComponentName(c);
+
         if (name == null) {
             return null;
         }
+
         StringBuilder path = new StringBuilder(name);
-        while ((c.getParent() != null) && !(c instanceof Window) && !(c instanceof Applet)) {
+
+        while (
+                (c.getParent() != null) &&
+                !(c instanceof Window) )
+        {
             c = c.getParent();
             name = getComponentName(c);
             if (name == null) {
