@@ -197,16 +197,6 @@ public class ResourceMap
         return _parent;
     }
 
-//    /**
-//     * Returns the names of the ResourceBundles that define the
-//     * resources contained by this ResourceMap.
-//     *
-//     * @return the names of the ResourceBundles in this ResourceMap
-//     */
-//    private List<String> getBundleNames() {
-//        return _bundleNames;
-//    }
-
     /**
      * Returns the ClassLoader used to load the ResourceBundles for this
      * ResourceMap.
@@ -358,13 +348,13 @@ public class ResourceMap
         }
     }
 
-    public PlatformType getPlatform() {
+    private PlatformType getPlatform() {
         if (platform != null) return platform;
         if (_parent != null) return _parent.getPlatform();
         return PlatformType.DEFAULT;
     }
 
-    public void setPlatform(PlatformType platform) {
+    private void setPlatform_(PlatformType platform) {
         if(platform == null) throw new IllegalArgumentException("Platform could not be null.");
         if (this.platform != null) throw new IllegalStateException("The platform attribute is already set for this resource map.");
         this.platform = platform;
@@ -517,7 +507,7 @@ public class ResourceMap
         checkNullKey(key);
 
         if (KEY_PLATFORM.equals(key)) {
-            setPlatform((PlatformType) value);
+            setPlatform_((PlatformType) value);
         } else {
             Map<String, Object> bundlesMap = getBundlesMap();
             if (bundlesMap != null) {

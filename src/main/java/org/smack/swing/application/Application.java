@@ -29,7 +29,6 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.jdesktop.util.PlatformType;
 import org.smack.swing.application.ResourceManager.Resource;
-import org.smack.swing.application.util.AppHelper;
 import org.smack.swing.application.util.OSXAdapter;
 import org.smack.util.ServiceManager;
 import org.smack.util.StringUtil;
@@ -246,7 +245,7 @@ public abstract class Application extends BaseApplication
         // Application.* properties.
         ResourceMap appResourceMap = ctx.getResourceMap();
 
-        PlatformType platform = AppHelper.getPlatform();
+        PlatformType platform = PlatformType.getPlatform();
 
         appResourceMap.putResource(
                 ResourceMap.KEY_PLATFORM,

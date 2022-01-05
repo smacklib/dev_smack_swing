@@ -6,10 +6,6 @@
  */
 package org.smack.swing.application.util;
 
-import javax.swing.Action;
-
-import org.jdesktop.util.PlatformType;
-import org.smack.swing.GTools;
 import org.smack.swing.application.Application;
 import org.smack.swing.application.ResourceManager;
 import org.smack.swing.application.ResourceMap;
@@ -58,26 +54,5 @@ public final class AppHelper {
     public static ResourceMap getResourceMap( Application app, Class<?> pClass )
     {
         return getResourceManager( app ).getResourceMap(pClass);
-    }
-
-    /**
-     * Looks up the Action for the given name in the ActionMap associated
-     * with the passed object.
-     *
-     * @param pObj The object that carries the action.
-     * @param pName The name of the action.
-     * @throws IllegalArgumentException If the Action was not found.
-     */
-    public static Action getAction( Object pObj, String pName )
-    {
-        return GTools.getAction( pObj, pName );
-    }
-
-    /**
-     * Determines a platform type the application is running on.
-	 * @return current platform type
-     */
-    public static PlatformType getPlatform() {
-        return PlatformType.getPlatform();
     }
 }
