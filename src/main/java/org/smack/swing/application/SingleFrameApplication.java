@@ -186,7 +186,7 @@ public abstract class SingleFrameApplication extends Application
         ResourceManager rm =
                 ServiceManager.getApplicationService( ResourceManager.class );
 
-        rm.injectComponents( root, rm.getApplicationResourceMap() );
+        rm.injectComponents( root, rm.getResourceMap( getClass() ) );
 //        getContext().getResourceMap().injectComponents(root);
     }
 

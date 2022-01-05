@@ -106,8 +106,6 @@ public final class ResourceManager
 
     private final List<String> _applicationBundleNames;
 
-    private ResourceMap _appResourceMap = null;
-
     /**
      * The application class used to compute the
      * application-wide elements of the resource map.
@@ -361,37 +359,6 @@ public final class ResourceManager
     public final ResourceMap getResourceMap( Class<?> cls )
     {
         return getResourceMap( Locale.getDefault(), cls, cls );
-    }
-
-    private ResourceMap getApplicationResourceMap( Locale locale )
-    {
-        if (_appResourceMap == null)
-        {
-            ClassLoader classLoader =
-                    _applicationClass.getClassLoader();
-
-            _appResourceMap = createResourceMapChain(
-                    locale,
-                    classLoader,
-                    null,
-                    _applicationBundleNames.listIterator());
-        }
-
-        return _appResourceMap;
-    }
-
-    /**
-     * Returns the chain of ResourceMaps that's shared by the entire application,
-     * beginning with the resources defined for the application's class.
-     * If the {@code applicationClass} property has not been set, e.g. because
-     * the application has not been {@link Application#launch launched} yet,
-     * then a ResourceMap for just {@code Application.class} is returned.
-     *
-     * @return the Application's ResourceMap.
-     */
-    public ResourceMap getApplicationResourceMap()
-    {
-        return getApplicationResourceMap( Locale.getDefault() );
     }
 
     /**

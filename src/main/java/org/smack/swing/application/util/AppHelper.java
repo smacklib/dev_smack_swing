@@ -45,7 +45,7 @@ public final class AppHelper {
      */
     public static ResourceMap getResourceMap( Application application )
     {
-        return getResourceManager( application ).getApplicationResourceMap();
+        return getResourceManager( application ).getResourceMap( application.getClass() );
     }
 
     /**

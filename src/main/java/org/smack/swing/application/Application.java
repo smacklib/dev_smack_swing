@@ -671,7 +671,6 @@ public abstract class Application extends BaseApplication
      * @param e the triggering event
      * @see #exit(EventObject)
      */
-    @Action
     public void quit(ActionEvent e) {
         exit(e);
     }

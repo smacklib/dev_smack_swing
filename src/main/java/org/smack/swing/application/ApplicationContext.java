@@ -88,7 +88,7 @@ public final class ApplicationContext extends AbstractBeanEdt {
      * @see ResourceManager#getApplicationResourceMap()
      */
     public final ResourceMap getResourceMap() {
-        return getResourceManager().getApplicationResourceMap();
+        return getResourceManager().getResourceMap( application.getClass() );
     }
 
     /**
