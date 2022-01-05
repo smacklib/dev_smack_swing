@@ -465,11 +465,11 @@ public abstract class MackAction extends AbstractActionExt
             iconOrNameSpecified = true;
         }
         // Action.mnemonic => Action.MNEMONIC_KEY
-        Integer mnemonic = resourceMap.getKeyCode(
+        var mnemonic = resourceMap.getKeyStroke(
                 makeResourceKeyName( "mnemonic" ) );
         if ( mnemonic != null )
         {
-            setMnemonic( mnemonic );
+            setMnemonic( mnemonic.getKeyCode() );
         }
         // Action.mnemonic => Action.DISPLAYED_MNEMONIC_INDEX_KEY
         Integer index = resourceMap.getInteger(

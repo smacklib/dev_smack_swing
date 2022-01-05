@@ -893,22 +893,22 @@ public class ResourceMap
         return (KeyStroke) getObject(key, KeyStroke.class);
     }
 
-    /**
-     * A convenience method that's shorthand for calling:
-     * <tt>getKeyStroke(key).getKeyCode()</tt>.  If there's
-     * no resource named <tt>key</tt> then null is returned.
-     *
-     * @param key the name of the resource
-     * @throws LookupException if an error occurs during lookup or string conversion
-     * @throws IllegalArgumentException if <tt>key</tt> is null
-     * @return the KeyCode value of the resource named key
-     * @see #getObject
-     */
-    public Integer getKeyCode(String key) {
-        KeyStroke ks = getKeyStroke(key);
-        return (ks != null) ? ks.getKeyCode() : null;
-    }
-
+//    /**
+//     * A convenience method that's shorthand for calling:
+//     * <tt>getKeyStroke(key).getKeyCode()</tt>.  If there's
+//     * no resource named <tt>key</tt> then null is returned.
+//     *
+//     * @param key the name of the resource
+//     * @throws LookupException if an error occurs during lookup or string conversion
+//     * @throws IllegalArgumentException if <tt>key</tt> is null
+//     * @return the KeyCode value of the resource named key
+//     * @see #getObject
+//     */
+//    public Integer getKeyCode(String key) {
+//        KeyStroke ks = getKeyStroke(key);
+//        return (ks != null) ? ks.getKeyCode() : null;
+//    }
+//
     /**
      * Unchecked exception thrown by {@link #injectComponent} and
      * {@link #injectComponents} when a property value specified by
