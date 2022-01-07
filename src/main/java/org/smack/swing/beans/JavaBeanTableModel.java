@@ -21,8 +21,8 @@ import java.util.logging.Logger;
 import javax.swing.table.AbstractTableModel;
 
 import org.smack.swing.application.Application;
-import org.smack.swing.application.ResourceMap;
 import org.smack.util.ReflectionUtil;
+import org.smack.util.resource.ResourceMap;
 
 /**
  * <p>A table model that allows to display a list of Java Beans.
@@ -99,14 +99,14 @@ public class JavaBeanTableModel<B> extends AbstractTableModel
         // Check whether we have a localized description.
         ResourceMap rm = Application.getResourceManager().getResourceMap( rowType );
 
-        String[] columnList = rm.get( "PROPERTY_DISPLAY_ORDER", String[].class );
+        String[] columnList = rm.getAs( "PROPERTY_DISPLAY_ORDER", String[].class, null );
 
         if ( columnList != null )
             _columns = orderColums( _columns, columnList );
 
         for ( PropertyDescriptor pd : _columns )
         {
-            String displayName = rm.getString( pd.getName() );
+            String displayName = rm.get( pd.getName() );
 
             if ( displayName != null )
                 pd.setDisplayName( displayName );

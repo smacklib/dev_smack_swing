@@ -8,7 +8,6 @@
 package org.smack.swing.application;
 
 import org.smack.swing.beans.AbstractBeanEdt;
-import org.smack.util.ServiceManager;
 
 /**
  * A raw base application.  Offers management of ApplicationServices.
@@ -25,16 +24,5 @@ class BaseApplication extends AbstractBeanEdt
     public BaseApplication()
     {
         // Catch ctor.
-    }
-
-    /**
-     * Get an application service of the specified type.
-     *
-     * @param singletonType The type of the application service.
-     * @return An instance of the requested service.
-     */
-    public synchronized <T> T getApplicationService( Class<T> singletonType )
-    {
-        return ServiceManager.getApplicationService( singletonType );
     }
 }

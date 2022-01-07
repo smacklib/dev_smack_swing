@@ -29,7 +29,9 @@ import org.smack.util.collections.MultiMap;
  *
  * @version $Rev$
  * @author Michael Binz
+ * @deprecated Not used.
  */
+@Deprecated
 public final class MackActionManager
 {
     private final static MackActionSorter _sorter =
@@ -69,7 +71,7 @@ public final class MackActionManager
         ArrayList<String> result = new ArrayList<String>();
 
         String userConfiguredMenuOrder = Application.getInstance().getContext()
-                .getResourceMap().getString("MACK_MENU");
+                .getResourceMap().get("MACK_MENU");
 
         if (userConfiguredMenuOrder != null)
         {
@@ -270,7 +272,7 @@ public final class MackActionManager
 
             // Localize the menu name.
             String itemName =
-                Application.getResourceManager().getResourceMap(getClass()).getString(name.toString());
+                Application.getResourceManager().getResourceMap(getClass()).get(name.toString());
             if (!StringUtil.hasContent(itemName))
                 itemName = name.toString();
 

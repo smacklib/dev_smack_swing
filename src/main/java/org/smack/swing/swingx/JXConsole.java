@@ -775,7 +775,7 @@ public final class JXConsole extends JPanel implements KeyListener {
                 // Message.
                 String.format( FILE_EXISTS_MESSAGE, f.getName() ),
                 // Title.
-                Application.getInstance().getContext().getResourceMap().getString( Application.KEY_APPLICATION_TITLE ),
+                Application.getInstance().getContext().getResourceMap().get( Application.KEY_APPLICATION_TITLE ),
                 // Options
                 JOptionPane.YES_NO_OPTION,
                 //

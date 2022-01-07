@@ -28,10 +28,10 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.jdesktop.util.PlatformType;
-import org.smack.swing.application.ResourceManager.Resource;
 import org.smack.swing.application.util.OSXAdapter;
 import org.smack.util.ServiceManager;
 import org.smack.util.StringUtil;
+import org.smack.util.resource.ResourceManager.Resource;
 
 /**
  * The base class for Swing applications.
@@ -132,7 +132,8 @@ import org.smack.util.StringUtil;
  */
 public abstract class Application extends BaseApplication
 {
-    private static final Logger LOG = Logger.getLogger(Application.class.getName());
+    private static final Logger LOG =
+            Logger.getLogger( Application.class.getName() );
 
     public static final String KEY_APPLICATION_ID = "Application.id";
     public static final String KEY_APPLICATION_TITLE = "Application.title";
@@ -243,13 +244,13 @@ public abstract class Application extends BaseApplication
 
         // Load the application resource map, notably the
         // Application.* properties.
-        ResourceMap appResourceMap = ctx.getResourceMap();
+        org.smack.util.resource.ResourceMap appResourceMap = ctx.getResourceMap();
 
         PlatformType platform = PlatformType.getPlatform();
 
-        appResourceMap.putResource(
-                ResourceMap.KEY_PLATFORM,
-                platform );
+//        appResourceMap.putResource(
+//                ResourceMap.KEY_PLATFORM,
+//                platform );
 
         // Generic registration with the Mac OS X application menu.
         if ( PlatformType.OS_X == platform )
@@ -277,13 +278,13 @@ public abstract class Application extends BaseApplication
      * the installed L&Fs by name case insensitive.
      * If not found, then 'system' is used.
      */
-    private static void setLookAndFeel( ResourceMap appResourceMap )
+    private static void setLookAndFeel( org.smack.util.resource.ResourceMap appResourceMap )
     {
         // Initialize the UIManager lookAndFeel property with the
         // Application.lookAndFeel resource.  If the resource
         // isn't defined we default to "system".
         String lnf =
-                appResourceMap.getString(KEY_APPLICATION_LOOKANDFEEL);
+                appResourceMap.get(KEY_APPLICATION_LOOKANDFEEL);
         if ( StringUtil.isEmpty( lnf ) )
             lnf = "system";
 
@@ -782,45 +783,14 @@ public abstract class Application extends BaseApplication
      * been initialized this will return a newly allocated Resource manager
      * that can be used stand-alone. Never returns {@code null}.
      */
-    public static ResourceManager getResourceManager()
+    public static org.smack.util.resource.ResourceManager getResourceManager()
     {
-        return ServiceManager.getApplicationService( ResourceManager.class );
-//        try
-//        {
-//            return AppHelper.getResourceManager( getInstance() );
-//        }
-//        catch ( Exception e )
-//        {
-//            LOG.warning( "Creating standalone ResourceManager." );
-//            return new ResourceManager( Application.class );
-//        }
+        return ServiceManager.getApplicationService( org.smack.util.resource.ResourceManager.class );
     }
 
-//    /**
-//     * Application placeholder class
-//     *
-//     * Instance of this class is created when client
-//     * invokes static method {@code Application.getInstance()}
-//     * @author etf
-//     * @see Application#getInstance()
-//     */
-//    private static final class DesignTimeApplication extends Application {
-//
-//        protected DesignTimeApplication() {
-//            ApplicationContext ctx = getContext();
-////            ctx.setApplicationClass(getClass());
-////            ctx.setApplication(this);
-//            ResourceMap appResourceMap = ctx.getResourceMap();
-//            appResourceMap.setPlatform(PlatformType.DEFAULT);
-//        }
-//
-//        @Override
-//        protected void startup() {
-//        }
-//    }
-//
     @Resource
     private String id = getClass().getSimpleName();
+
     /**
      * Return the application's id as defined in the resources.
      * @return The application's id.
@@ -883,5 +853,16 @@ public abstract class Application extends BaseApplication
     public String getVendorId()
     {
         return vendorId;
+    }
+
+    /**
+     * Get an application service of the specified type.
+     *
+     * @param singletonType The type of the application service.
+     * @return An instance of the requested service.
+     */
+    protected static synchronized <T> T getApplicationService( Class<T> singletonType )
+    {
+        return ServiceManager.getApplicationService( singletonType );
     }
 }

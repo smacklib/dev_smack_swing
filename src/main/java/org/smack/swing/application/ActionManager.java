@@ -39,7 +39,7 @@ public final class ActionManager extends AbstractBeanEdt
     }
 
     private ApplicationActionMap createActionMapChain(
-            Class<?> startClass, Class<?> stopClass, Object actionsObject, ResourceMap resourceMap) {
+            Class<?> startClass, Class<?> stopClass, Object actionsObject, org.smack.util.resource.ResourceMap resourceMap) {
         // All of the classes from stopClass to startClass, inclusive.
         List<Class<?>> classes = new ArrayList<Class<?>>();
         for (Class<?> c = startClass;; c = c.getSuperclass()) {
@@ -87,7 +87,7 @@ public final class ActionManager extends AbstractBeanEdt
         if (globalActionMap == null) {
             Application appObject = Application.getInstance();
             Class<?> appClass = appObject.getClass();
-            ResourceMap resourceMap = AppHelper.getResourceMap( appObject );
+            org.smack.util.resource.ResourceMap resourceMap = AppHelper.getResourceMap( appObject );
             globalActionMap = createActionMapChain(appClass, Application.class, appObject, resourceMap);
         }
         return globalActionMap;
@@ -147,8 +147,8 @@ public final class ActionManager extends AbstractBeanEdt
             ApplicationActionMap classActionMap = (ref != null) ? ref.get() : null;
             if ((classActionMap == null) || (classActionMap.getActionsClass() != actionsClass)) {
                 Class<?> actionsObjectClass = actionsObject.getClass();
-                ResourceMap resourceMap =
-                    Application.getResourceManager().getResourceMap(actionsObjectClass, actionsClass);
+                org.smack.util.resource.ResourceMap resourceMap =
+                    Application.getResourceManager().getResourceMap(actionsObjectClass);
                 classActionMap = createActionMapChain(actionsObjectClass, actionsClass, actionsObject, resourceMap);
                 ActionMap lastActionMap = classActionMap;
                 while (lastActionMap.getParent() != null) {

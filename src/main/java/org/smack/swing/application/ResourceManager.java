@@ -340,7 +340,7 @@ public final class ResourceManager
         return result;
     }
 
-    public ResourceMap getResourceMap( Class<?> startClass, Class<?> stopClass )
+    private ResourceMap getResourceMap( Class<?> startClass, Class<?> stopClass )
     {
         return getResourceMap( Locale.getDefault(), startClass, stopClass );
     }

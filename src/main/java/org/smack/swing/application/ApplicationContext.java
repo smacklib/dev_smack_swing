@@ -13,7 +13,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.swing.JComponent;
 
-import org.smack.swing.application.util.AppHelper;
 import org.smack.swing.beans.AbstractBeanEdt;
 import org.smack.util.ServiceManager;
 
@@ -59,19 +58,6 @@ public final class ApplicationContext extends AbstractBeanEdt {
     }
 
     /**
-     * The application's {@code ResourceManager} provides
-     * read-only cached access to resources in ResourceBundles via the
-     * {@link ResourceMap ResourceMap} class.
-     *
-     * @return this application's ResourceManager.
-     * @deprecated Use Application.getResourceManager
-     */
-    @Deprecated
-    private final ResourceManager getResourceManager() {
-        return AppHelper.getResourceManager( application );
-    }
-
-    /**
      * Returns the {@link ResourceMap#getParent chain} of ResourceMaps
      * that's shared by the entire application, beginning with the one
      * defined for the Application class, i.e. the value of the
@@ -87,8 +73,8 @@ public final class ApplicationContext extends AbstractBeanEdt {
      * @return the Application's ResourceMap
      * @see ResourceManager#getApplicationResourceMap()
      */
-    public final ResourceMap getResourceMap() {
-        return getResourceManager().getResourceMap( application.getClass() );
+    public final org.smack.util.resource.ResourceMap getResourceMap() {
+        return Application.getResourceManager().getResourceMap( application.getClass() );
     }
 
     /**
@@ -96,7 +82,7 @@ public final class ApplicationContext extends AbstractBeanEdt {
      * @return this application's ActionManager.
      * @see #getActionMap(Object)
      */
-    public final ActionManager getActionManager() {
+    private final ActionManager getActionManager() {
         return ServiceManager.getApplicationService( ActionManager.class );
     }
 

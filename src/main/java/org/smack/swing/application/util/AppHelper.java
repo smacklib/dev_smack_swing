@@ -7,8 +7,9 @@
 package org.smack.swing.application.util;
 
 import org.smack.swing.application.Application;
-import org.smack.swing.application.ResourceManager;
-import org.smack.swing.application.ResourceMap;
+import org.smack.util.ServiceManager;
+import org.smack.util.resource.ResourceManager;
+import org.smack.util.resource.ResourceMap;
 
 /**
  * Help methods on application level.
@@ -28,9 +29,9 @@ public final class AppHelper {
      * @param application The application.
      * @return The associated resource manager.
      */
-    public static ResourceManager getResourceManager( Application application )
+    private static ResourceManager getResourceManager( Application application )
     {
-        return application.getApplicationService( ResourceManager.class );
+        return ServiceManager.getApplicationService( ResourceManager.class );
     }
 
     /**
@@ -42,17 +43,5 @@ public final class AppHelper {
     public static ResourceMap getResourceMap( Application application )
     {
         return getResourceManager( application ).getResourceMap( application.getClass() );
-    }
-
-    /**
-     * Returns the resource map for the given class.
-     *
-     * @param app The application instance.
-     * @param pClass The target class.
-     * @return The associated resource map.
-     */
-    public static ResourceMap getResourceMap( Application app, Class<?> pClass )
-    {
-        return getResourceManager( app ).getResourceMap(pClass);
     }
 }

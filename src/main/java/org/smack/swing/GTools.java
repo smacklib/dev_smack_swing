@@ -215,7 +215,7 @@ public class GTools
         if (pArgs == null)
             pArgs = new Object[0];
 
-        return Application.getResourceManager().getResourceMap(pClass).getString( pKey, pArgs );
+        return Application.getResourceManager().getResourceMap(pClass).getFormatted( pKey, pArgs );
     }
 
     /**

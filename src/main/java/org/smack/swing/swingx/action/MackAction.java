@@ -21,12 +21,9 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import org.smack.swing.application.Application;
-import org.smack.swing.application.ResourceMap;
 import org.smack.swing.application.Task;
 import org.smack.util.StringUtil;
-
-
-
+import org.smack.util.resource.ResourceMap;
 
 /**
  * A fully resource configurable Action.  The action is keyed by the
@@ -116,7 +113,7 @@ public abstract class MackAction extends AbstractActionExt
      * @param key
      * @param resourceMap
      */
-    protected MackAction( String key, ResourceMap resourceMap )
+    protected MackAction( String key, org.smack.util.resource.ResourceMap resourceMap )
     {
         if ( ! StringUtil.hasContent( key, true ) )
             throw new IllegalArgumentException( "key == null" );
@@ -457,7 +454,7 @@ public abstract class MackAction extends AbstractActionExt
         boolean iconOrNameSpecified = false;
 
         // Action.text => Action.NAME,MNEMONIC_KEY,DISPLAYED_MNEMONIC_INDEX_KEY
-        String text = resourceMap.getString(
+        String text = resourceMap.get(
                 makeResourceKeyName( "text" ) );
         if ( text != null )
         {
@@ -465,27 +462,27 @@ public abstract class MackAction extends AbstractActionExt
             iconOrNameSpecified = true;
         }
         // Action.mnemonic => Action.MNEMONIC_KEY
-        var mnemonic = resourceMap.getKeyStroke(
-                makeResourceKeyName( "mnemonic" ) );
+        var mnemonic = resourceMap.getAs(
+                makeResourceKeyName( "mnemonic" ), KeyStroke.class, null );
         if ( mnemonic != null )
         {
             setMnemonic( mnemonic.getKeyCode() );
         }
         // Action.mnemonic => Action.DISPLAYED_MNEMONIC_INDEX_KEY
-        Integer index = resourceMap.getInteger(
-                makeResourceKeyName( "displayedMnemonicIndex" ) );
+        Integer index = resourceMap.getAs(
+                makeResourceKeyName( "displayedMnemonicIndex" ), Integer.class, null );
         if ( index != null )
             putValue( DISPLAYED_MNEMONIC_INDEX_KEY, index );
 
         // Action.accelerator => Action.ACCELERATOR_KEY
-        KeyStroke key = resourceMap.getKeyStroke(
-                makeResourceKeyName( "accelerator" ) );
+        KeyStroke key = resourceMap.getAs(
+                makeResourceKeyName( "accelerator" ), KeyStroke.class, null );
         if ( key != null )
             setAccelerator( key );
 
         // Action.icon => Action.SMALL_ICON,LARGE_ICON_KEY
-        Icon icon = resourceMap.getIcon(
-                makeResourceKeyName( "icon" ) );
+        Icon icon = resourceMap.getAs(
+                makeResourceKeyName( "icon" ), Icon.class, null );
         if ( icon != null )
         {
             setSmallIcon( icon );
@@ -493,30 +490,30 @@ public abstract class MackAction extends AbstractActionExt
             iconOrNameSpecified = true;
         }
         // Action.smallIcon => Action.SMALL_ICON
-        Icon smallIcon = resourceMap.getIcon(
-                makeResourceKeyName( "smallIcon" ) );
+        Icon smallIcon = resourceMap.getAs(
+                makeResourceKeyName( "smallIcon" ), Icon.class, null );
         if ( smallIcon != null )
         {
             setSmallIcon( smallIcon );
             iconOrNameSpecified = true;
         }
         // Action.largeIcon => Action.LARGE_ICON
-        Icon largeIcon = resourceMap.getIcon(
-                makeResourceKeyName( "largeIcon" ) );
+        Icon largeIcon = resourceMap.getAs(
+                makeResourceKeyName( "largeIcon" ), Icon.class, null );
         if ( largeIcon != null )
         {
             setLargeIcon( largeIcon );
             iconOrNameSpecified = true;
         }
         // Action.shortDescription => Action.SHORT_DESCRIPTION
-        setShortDescription( resourceMap.getString(
+        setShortDescription( resourceMap.get(
                 makeResourceKeyName( "shortDescription" ) ) );
         // Action.longDescription => Action.LONG_DESCRIPTION
-        setLongDescription( resourceMap.getString(
+        setLongDescription( resourceMap.get(
                 makeResourceKeyName( "longDescription" ) ) );
 
         // Action.command => Action.ACTION_COMMAND_KEY
-        String actionCommand = resourceMap.getString(
+        String actionCommand = resourceMap.get(
                 makeResourceKeyName( "command" ) );
         if ( StringUtil.hasContent( actionCommand ) )
             setActionCommand( actionCommand );
@@ -527,49 +524,49 @@ public abstract class MackAction extends AbstractActionExt
             setName( StringUtil.EMPTY_STRING + getKey() );
 
         // Check if this is a toolbar action.
-        Boolean toolbarFlag = resourceMap.getBoolean(
-                makeResourceKeyName( "toolbarFlag" ) );
+        Boolean toolbarFlag = resourceMap.getAs(
+                makeResourceKeyName( "toolbarFlag" ), Boolean.class, null );
         if ( toolbarFlag != null )
             setToolbar( toolbarFlag.booleanValue() );
 
         // Check if this is a menu bar action.
         {
-            Boolean menuFlag = resourceMap.getBoolean(
-                    makeResourceKeyName( "menuFlag" ) );
+            Boolean menuFlag = resourceMap.getAs(
+                    makeResourceKeyName( "menuFlag" ), Boolean.class, null );
             if ( menuFlag != null )
                 setMenubar( menuFlag.booleanValue() );
         }
         // Check if this is a popup menu action.
         {
-            Boolean popupFlag = resourceMap.getBoolean(
-                    makeResourceKeyName( "popupFlag" ) );
+            Boolean popupFlag = resourceMap.getAs(
+                    makeResourceKeyName( "popupFlag" ), Boolean.class, null );
             if ( popupFlag != null )
                 setPopup( popupFlag.booleanValue() );
         }
         // Get the action's group.
         {
-            String group = resourceMap.getString(
+            String group = resourceMap.get(
                     makeResourceKeyName( "group" ) );
             if ( group != null )
                 setGroup( group );
         }
         // Get the action's category.
         {
-            String category = resourceMap.getString(
+            String category = resourceMap.get(
                     makeResourceKeyName( "category" ) );
             if ( category != null )
                 setCategory( category );
         }
         // Get the category sort id.
         {
-            String categorySortId = resourceMap.getString(
+            String categorySortId = resourceMap.get(
                     makeResourceKeyName( "categorySortId" ) );
             if ( categorySortId != null )
                 setCategorySortId( categorySortId );
         }
         // Set the selected state.
         {
-            String selected = resourceMap.getString(
+            String selected = resourceMap.get(
                     makeResourceKeyName( "selected" ) );
             if ( selected != null )
             {
@@ -578,8 +575,6 @@ public abstract class MackAction extends AbstractActionExt
             }
         }
     }
-
-
 
     /**
      *
@@ -591,8 +586,6 @@ public abstract class MackAction extends AbstractActionExt
                 task );
     }
 
-
-
     /**
      * Get the resource map for the passed class.
      *
@@ -602,15 +595,12 @@ public abstract class MackAction extends AbstractActionExt
     private static ResourceMap resourceMap( Class<?> classs )
     {
         return Application.getResourceManager().getResourceMap(
-                classs,
-                MackAction.class );
+                classs );
     }
     public final ResourceMap getResourceMap()
     {
         return _resourceMap;
     }
-
-
 
     /**
      * An internal helper class that configures the text and mnemonic

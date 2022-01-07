@@ -196,7 +196,7 @@ public class ApplicationAction extends MackAction
      * @see ApplicationActionMap#getActionsObject
      */
     public ApplicationAction(ApplicationActionMap appAM,
-            ResourceMap resourceMap,
+            org.smack.util.resource.ResourceMap resourceMap,
             String baseName,
             Method actionMethod,
             String enabledProperty,
@@ -254,7 +254,7 @@ public class ApplicationAction extends MackAction
     /* Shorter convenience constructor used to create ProxyActions,
      * see ApplicationActionMap.addProxyAction().
      */
-    ApplicationAction(ApplicationActionMap appAM, ResourceMap resourceMap, String actionName) {
+    ApplicationAction(ApplicationActionMap appAM, org.smack.util.resource.ResourceMap resourceMap, String actionName) {
         this(appAM, resourceMap, actionName, null, null, false, null, TaskService.DEFAULT_NAME, Task.BlockingScope.NONE);
     }
 

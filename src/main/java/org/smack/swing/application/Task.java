@@ -224,7 +224,7 @@ public abstract class Task<T, V> extends SwingWorker<T, V>
         ResourceManager rm =
                 ServiceManager.getApplicationService( ResourceManager.class );
 
-        return rm.getResourceMap( getClass(), Task.class );
+        return rm.getResourceMap( getClass() );
     }
 
     /**

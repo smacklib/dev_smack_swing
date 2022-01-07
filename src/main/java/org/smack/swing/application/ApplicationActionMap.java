@@ -63,7 +63,7 @@ public class ApplicationActionMap extends ActionMap {
      * @param actionsObject the object to be scanned for the actions.
      * @param resourceMap the {@code ResourceMap} to be used for those actions
      */
-    public ApplicationActionMap(Class<?> actionsClass, Object actionsObject, ResourceMap resourceMap) {
+    public ApplicationActionMap(Class<?> actionsClass, Object actionsObject, org.smack.util.resource.ResourceMap resourceMap) {
         if (actionsClass == null) {
             throw new IllegalArgumentException("null actionsClass");
         }
@@ -135,7 +135,7 @@ public class ApplicationActionMap extends ActionMap {
     /* Add Actions for each actionsClass method with an @Action
      * annotation and for the class's @ProxyActions annotation
      */
-    private void addAnnotationActions(ResourceMap resourceMap) {
+    private void addAnnotationActions(org.smack.util.resource.ResourceMap resourceMap) {
         final Class<?> actionsClass = getActionsClass();
         // @Action
         for (Method m : actionsClass.getDeclaredMethods()) {

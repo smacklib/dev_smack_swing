@@ -41,8 +41,6 @@ import javax.swing.Timer;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.MouseInputListener;
 
-import org.smack.util.ServiceManager;
-
 final class DefaultInputBlocker extends Task.InputBlocker {
 
     private static final Logger LOG = Logger.getLogger(DefaultInputBlocker.class.getName());
@@ -91,22 +89,22 @@ final class DefaultInputBlocker extends Task.InputBlocker {
      * prefix to all of the components before the second step.
      */
     private void injectBlockingDialogComponents(Component root) {
-        ResourceManager rm =
-                ServiceManager.getApplicationService( ResourceManager.class );
-
-        ResourceMap taskResourceMap = getTask().getResourceMap();
-        if (taskResourceMap != null) {
-            rm.injectComponents(root,taskResourceMap);
-        }
-        ApplicationAction action = getAction();
-        if (action != null) {
-            ResourceMap actionResourceMap = action.getResourceMap();
-            String actionName = action.getKey();
-            for (Component c : blockingDialogComponents(root)) {
-                c.setName(actionName + "." + c.getName());
-            }
-            rm.injectComponents( root, actionResourceMap );
-        }
+//        org.smack.util.resource.ResourceManager rm =
+//                ServiceManager.getApplicationService( org.smack.util.resource.ResourceManager.class );
+//
+//        ResourceMap taskResourceMap = getTask().getResourceMap();
+//        if (taskResourceMap != null) {
+//            rm.injectComponents(root,taskResourceMap);
+//        }
+//        ApplicationAction action = getAction();
+//        if (action != null) {
+//            org.smack.util.resource.ResourceMap actionResourceMap = action.getResourceMap();
+//            String actionName = action.getKey();
+//            for (Component c : blockingDialogComponents(root)) {
+//                c.setName(actionName + "." + c.getName());
+//            }
+//            rm.injectComponents( root, actionResourceMap );
+//        }
     }
 
     /* Creates a dialog whose visuals are initialized from the
@@ -343,19 +341,20 @@ final class DefaultInputBlocker extends Task.InputBlocker {
      * The latter's default in defined in resources/Application.properties.
      */
     private int blockingDialogDelay() {
-        Integer delay = null;
-        String key = "BlockingDialogTimer.delay";
-        ApplicationAction action = getAction();
-        if (action != null) {
-            ResourceMap actionResourceMap = action.getResourceMap();
-            String actionName = action.getKey();
-            delay = actionResourceMap.getInteger(actionName + "." + key);
-        }
-        ResourceMap taskResourceMap = getTask().getResourceMap();
-        if ((delay == null) && (taskResourceMap != null)) {
-            delay = taskResourceMap.getInteger(key);
-        }
-        return (delay == null) ? 0 : delay;
+//        Integer delay = null;
+//        String key = "BlockingDialogTimer.delay";
+//        ApplicationAction action = getAction();
+//        if (action != null) {
+//            ResourceMap actionResourceMap = action.getResourceMap();
+//            String actionName = action.getKey();
+//            delay = actionResourceMap.getInteger(actionName + "." + key);
+//        }
+//        ResourceMap taskResourceMap = getTask().getResourceMap();
+//        if ((delay == null) && (taskResourceMap != null)) {
+//            delay = taskResourceMap.getInteger(key);
+//        }
+//        return (delay == null) ? 0 : delay;
+        return 0;
     }
 
     private void showBlockingDialog(boolean f) {

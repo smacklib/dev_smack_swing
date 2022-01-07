@@ -29,7 +29,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 
-import org.smack.swing.application.Application;
+import org.smack.util.ServiceManager;
 
 /**
  * The ActionManager manages sets of <code>javax.swing.Action</code>s for an
@@ -105,14 +105,14 @@ public class ActionManager
      * Return the singleton instance.
      */
     public static ActionManager getInstance() {
-        return Application.getInstance().getApplicationService( ActionManager.class );
+        return ServiceManager.getApplicationService( ActionManager.class );
     }
 
     /**
      * Returns the ids for all the managed actions.
      * <p>
-     * An action id is a unique idenitfier which can
-     * be used to retrieve the corrspondng Action from the ActionManager.
+     * An action id is a unique identifier which can
+     * be used to retrieve the corresponding Action from the ActionManager.
      * This identifier can also
      * be used to set the properties of the action through the action
      * manager like setting the state of the enabled or selected flags.
