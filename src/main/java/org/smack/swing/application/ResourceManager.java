@@ -18,6 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 
 import org.smack.util.ServiceManager;
+import org.smack.util.resource.ResourceMap;
 
 /**
  * The application's {@code ResourceManager} provides
@@ -107,7 +108,7 @@ public final class ResourceManager
      *   specified class's package.
      * @see #getResourceMap(Class, Class)
      */
-    public final org.smack.util.resource.ResourceMap getResourceMap( Class<?> cls )
+    public final ResourceMap getResourceMap( Class<?> cls )
     {
         return _smackRm.getResourceMap2( cls );
     }
@@ -131,7 +132,7 @@ public final class ResourceManager
      * @param pd
      * @param key
      */
-    private void injectComponentProperty(Component component, PropertyDescriptor pd, String key, org.smack.util.resource.ResourceMap map ) {
+    private void injectComponentProperty(Component component, PropertyDescriptor pd, String key, ResourceMap map ) {
         Method setter = pd.getWriteMethod();
         Class<?> type = pd.getPropertyType();
         if ((setter != null) && (type != null) && map.containsKey(key)) {
@@ -168,7 +169,7 @@ public final class ResourceManager
      * @param componentName
      * @param component
      */
-    private void injectComponentProperties(String componentName, Component component, org.smack.util.resource.ResourceMap map) {
+    private void injectComponentProperties(String componentName, Component component, ResourceMap map) {
         if ( componentName == null )
             return;
 
@@ -235,7 +236,7 @@ public final class ResourceManager
      * @throws IllegalArgumentException if target is null
      * @see #injectComponent
      */
-    public void injectComponents(Component root,org.smack.util.resource.ResourceMap map) {
+    public void injectComponents(Component root, ResourceMap map) {
         injectComponent(root,map);
         if (root instanceof JMenu) {
             /* Warning: we're bypassing the popupMenu here because
@@ -298,11 +299,11 @@ public final class ResourceManager
      * @throws PropertyInjectionException if a property specified by a resource can't be set
      * @throws IllegalArgumentException if target is null
      */
-    public void injectComponent(Component target,org.smack.util.resource.ResourceMap map) {
+    public void injectComponent(Component target, ResourceMap map) {
         if (target == null) {
             throw new IllegalArgumentException("null target");
         }
-        injectComponentProperties(target.getName(), target,map);
+        injectComponentProperties( target.getName(), target, map );
     }
     /**
      * Inject the passed bean's properties from this map. The prefix is
@@ -313,7 +314,7 @@ public final class ResourceManager
      * @param bean The bean whose properties are injected.
      * @param prefix The prefix used to filter the map's keys.
      */
-    public void injectProperties( Object bean, String prefix, org.smack.util.resource.ResourceMap map )
+    public void injectProperties( Object bean, String prefix, ResourceMap map )
     {
         _smackRm.injectProperties( bean, prefix, map );
     }
