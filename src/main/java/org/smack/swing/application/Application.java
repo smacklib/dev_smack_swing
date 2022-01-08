@@ -8,6 +8,7 @@ package org.smack.swing.application;
 import java.awt.ActiveEvent;
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -21,7 +22,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -824,12 +824,12 @@ public abstract class Application extends AbstractBeanEdt
     }
 
     @Resource
-    private ImageIcon icon;
+    private Image icon;
     /**
      * Return the application's icon as defined in the resources.
      * @return The application icon.
      */
-    public ImageIcon getIcon()
+    public Image getIcon()
     {
         return icon;
     }

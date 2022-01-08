@@ -100,7 +100,7 @@ public class FrameView extends View {
             f.setTitle( a.getTitle() );
 
         if ( f.getIconImage() == null && a.getIcon() != null )
-            f.setIconImage(a.getIcon().getImage());
+            f.setIconImage( a.getIcon() );
 
         return f;
     }
