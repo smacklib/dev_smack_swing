@@ -15,6 +15,7 @@ import javax.swing.ActionMap;
 import org.smack.swing.swingx.action.MackAction;
 import org.smack.util.ReflectionUtil;
 import org.smack.util.StringUtil;
+import org.smack.util.resource.ResourceMap;
 
 
 /**
@@ -578,6 +579,7 @@ public class ApplicationAction extends MackAction
                 task.setInputBlocker(createInputBlocker(task, actionEvent));
             }
 //            final ApplicationContext ctx = appAM.getContext();
+            // micbinz fixme
             final TaskService ts = null; //ctx.getTaskService(taskService);
             if (ts != null) {
                 ts.execute(task);

@@ -4,48 +4,25 @@
  */
 package org.smack.swing.application;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 import java.awt.Component;
 import java.awt.Container;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import javax.swing.AbstractButton;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 
-import org.smack.swing.application.ResourceMap.InjectFieldException;
-import org.smack.swing.application.ResourceMap.LookupException;
-import org.smack.swing.application.ResourceMap.PropertyInjectionException;
-import org.smack.util.Pair;
-import org.smack.util.ReflectionUtil;
-import org.smack.util.StringUtil;
-
+import org.smack.util.ServiceManager;
 
 /**
  * The application's {@code ResourceManager} provides
  * read-only cached access to resources in {@code ResourceBundles} via the
- * {@link ResourceMap ResourceMap} class.  {@code ResourceManager} is a
+ * {@link org.smack.util.resource.ResourceMap ResourceMap} class.  {@code ResourceManager} is a
  * property of the {@code ApplicationContext} and most applications
  * look up resources relative to it, like this:
  * <pre>
@@ -72,7 +49,6 @@ import org.smack.util.StringUtil;
  * @see ApplicationContext#getResourceMap
  * @see ResourceMap
  *
- * @version $Rev$
  * @author Michael Binz
  * @author Hans Muller (Hans.Muller@Sun.COM)
  */
@@ -81,37 +57,7 @@ public final class ResourceManager
     private final static Logger LOG =
             Logger.getLogger( ResourceManager.class.getName() );
 
-    @Target({FIELD})
-    @Retention(RUNTIME)
-    public @interface Resource {
-        /**
-         * @return The name of the resource.  For field annotations,
-         * the default is the field name.
-         */
-        String name() default StringUtil.EMPTY_STRING;
-
-        /**
-         * @return A default value for this resource.
-         */
-        String dflt() default DFLT_NULL;
-    }
-    /**
-     * Used as a default null value for the @Resource.dflt field. Never
-     * modify.
-     */
-    static final private String DFLT_NULL = "313544b196b54c29a26e43bdf204b023";
-
-    private final Map<String, ResourceMap> resourceMaps =
-                new ConcurrentHashMap<String, ResourceMap>();
-
-    private final List<String> _applicationBundleNames;
-
-    /**
-     * The application class used to compute the
-     * application-wide elements of the resource map.
-     * Is never null.
-     */
-    private final Class<?> _applicationClass;
+    private final org.smack.util.resource.ResourceManager _smackRm;
 
     /**
      * Creates an instance.
@@ -146,203 +92,8 @@ public final class ResourceManager
      * @see ApplicationContext#getResourceManager
      * @see ApplicationContext#getResourceMap
      */
-    public ResourceManager( Class<?> applicationClass ) {
-        if ( applicationClass == null )
-            throw new IllegalArgumentException( "null applicationClass" );
-        _applicationClass = applicationClass;
-        _applicationBundleNames = allBundleNames(
-                _applicationClass,
-                Object.class );
-    }
-
-    /**
-     * Returns a list of the ResourceBundle names for all of
-     * the classes from startClass to (including) stopClass.  The
-     * bundle names for each class are #getClassBundleNames(Class).
-     * The list is in priority order: resources defined in bundles
-     * earlier in the list shadow resources with the same name that
-     * appear bundles that come later.
-     */
-    static private List<String> allBundleNames(Class<?> startClass, Class<?> stopClass)
-    {
-        List<String> result = new ArrayList<String>();
-
-        Class<?> limitClass = stopClass.getSuperclass(); // could be null
-
-        for (Class<?> c = startClass; c != limitClass; c = c.getSuperclass())
-            result.addAll(getClassBundleNames(c));
-
-        return Collections.unmodifiableList(result);
-    }
-
-    /**
-     * Returns the package name of a resource bundle.
-     * "org.bsaf192.Lumumba" -> "org.bsaf192".
-     *
-     * @param bundleName A resource bundle name.
-     * @return The corresponding package name.
-     */
-    private static String bundlePackageName( String bundleName )
-    {
-        int idx = bundleName.lastIndexOf( "." );
-
-        return ( idx == -1 ) ?
-                StringUtil.EMPTY_STRING :
-                bundleName.substring( 0, idx );
-    }
-
-    /**
-     * Creates a parent chain of ResourceMaps for the specified
-     * ResourceBundle names.  One ResourceMap is created for each
-     * subsequence of ResourceBundle names with a common bundle
-     * package name, i.e. with a common resourcesDir.  The parent
-     * of the final ResourceMap in the chain is root.
-     */
-    private ResourceMap createResourceMapChain(
-            Locale locale,
-            ClassLoader cl,
-            ResourceMap root,
-            ListIterator<String> names)
-    {
-        if ( !names.hasNext() )
-            return root;
-
-        String bundleName0 = names.next();
-        String rmBundlePackage = bundlePackageName(bundleName0);
-
-        List<String> rmNames = new ArrayList<String>();
-        rmNames.add(bundleName0);
-
-        while ( names.hasNext())
-        {
-            String bundleName = names.next();
-            if (rmBundlePackage.equals(bundlePackageName(bundleName))) {
-                rmNames.add(bundleName);
-            } else {
-                names.previous();
-                break;
-            }
-        }
-
-        // Process the tail of the iterator.  A bit lispy.
-        ResourceMap parent = createResourceMapChain(
-                locale,
-                cl,
-                root,
-                names);
-
-        return new ResourceMap(locale, parent, cl, rmNames);
-    }
-
-    /**
-     * Returns a {@link ResourceMap#getParent chain} of {@code ResourceMaps}
-     * that encapsulate the {@code ResourceBundles} for each class
-     * from {@code startClass} to (including) {@code stopClass}.  The
-     * final link in the chain is Application ResourceMap chain, i.e.
-     * the value of {@link #getApplicationResourceMap() getResourceMap()}.
-     * <p>
-     * The ResourceBundle names for the chain of ResourceMaps
-     * are defined by  {@link #getClassBundleNames} and
-     * {@link #getApplicationBundleNames}.  Collectively they define the
-     * standard location for {@code ResourceBundles} for a particular
-     * class as the {@code resources} subpackage.  For example, the
-     * ResourceBundle for the single class {@code com.myco.MyScreen}, would
-     * be named {@code com.myco.resources.MyScreen}.  Typical
-     * ResourceBundles are ".properties" files, so: {@code
-     * com/foo/bar/resources/MyScreen.properties}.  The following table
-     * is a list of the ResourceMaps and their constituent
-     * ResourceBundles for the same example:
-     * <p>
-     * <table border="1" cellpadding="4%">
-     *   <caption><em>ResourceMap chain for class MyScreen in MyApp</em></caption>
-     *     <tr>
-     *       <th></th>
-     *       <th>ResourceMap</th>
-     *       <th>ResourceBundle names</th>
-     *       <th>Typical ResourceBundle files</th>
-     *     </tr>
-     *     <tr>
-     *       <td>1</td>
-     *       <td>class: com.myco.MyScreen</td>
-     *       <td>com.myco.resources.MyScreen</td>
-     *       <td>com/myco/resources/MyScreen.properties</td>
-     *     </tr>
-     *     <tr>
-     *       <td>2</td>
-     *       <td>application: com.myco.MyApp</td>
-     *       <td>com.myco.resources.MyApp</td>
-     *       <td>com/myco/resources/MyApp.properties</td>
-     *     </tr>
-     *     <tr>
-     *       <td>3</td>
-     *       <td>application: javax.swing.application.Application</td>
-     *       <td>javax.swing.application.resources.Application</td>
-     *       <td>javax.swing.application.resources.Application.properties</td>
-     *     </tr>
-     * </table>
-     *
-     * <p>Note that inner classes are searched for by "simple" name - eg,
-     * for a class MyApp$InnerClass, the resource bundle must be named
-     * InnerClass.properties. See the notes on {@link #classBundleBaseName classBundleBaseName} </p>
-     *
-     * <p>
-     * None of the ResourceBundles are required to exist.  If more than one
-     * ResourceBundle contains a resource with the same name then
-     * the one earlier in the list has precedence
-     * <p>
-     * ResourceMaps are constructed lazily and cached.  One ResourceMap
-     * is constructed for each sequence of classes in the same package.
-     *
-     * @param startClass the first class whose ResourceBundles will be included
-     * @param stopClass the last class whose ResourceBundles will be included
-     * @return a {@code ResourceMap} chain that contains resources loaded from
-     *   {@code ResourceBundles}  found in the resources subpackage for
-     *   each class.
-     * @see #getClassBundleNames
-     * @see #getApplicationBundleNames
-     * @see ResourceMap#getParent
-     * @see ResourceMap#getBundleNames
-     */
-    private ResourceMap getResourceMap(Locale locale, Class<?> startClass, Class<?> stopClass)
-    {
-        if (startClass == null)
-            throw new IllegalArgumentException("null startClass");
-        if (stopClass == null)
-            throw new IllegalArgumentException("null stopClass");
-        if (!stopClass.isAssignableFrom(startClass))
-            throw new IllegalArgumentException("startClass is not a subclass, or the same as, stopClass");
-
-        String classResourceMapKey = startClass.getName() + stopClass.getName();
-
-        ResourceMap result = resourceMaps.get(classResourceMapKey);
-
-        if ( result != null )
-            return result;
-
-        // Get the bundle names for the whole chain of classes.
-        // We put the application bundle names in front of the list to
-        // allow overriding of all resources in the application resources.
-        List<String> classBundleNames =
-                new ArrayList<String>( _applicationBundleNames );
-        classBundleNames.addAll( allBundleNames( startClass, stopClass ) );
-
-        ClassLoader classLoader =
-                startClass.getClassLoader();
-
-        result = createResourceMapChain(
-                locale,
-                classLoader,
-                null,
-                classBundleNames.listIterator() );
-
-        resourceMaps.put(classResourceMapKey, result);
-
-        return result;
-    }
-
-    private ResourceMap getResourceMap( Class<?> startClass, Class<?> stopClass )
-    {
-        return getResourceMap( Locale.getDefault(), startClass, stopClass );
+    public ResourceManager( Class<?> notUsed ) {
+        _smackRm = ServiceManager.getApplicationService( org.smack.util.resource.ResourceManager.class );
     }
 
     /**
@@ -356,9 +107,9 @@ public final class ResourceManager
      *   specified class's package.
      * @see #getResourceMap(Class, Class)
      */
-    public final ResourceMap getResourceMap( Class<?> cls )
+    public final org.smack.util.resource.ResourceMap getResourceMap( Class<?> cls )
     {
-        return getResourceMap( Locale.getDefault(), cls, cls );
+        return _smackRm.getResourceMap2( cls );
     }
 
     /**
@@ -371,191 +122,7 @@ public final class ResourceManager
      */
     public void injectResources( Object o )
     {
-        Class<?> clazz;
-
-        // If we already received a class instance, use it. Otherwise
-        // get the objects class.  This allows injection of static
-        // attribute values on library classes.
-        if ( o instanceof Class )
-            clazz = (Class<?>)o;
-        else
-            clazz = o.getClass();
-
-        ResourceMap resourceMap = getResourceMap(
-                clazz, Object.class );
-
-        // Perform the injection for the object's class and all its
-        // super classes.
-        // TODO michab -- Ensure quick return if already injected.
-        for ( Class<?> c : ReflectionUtil.getInheritanceList( clazz ) )
-        {
-            if ( c.getClassLoader() == null )
-                break;
-
-            injectFields( o, c, resourceMap );
-        }
-    }
-
-    /**
-     * Map from a class to a list of the names of the
-     * {@code ResourceBundles} specific to the class.
-     * The list is in priority order: resources defined
-     * by the first ResourceBundle shadow resources with the
-     * the same name that come later.
-     * <p>
-     * By default this method returns one ResourceBundle
-     * whose name is the same as the class's name, but in the
-     * {@code "resources"} subpackage.
-     * <p>
-     * For example, given a class named
-     * {@code com.foo.bar.MyClass}, the ResourceBundle name would
-     * be {@code "com.foo.bar.resources.MyClass"}. If MyClass is
-     * an inner class, only its "simple name" is used.  For example,
-     * given an inner class named {@code com.foo.bar.OuterClass$InnerClass},
-     * the ResourceBundle name would be
-     * {@code "com.foo.bar.resources.InnerClass"}.
-     * Although this could result in a collision, creating more
-     * complex rules for inner classes would be a burden for
-     * developers.
-     * <p>
-     * This method is used by the {@code getResourceMap} methods
-     * to compute the list of ResourceBundle names
-     * for a new {@code ResourceMap}.
-     *
-     * @param cls the named ResourceBundles are specific to {@code cls}.
-     * @return the names of the ResourceBundles to be loaded for {@code cls}
-     * @see #getResourceMap
-     * @see #getApplicationBundleNames
-     */
-    private static List<String> getClassBundleNames(Class<?> cls)
-    {
-        Package packge = cls.getPackage();
-
-        String resourcePackage = packge != null ?
-                packge.getName() + "." :
-                StringUtil.EMPTY_STRING;
-
-        resourcePackage += "resources.";
-
-        String classBundle =
-            resourcePackage + cls.getSimpleName();
-        String packageBundle =
-            resourcePackage + "package";
-
-        return Arrays.asList( classBundle, packageBundle );
-    }
-
-    /**
-     * Set each field with a <tt>&#064;Resource</tt> annotation in the target object,
-     * to the value of a resource whose name is the simple name of the target
-     * class followed by "." followed by the name of the field.  If the
-     * key <tt>&#064;Resource</tt> parameter is specified, then a resource with that name
-     * is used instead.  Array valued fields can also be initialized.
-     * For example:
-     * <pre>
-     * class MyClass {
-     *   &#064;Resource String sOne;
-     *   &#064;Resource(key="sTwo") String s2;
-     *   &#064;Resource int[] numbers;
-     * }
-     * </pre>
-     * Given the previous class and the following resource file:
-     * <pre>
-     * MyClass.sOne = One
-     * sTwo = Two
-     * MyClass.numbers = 10 11
-     * </pre>
-     * Then <tt>injectFields(new MyClass())</tt> would initialize the MyClass
-     * <tt>sOne</tt> field to "One", the <tt>s2</tt> field to "Two", and the
-     * two elements of the numbers array to 10 and 11.
-     * <p>
-     * If <tt>target</tt> is null an IllegalArgumentException is
-     * thrown.  If an error occurs during resource lookup, then an
-     * unchecked LookupException is thrown.  If a target field marked
-     * with <tt>&#064;Resource</tt> can't be set, then an unchecked
-     * InjectFieldException is thrown.
-     *
-     * @param target the object whose fields will be initialized
-     * @param targetType The type of the target object to inject.
-     * This is used to explicitly inject super-class resources.
-     * @throws LookupException if an error occurs during lookup or string conversion
-     * @throws InjectFieldException if a field can't be set
-     * @throws IllegalArgumentException if target is null
-     * @see #getObject
-     */
-    public void injectFields(Object target, Class<?> targetType, ResourceMap map ) {
-        if (target==null)
-            throw new IllegalArgumentException("null target");
-        if (targetType.isPrimitive())
-            throw new IllegalArgumentException("primitive target");
-        if (targetType.isArray())
-            throw new IllegalArgumentException("array target");
-
-        String keyPrefix = targetType.getSimpleName() + ".";
-
-        for ( Pair<Field,Resource> field :
-            org.jdesktop.util.ReflectionUtil.getAnnotatedFields(
-                    targetType,
-                    Resource.class ) )
-        {
-            String key = field.right.name();
-
-            if ( ! StringUtil.hasContent( key ) )
-                key = keyPrefix + field.left.getName();
-
-            injectField( field.left, target, key, map );
-        }
-    }
-
-    /**
-     * Inject a single field.
-     *
-     * @param field The field to inject.
-     * @param target The target object instance.
-     * @param key The resource key.
-     */
-    private void injectField( Field field, Object target, String key, ResourceMap map )
-    {
-        if (!field.isAccessible())
-            field.setAccessible(true);
-
-        Class<?> type = field.getType();
-
-        if ( Component.class.isAssignableFrom( type ) )
-        {
-            Component fieldValue = null;
-            try
-            {
-                fieldValue = (Component)field.get( target );
-            }
-            catch ( Exception e )
-            {
-                throw new InjectFieldException("unable to get field's value", field, target, key, e);
-            }
-
-            if ( fieldValue == null )
-                throw new InjectFieldException( "null component field marked with @Resource", field, target, key, null );
-            // TODO if null try to create instance using deflt ctor?
-
-            injectComponentProperties( key, fieldValue, map );
-        }
-        else
-        {
-            Object value = map.getObject(key, type);
-
-            if ( value == null )
-            {
-                LOG.warning( "No value for @Resource(" + key + ")" );
-                return;
-            }
-
-            try {
-                field.set(target, value);
-            }
-            catch (Exception e) {
-                throw new InjectFieldException("unable to set field's value", field, target, key, e);
-            }
-        }
+        _smackRm.injectResources( o );
     }
 
     /**
@@ -564,11 +131,11 @@ public final class ResourceManager
      * @param pd
      * @param key
      */
-    private void injectComponentProperty(Component component, PropertyDescriptor pd, String key, ResourceMap map ) {
+    private void injectComponentProperty(Component component, PropertyDescriptor pd, String key, org.smack.util.resource.ResourceMap map ) {
         Method setter = pd.getWriteMethod();
         Class<?> type = pd.getPropertyType();
         if ((setter != null) && (type != null) && map.containsKey(key)) {
-            Object value = map.getObject(key, type);
+            Object value = map.getAs(key, type,null);
             String propertyName = pd.getName();
             try {
                 // Note: this could be generalized, we could delegate
@@ -583,18 +150,16 @@ public final class ResourceManager
             } catch (Exception e) {
                 String pdn = pd.getName();
                 String msg = "property setter failed";
-                RuntimeException re = new PropertyInjectionException(msg, key, component, pdn);
-                re.initCause(e);
-                throw re;
+                throw new RuntimeException(msg, e);  // key, component, pdn);
             }
         } else if (type != null) {
             String pdn = pd.getName();
             String msg = "no value specified for resource";
-            throw new PropertyInjectionException(msg, key, component, pdn);
+            throw new RuntimeException(msg);//, key, component, pdn);
         } else if (setter == null) {
             String pdn = pd.getName();
             String msg = "can't set read-only property";
-            throw new PropertyInjectionException(msg, key, component, pdn);
+            throw new RuntimeException(msg);//, key, component, pdn);
         }
     }
 
@@ -603,7 +168,7 @@ public final class ResourceManager
      * @param componentName
      * @param component
      */
-    private void injectComponentProperties(String componentName, Component component, ResourceMap map) {
+    private void injectComponentProperties(String componentName, Component component, org.smack.util.resource.ResourceMap map) {
         if ( componentName == null )
             return;
 
@@ -626,9 +191,7 @@ public final class ResourceManager
             beanInfo = Introspector.getBeanInfo(component.getClass());
         } catch (IntrospectionException e) {
             String msg = "introspection failed";
-            RuntimeException re = new PropertyInjectionException(msg, null, component, null);
-            re.initCause(e);
-            throw re;
+            throw new RuntimeException(msg, e); //null, component, null);
         }
         PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
         if ((pds != null) && (pds.length > 0)) {
@@ -672,7 +235,7 @@ public final class ResourceManager
      * @throws IllegalArgumentException if target is null
      * @see #injectComponent
      */
-    public void injectComponents(Component root,ResourceMap map) {
+    public void injectComponents(Component root,org.smack.util.resource.ResourceMap map) {
         injectComponent(root,map);
         if (root instanceof JMenu) {
             /* Warning: we're bypassing the popupMenu here because
@@ -728,17 +291,14 @@ public final class ResourceManager
      * the corresponding property can't be set, an (unchecked) {@link
      * PropertyInjectionException} is thrown.
      *
-     *
-     *
      * @param target the Component to inject
      * @see #injectComponents
      * @see #getObject
      * @see ResourceConverter#forType
-     * @throws LookupException if an error occurs during lookup or string conversion
      * @throws PropertyInjectionException if a property specified by a resource can't be set
      * @throws IllegalArgumentException if target is null
      */
-    public void injectComponent(Component target,ResourceMap map) {
+    public void injectComponent(Component target,org.smack.util.resource.ResourceMap map) {
         if (target == null) {
             throw new IllegalArgumentException("null target");
         }
@@ -753,60 +313,8 @@ public final class ResourceManager
      * @param bean The bean whose properties are injected.
      * @param prefix The prefix used to filter the map's keys.
      */
-    public void injectProperties( Object bean, String prefix, ResourceMap map )
+    public void injectProperties( Object bean, String prefix, org.smack.util.resource.ResourceMap map )
     {
-        BeanInfo beanInfo;
-        try {
-            beanInfo = Introspector.getBeanInfo(
-                    bean.getClass() );
-        } catch (IntrospectionException e) {
-            throw new IllegalArgumentException( "Introspection failed.", e );
-        }
-
-        // Add the dot.
-        prefix += ".";
-
-        Set<String> definedKeys = new HashSet<String>();
-        for ( String c : map.keySet() )
-            if ( c.startsWith( prefix ) )
-                definedKeys.add( c );
-
-        if ( definedKeys.size() == 0 )
-            return;
-
-        for ( PropertyDescriptor c : beanInfo.getPropertyDescriptors() )
-        {
-            Method setter = c.getWriteMethod();
-
-            // Skip read-only properties.
-            if ( setter == null )
-                continue;
-
-            String currentKey = prefix + c.getName();
-            if ( ! definedKeys.contains( currentKey ) )
-                continue;
-
-            definedKeys.remove( currentKey );
-
-            try
-            {
-                // This implicitly transforms the key's value.
-                setter.invoke( bean, map.get( currentKey, c.getPropertyType() ) );
-            }
-            catch ( IllegalAccessException e )
-            {
-                throw new RuntimeException( e );
-            }
-            catch ( InvocationTargetException e )
-            {
-                throw new RuntimeException( e.getCause() );
-            }
-
-            if ( definedKeys.size() == 0 )
-                return;
-        }
-
-        for ( String c : definedKeys )
-            LOG.warning( String.format( "Key '%s' defined in map does not match property.", c ) );
+        _smackRm.injectProperties( bean, prefix, map );
     }
 }

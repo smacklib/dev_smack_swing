@@ -36,10 +36,10 @@ import javax.swing.border.AbstractBorder;
 
 import org.smack.swing.GTools;
 import org.smack.swing.application.Application;
-import org.smack.swing.application.ResourceManager.Resource;
 import org.smack.swing.swingx.action.AbstractActionExt;
 import org.smack.swing.swingx.util.ComponentDragHandler;
 import org.smack.util.StringUtil;
+import org.smack.util.resource.ResourceManager.Resource;
 
 /**
  * An icon that can be placed on a {@link JXDesktop} pane.

@@ -40,7 +40,7 @@ import org.smack.util.ServiceManager;
  * Tasks should provide localized values for the {@code title},
  * {@code description}, and {@code message} properties in a
  * ResourceBundle for the Task subclass.  A
- * {@link ResourceMap} is
+ * {@link org.smack.util.resource.ResourceMap} is
  * loaded automatically using the Task subclass as the
  * {@code startClass} and Task.class the {@code stopClass}.
  * This ResourceMap is also used to look up format strings used in
@@ -124,7 +124,7 @@ import org.smack.util.ServiceManager;
  *
  * @author Hans Muller (Hans.Muller@Sun.COM)
  * @see ApplicationContext
- * @see ResourceMap
+ * @see org.smack.util.resource.ResourceMap
  * @see TaskListener
  * @see TaskEvent
  */
@@ -144,7 +144,7 @@ public abstract class Task<T, V> extends SwingWorker<T, V>
 
     private final Application application;
     private String resourcePrefix;
-    private ResourceMap resourceMap;
+    private org.smack.util.resource.ResourceMap resourceMap;
     private List<TaskListener<T, V>> taskListeners;
     private InputBlocker inputBlocker;
     private String title = null;
@@ -193,7 +193,7 @@ public abstract class Task<T, V> extends SwingWorker<T, V>
         APPLICATION
     }
 
-    private void initTask(ResourceMap resourceMap, String prefix) {
+    private void initTask(org.smack.util.resource.ResourceMap resourceMap, String prefix) {
         this.resourceMap = resourceMap;
         if ((prefix == null) || (prefix.length() == 0)) {
             resourcePrefix = "";
@@ -203,9 +203,9 @@ public abstract class Task<T, V> extends SwingWorker<T, V>
             resourcePrefix = prefix + ".";
         }
         if (resourceMap != null) {
-            title = resourceMap.getString(resourceName(PROP_TITLE));
-            description = resourceMap.getString(resourceName(PROP_DESCRIPTION));
-            message = resourceMap.getString(resourceName(PROP_MESSAGE));
+            title = resourceMap.get(resourceName(PROP_TITLE));
+            description = resourceMap.get(resourceName(PROP_DESCRIPTION));
+            message = resourceMap.get(resourceName(PROP_MESSAGE));
             if (message != null) {
                 messageTime = System.currentTimeMillis();
             }
@@ -219,47 +219,12 @@ public abstract class Task<T, V> extends SwingWorker<T, V>
      * @param application
      * @return
      */
-    private ResourceMap defaultResourceMap(Application application)
+    private org.smack.util.resource.ResourceMap defaultResourceMap(Application application)
     {
         ResourceManager rm =
                 ServiceManager.getApplicationService( ResourceManager.class );
 
         return rm.getResourceMap( getClass() );
-    }
-
-    /**
-     * <b>Warning:</b> This constructor is deprecated.  It will be removed
-     * in a future release.  This constructor was a way for developers
-     * to initialize a Task's title/description/message properties,
-     * and it's InputBlocker's visual properties, from an alternative
-     * ResourceMap.  This feature is now supported with the
-     * InputBlocker's resourceMap property.
-     * <p>
-     * Construct a {@code Task}.  If the {@code resourceMap} parameter
-     * is not null, then the {@code title}, {@code description}, and
-     * {@code message} properties are initialized from resources.  The
-     * {@code resourceMap} is also used to lookup localized messages
-     * defined with the {@link #message message} method.  In both
-     * cases, if the value of {@code resourcePrefix} is not null or an
-     * empty string {@code ""}, resource names must have the name of
-     * the {@code resourcePrefix} parameter, followed by a ".", as a
-     * prefix
-     *
-     * @param application
-     * @param resourceMap the ResourceMap for the Task's user properties, can be null
-     * @param resourcePrefix prefix for resource names, can be null
-     * @see #getResourceMap
-     * @see #setTitle
-     * @see #setDescription
-     * @see #setMessage
-     * @see #resourceName
-     * @see ApplicationContext#getResourceMap
-     * @deprecated
-     */
-    @Deprecated
-    public Task(Application application, ResourceMap resourceMap, String resourcePrefix) {
-        this.application = application;
-        initTask(resourceMap, resourcePrefix);
     }
 
     /**
@@ -369,7 +334,7 @@ public abstract class Task<T, V> extends SwingWorker<T, V>
      * @return this Task's {@code ResourceMap}
      * @see #resourceName
      */
-    public final ResourceMap getResourceMap() {
+    public final org.smack.util.resource.ResourceMap getResourceMap() {
         return resourceMap;
     }
 
@@ -574,13 +539,13 @@ public abstract class Task<T, V> extends SwingWorker<T, V>
      * @param formatResourceKey the suffix of the format string's resource name.
      * @param args the arguments referred to by the placeholders in the format string
      * @see #setMessage
-     * @see ResourceMap#getString(String, Object...)
+     * @see org.smack.util.resource.ResourceMap#getFormatted(String, Object...)
      * @see java.text.MessageFormat
      */
     protected final void message(String formatResourceKey, Object... args) {
-        ResourceMap resourceMap = getResourceMap();
+        var resourceMap = getResourceMap();
         if (resourceMap != null) {
-            setMessage(resourceMap.getString(resourceName(formatResourceKey), args));
+            setMessage(resourceMap.getFormatted(resourceName(formatResourceKey), args));
         } else {
             setMessage(formatResourceKey);
         }

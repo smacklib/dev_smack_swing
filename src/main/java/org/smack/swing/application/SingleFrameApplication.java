@@ -57,7 +57,7 @@ import org.smack.util.ServiceManager;
  * "mainFrame"), that contains the "Hello World" JLabel.  Before the
  * frame is made visible, the properties of all of the components in
  * the hierarchy are initialized with
- * {@link ResourceMap#injectComponents ResourceMap.injectComponents}
+ * {@link org.smack.util.resource.ResourceMap#injectComponents ResourceMap.injectComponents}
  * and then restored from saved session state (if any) with
  * {@link SessionStorage#restore SessionStorage.restore}.
  * When the application shuts down, session state is saved.
@@ -168,7 +168,7 @@ public abstract class SingleFrameApplication extends Application
      * injecting resources.
      * <p>
      * By default the {@code show} methods
-     * {@link ResourceMap#injectComponents inject resources} before
+     * {@link org.smack.util.resource.ResourceMap#injectComponents inject resources} before
      * initializing the JFrame or JDialog's size, location,
      * and restoring the window's session state.  If the application
      * is showing a window whose resources have already been injected,
@@ -177,7 +177,6 @@ public abstract class SingleFrameApplication extends Application
      * behavior.
      *
      * @param root the root of the component hierarchy
-     * @see ResourceMap#injectComponents
      * @see #show(JComponent)
      * @see #show(JFrame)
      * @see #show(JDialog)
@@ -285,7 +284,7 @@ public abstract class SingleFrameApplication extends Application
      * <p>
      * Before the main frame is made visible, the properties of all of
      * the components in the hierarchy are initialized with {@link
-     * ResourceMap#injectComponents ResourceMap.injectComponents} and
+     * org.smack.util.resource.ResourceMap#injectComponents ResourceMap.injectComponents} and
      * then restored from saved session state (if any) with {@link
      * SessionStorage#restore SessionStorage.restore}.  When the
      * application shuts down, session state is saved.

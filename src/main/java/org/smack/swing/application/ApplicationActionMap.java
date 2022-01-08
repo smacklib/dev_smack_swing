@@ -41,7 +41,7 @@ import javax.swing.ActionMap;
  * are initialized from the ResourceMap.
  *
  * @see ApplicationAction
- * @see ResourceMap
+ * @see org.smack.util.resource.ResourceMap
  * @author Hans Muller (Hans.Muller@Sun.COM)
  */
 @SuppressWarnings("serial")

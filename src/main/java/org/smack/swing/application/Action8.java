@@ -60,9 +60,9 @@ public class Action8 extends AbstractActionExt
      */
     public Action8 inject( Class<?> context, String key )
     {
-        ResourceManager rm =
-                ServiceManager.getApplicationService( ResourceManager.class );
-        ResourceMap map =
+        var rm =
+                ServiceManager.getApplicationService( org.smack.util.resource.ResourceManager.class );
+        var map =
                 rm.getResourceMap( context );
         rm.injectProperties(
                 this,

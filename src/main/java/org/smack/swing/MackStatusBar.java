@@ -24,12 +24,9 @@ import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 
 import org.smack.swing.application.Application;
-import org.smack.swing.application.ResourceManager.Resource;
 import org.smack.swing.application.TaskMonitor;
 import org.smack.util.StringUtil;
-
-
-
+import org.smack.util.resource.ResourceManager.Resource;
 
 /**
  * A StatusBar panel that tracks a TaskMonitor. Although one could certainly
