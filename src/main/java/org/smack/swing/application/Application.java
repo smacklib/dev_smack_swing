@@ -29,6 +29,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.jdesktop.util.PlatformType;
 import org.smack.swing.application.util.OSXAdapter;
+import org.smack.swing.beans.AbstractBeanEdt;
 import org.smack.util.ServiceManager;
 import org.smack.util.StringUtil;
 import org.smack.util.resource.ResourceManager.Resource;
@@ -130,7 +131,7 @@ import org.smack.util.resource.ResourceManager.Resource;
  * @author Michael Binz
  * @author Hans Muller (Hans.Muller@Sun.COM)
  */
-public abstract class Application extends BaseApplication
+public abstract class Application extends AbstractBeanEdt
 {
     private static final Logger LOG =
             Logger.getLogger( Application.class.getName() );
