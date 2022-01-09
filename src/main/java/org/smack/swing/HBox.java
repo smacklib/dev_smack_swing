@@ -34,7 +34,7 @@ public class HBox extends Box
      */
     public void addGap()
     {
-        add( Box.createHorizontalStrut( GTools.GAP ) );
+        add( Box.createHorizontalStrut( SwingUtil.GAP ) );
     }
 
     /**

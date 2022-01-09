@@ -31,7 +31,7 @@ import javax.swing.WindowConstants;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 
-import org.smack.swing.GTools;
+import org.smack.swing.SwingUtil;
 import org.smack.swing.application.Action;
 import org.smack.swing.beans.JavaBeanProperty;
 import org.smack.swing.beans.PropertyLink;
@@ -85,11 +85,11 @@ public class JXDesktop extends JDesktopPane
     private final JPopupMenu _windowMenu = new JPopupMenu( "Window" );
 
     public final javax.swing.Action ACTION_CASCADE =
-            GTools.getAction( this, "actCascade" );
+            SwingUtil.getAction( this, "actCascade" );
     public final javax.swing.Action ACTION_TILE_VERTICALLY =
-            GTools.getAction( this, "actTileVertically" );
+            SwingUtil.getAction( this, "actTileVertically" );
     public final javax.swing.Action ACTION_TILE_HORIZONTALLY =
-            GTools.getAction( this, "actTileHorizontally" );
+            SwingUtil.getAction( this, "actTileHorizontally" );
 
 //    private final ContainerListener _containerListener = new ContainerListener()
 //    {

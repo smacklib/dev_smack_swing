@@ -127,21 +127,15 @@ import org.smack.util.resource.ResourceManager.Resource;
  * @see SingleFrameApplication
  * @see ApplicationContext
  * @see UIManager#setLookAndFeel
- * @version $Rev$
  * @author Michael Binz
- * @author Hans Muller (Hans.Muller@Sun.COM)
  */
 public abstract class Application extends AbstractBeanEdt
 {
     private static final Logger LOG =
             Logger.getLogger( Application.class.getName() );
 
-    public static final String KEY_APPLICATION_ID = "Application.id";
-    public static final String KEY_APPLICATION_TITLE = "Application.title";
-    public static final String KEY_APPLICATION_ICON = "Application.icon";
-    public static final String KEY_APPLICATION_VENDOR_ID = "Application.vendorId";
-    private static final String KEY_APPLICATION_LOOKANDFEEL =
-            "Application.lookAndFeel";
+    private static final String DEFAULT_LOOK_AND_FEEL =
+            "nimbus";
 
     private static Application application = null;
     private final List<ExitListener> _exitListeners =
@@ -210,7 +204,8 @@ public abstract class Application extends AbstractBeanEdt
         SwingUtilities.invokeLater(doCreateAndShowGUI);
     }
 
-    /* Initializes the ApplicationContext applicationClass and application
+    /**
+     * Initializes the ApplicationContext applicationClass and application
      * properties.
      *
      * Note that, as of Java SE 5, referring to a class literal
@@ -240,18 +235,10 @@ public abstract class Application extends AbstractBeanEdt
         T application =
                 ServiceManager.getApplicationService( applicationClass );
 
-        // Initialize the ApplicationContext application properties.
-        ApplicationContext ctx = application.getContext();
+        setLookAndFeel( application.getLookAndFeel() );
 
-        // Load the application resource map, notably the
-        // Application.* properties.
-        org.smack.util.resource.ResourceMap appResourceMap = ctx.getResourceMap();
-
-        PlatformType platform = PlatformType.getPlatform();
-
-//        appResourceMap.putResource(
-//                ResourceMap.KEY_PLATFORM,
-//                platform );
+        PlatformType platform =
+                PlatformType.getPlatform();
 
         // Generic registration with the Mac OS X application menu.
         if ( PlatformType.OS_X == platform )
@@ -262,8 +249,6 @@ public abstract class Application extends AbstractBeanEdt
                 LOG.log(Level.SEVERE, "Cannot set Mac Os X specific handler for Quit event", e);
             }
         }
-
-        setLookAndFeel( appResourceMap );
 
         return application;
     }
@@ -279,15 +264,10 @@ public abstract class Application extends AbstractBeanEdt
      * the installed L&Fs by name case insensitive.
      * If not found, then 'system' is used.
      */
-    private static void setLookAndFeel( org.smack.util.resource.ResourceMap appResourceMap )
+    private static void setLookAndFeel( String lnf )
     {
-        // Initialize the UIManager lookAndFeel property with the
-        // Application.lookAndFeel resource.  If the resource
-        // isn't defined we default to "system".
-        String lnf =
-                appResourceMap.get(KEY_APPLICATION_LOOKANDFEEL);
         if ( StringUtil.isEmpty( lnf ) )
-            lnf = "system";
+            throw new IllegalArgumentException( "Invalid LookAndFeel" );
 
         // For default nothing to do.
         if ( "default".equalsIgnoreCase( lnf ) )
@@ -311,20 +291,17 @@ public abstract class Application extends AbstractBeanEdt
         {
             LOG.warning(
                     "LookAndFeel not found: " +
-                    lnf +
-                    ". Using system lnf." );
-            setSystemLnf();
+                    lnf );
             return;
         }
 
-        try {
-                UIManager.setLookAndFeel(classname);
+        try
+        {
+            UIManager.setLookAndFeel(classname);
         } catch (Exception e) {
             LOG.warning(
                     "LookAndFeel failed to load: " +
-                    lnf +
-                    ". Using system lnf." );
-            setSystemLnf();
+                    lnf );
         }
     }
 
@@ -854,6 +831,17 @@ public abstract class Application extends AbstractBeanEdt
     public String getVendorId()
     {
         return vendorId;
+    }
+
+    @Resource( dflt = DEFAULT_LOOK_AND_FEEL )
+    private String lookAndFeel;
+    /**
+     * Return the application's vendor as defined in the resources.
+     * @return The vendor name.
+     */
+    public String getLookAndFeel()
+    {
+        return lookAndFeel;
     }
 
     /**

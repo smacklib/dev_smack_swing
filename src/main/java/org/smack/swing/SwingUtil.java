@@ -35,7 +35,7 @@ import org.smack.swing.application.SingleFrameApplication;
  *
  * @version $Revision$
  */
-public class GTools
+public class SwingUtil
 {
     /**
      * Icon for information messages. This is the default icon.
@@ -95,7 +95,7 @@ public class GTools
         int option = JOptionPane.showConfirmDialog(
                     pParent,
                     pMessage,
-                    getText( GTools.class, "confirmDialogTitle" ),
+                    getText( SwingUtil.class, "confirmDialogTitle" ),
                     JOptionPane.YES_NO_OPTION);
         return JOptionPane.YES_OPTION == option;
     }
@@ -280,7 +280,7 @@ public class GTools
     /**
      * This is a library and cannot be instantiated.
      */
-    private GTools()
+    private SwingUtil()
     {
         throw new AssertionError();
     }

@@ -19,7 +19,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
-import org.smack.swing.GTools;
+import org.smack.swing.SwingUtil;
 import org.smack.swing.HBox;
 import org.smack.swing.application.ResourceManager;
 import org.smack.util.ServiceManager;
@@ -56,7 +56,7 @@ public class JXDialogExt extends JDialog
         new JXHeader(
             StringUtil.EMPTY_STRING,
             StringUtil.EMPTY_STRING,
-            GTools.ICON_INFO );
+            SwingUtil.ICON_INFO );
 
     /**
      * Panel containing the user component and the button box.
@@ -64,8 +64,8 @@ public class JXDialogExt extends JDialog
     private final JPanel _mainPanel =
         new JPanel(
                 new BorderLayout(
-                        GTools.GAP,
-                        GTools.GAP));
+                        SwingUtil.GAP,
+                        SwingUtil.GAP));
 
     private final HBox _btnBox = new HBox();
 
@@ -74,7 +74,7 @@ public class JXDialogExt extends JDialog
      * window system close button.
      */
     public final Action ACT_CLOSE =
-        GTools.getAction(
+        SwingUtil.getAction(
                 this,
                 "closeAction" );
 
@@ -82,7 +82,7 @@ public class JXDialogExt extends JDialog
      * The action fired when the user clicks the Cancel button.
      */
     public final Action ACT_CANCEL =
-        GTools.getAction(
+        SwingUtil.getAction(
                 this,
                 "cancelAction" );
 
@@ -90,7 +90,7 @@ public class JXDialogExt extends JDialog
      * The action fired when the user clicks the OK button or the Enter key.
      */
     public final Action ACT_OK =
-        GTools.getAction(
+        SwingUtil.getAction(
                 this,
                 "okAction" );
 
@@ -186,7 +186,7 @@ public class JXDialogExt extends JDialog
 
         add(_info, BorderLayout.PAGE_START);
 
-        _mainPanel.setBorder(GTools.GAP_BORDER);
+        _mainPanel.setBorder(SwingUtil.GAP_BORDER);
         _mainPanel.add(_btnBox, BorderLayout.PAGE_END);
         add(_mainPanel, BorderLayout.CENTER);
 
@@ -195,8 +195,8 @@ public class JXDialogExt extends JDialog
 
         // We take over the closing of the dialog.
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        GTools.registerEsc(this, ACT_CLOSE);
-        GTools.registerWindowClosing(this, ACT_CLOSE);
+        SwingUtil.registerEsc(this, ACT_CLOSE);
+        SwingUtil.registerWindowClosing(this, ACT_CLOSE);
 
         ResourceManager rm = ServiceManager.getApplicationService( ResourceManager.class );
         rm.injectComponent( this, rm.getResourceMap( getClass() ) );
@@ -216,8 +216,8 @@ public class JXDialogExt extends JDialog
     {
         if ( pComponent == null )
         {
-            if ( GTools.getFrame() != null )
-                return GTools.getFrame();
+            if ( SwingUtil.getFrame() != null )
+                return SwingUtil.getFrame();
 
             return JOptionPane.getRootFrame();
         }
@@ -295,7 +295,7 @@ public class JXDialogExt extends JDialog
             _btnBox.addGap();
             _btnBox.addButton(ACT_CANCEL);
             getRootPane().setDefaultButton(okBtn);
-            GTools.registerEnter(this, ACT_OK);
+            SwingUtil.registerEnter(this, ACT_OK);
         } else if (_dialogButtons == Buttons.CLOSE) {
             _btnBox.addButton(ACT_CLOSE);
         }
@@ -428,7 +428,7 @@ public class JXDialogExt extends JDialog
     {
         if (isModified()) {
             String msg = "msg.confirmThrowChanges";
-            if (!GTools.confirm(this, msg))
+            if (!SwingUtil.confirm(this, msg))
                 return false;
         }
         return onCancel();
@@ -464,7 +464,7 @@ public class JXDialogExt extends JDialog
      */
     public void submitOnDoubleClickOn(Component pComponent)
     {
-        GTools.registerDoubleClick(pComponent, ACT_OK);
+        SwingUtil.registerDoubleClick(pComponent, ACT_OK);
     }
 
     /**
