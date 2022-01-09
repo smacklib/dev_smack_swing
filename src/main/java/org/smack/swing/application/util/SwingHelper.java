@@ -27,7 +27,9 @@ import javax.swing.RootPaneContainer;
  * @author Eric Heumann
  *
  * @since 1.9
+ * @deprecated Use org.smack.swing.SwingUtil
  */
+@Deprecated
 public final class SwingHelper {
 	private static final String WINDOW_STATE_NORMAL_BOUNDS = "WindowState.normalBounds";
 
