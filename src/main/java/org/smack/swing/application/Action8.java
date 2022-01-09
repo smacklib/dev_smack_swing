@@ -1,7 +1,7 @@
-/* $Id$
+/*
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
  *
- * Unpublished work.
- * Copyright © 2015 Michael G. Binz
+ * Copyright © 2001-2022 Michael Binz
  */
 package org.smack.swing.application;
 

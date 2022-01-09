@@ -1,7 +1,7 @@
-/* $Id$
- * Copyright (C) 2006 Sun Microsystems, Inc. All rights reserved.
- * Copyright (C) 2010 Illya Yalovyy (yalovoy@gmail.com)
- * Use is subject to license terms.
+/*
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
+ *
+ * Copyright © 2001-2022 Michael Binz
  */
 package org.smack.swing.application;
 
@@ -137,25 +137,25 @@ public abstract class Application extends AbstractBeanEdt
     private static final String DEFAULT_LOOK_AND_FEEL =
             "nimbus";
 
-    private static Application application = null;
+    private static Application application =
+            null;
     private final List<ExitListener> _exitListeners =
             new CopyOnWriteArrayList<ExitListener>();
     private final ApplicationContext context;
     private boolean ready;
 
     /**
-     * Subclasses can provide a no-args constructor
-     * to initialize private final state however GUI
-     * initialization, and anything else that might refer to
-     * public API, should be done in the {@link #startup startup}
+     * Subclasses can provide a no-args constructor to initialize private
+     * final state however GUI initialization, and anything else that might
+     * refer to public API, should be done in the {@link #startup startup}
      * method.
      */
     protected Application()
     {
         // Inject resource-defined fields on the application instance.
-        // This ensures that these are set before the object is
-        // accessible to the user.
-        getApplicationService( ResourceManager.class ).injectResources( this );
+        getApplicationService(
+                ResourceManager.class ).injectResources(
+                        this );
 
         context = new ApplicationContext(this);
     }
@@ -698,12 +698,8 @@ public abstract class Application extends AbstractBeanEdt
      * @see Application#launch
      * @see Application#getInstance(Class)
      */
-    public static synchronized Application getInstance() {
-
-//        if (Beans.isDesignTime() && application==null) {
-//            application = new DesignTimeApplication();
-//        }
-
+    public static synchronized Application getInstance()
+    {
         checkApplicationLaunched();
         return application;
     }
@@ -721,10 +717,10 @@ public abstract class Application extends AbstractBeanEdt
 
     /**
      * Shows the application {@code View}
-     * @param view - View to show
-     * @see View
+     * @param view The View to show
      */
-    public void show(View view) {
+    public void show(View view)
+    {
         Window window = (Window) view.getRootPane().getParent();
         if (window != null) {
             window.pack();

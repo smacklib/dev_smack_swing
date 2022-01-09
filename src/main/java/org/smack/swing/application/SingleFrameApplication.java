@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2006 Sun Microsystems, Inc. All rights reserved.
- * Copyright (C) 2010 Illya Yalovyy. All rights reserved.
- * Use is subject to license terms.
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
+ *
+ * Copyright © 2001-2022 Michael Binz
  */
 package org.smack.swing.application;
 

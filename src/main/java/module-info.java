@@ -1,3 +1,8 @@
+/*
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
+ *
+ * Copyright © 2001-2022 Michael Binz
+ */
 module framework.smack_swing
 {
     exports org.smack.swing.swingx.border;
