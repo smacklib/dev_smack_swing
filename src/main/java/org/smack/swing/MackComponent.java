@@ -1,9 +1,7 @@
-/* $Id$
+/*
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
  *
- * Mack
- *
- * Released under Gnu Public License
- * Copyright © 2010 Michael G. Binz
+ * Copyright © 2001-2022 Michael Binz
  */
 package org.smack.swing;
 

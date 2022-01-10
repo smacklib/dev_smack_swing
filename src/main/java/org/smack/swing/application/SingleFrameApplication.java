@@ -30,7 +30,7 @@ import javax.swing.JFrame;
 import javax.swing.JWindow;
 import javax.swing.RootPaneContainer;
 
-import org.smack.swing.application.util.SwingHelper;
+import org.smack.swing.SwingUtil;
 import org.smack.util.ServiceManager;
 
 /**
@@ -256,7 +256,7 @@ public abstract class SingleFrameApplication extends Application
 
             // If window location is default and size is not too big
             // the window should be centered
-            Point defaultLocation = SwingHelper.defaultLocation(window);
+            Point defaultLocation = SwingUtil.defaultLocation(window);
             if (!window.isLocationByPlatform() &&
                     (root.getX() == defaultLocation.getX()) &&
                     (root.getY() == defaultLocation.getY())) {
@@ -448,7 +448,7 @@ public abstract class SingleFrameApplication extends Application
             if (e.getComponent() instanceof JFrame) {
                 JFrame f = (JFrame) e.getComponent();
                 if ((f.getExtendedState() & Frame.MAXIMIZED_BOTH) == 0) {
-                    SwingHelper.putWindowNormalBounds(f, f.getBounds());
+                    SwingUtil.putWindowNormalBounds(f, f.getBounds());
                 }
             }
         }

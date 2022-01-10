@@ -1,12 +1,9 @@
 /*
- * Copyright (C) 2009 Illya Yalovyy
- * Use is subject to license terms.
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
+ *
+ * Copyright © 2001-2022 Michael Binz
  */
-
 package org.smack.swing.application.session;
-
-import static org.smack.swing.application.util.SwingHelper.computeVirtualGraphicsBounds;
-import static org.smack.swing.application.util.SwingHelper.isResizable;
 
 import java.awt.Component;
 import java.awt.Frame;
@@ -17,7 +14,7 @@ import java.awt.Window;
 
 import javax.swing.JFrame;
 
-import org.smack.swing.application.util.SwingHelper;
+import org.smack.swing.SwingUtil;
 
 /**
  * A {@code sessionState} property for Window.
@@ -82,7 +79,7 @@ public class WindowProperty implements PropertySupport {
          * see FrameStateListener#windowStateChanged in FrameView.
          */
         if ((c instanceof JFrame) && (0 != (frameState & Frame.MAXIMIZED_BOTH))) {
-            frameBounds = SwingHelper.getWindowNormalBounds((JFrame)c);
+            frameBounds = SwingUtil.getWindowNormalBounds((JFrame)c);
         }
 
         // Michab added null check.
@@ -126,12 +123,12 @@ public class WindowProperty implements PropertySupport {
         }
         Window w = (Window) c;
         WindowState windowState = (WindowState) state;
-        SwingHelper.putWindowNormalBounds(w, windowState.getBounds());
+        SwingUtil.putWindowNormalBounds(w, windowState.getBounds());
         if (!w.isLocationByPlatform() && (state != null)) {
 
             Rectangle gcBounds0 = windowState.getGraphicsConfigurationBounds();
-            if (gcBounds0 != null && isResizable(w)) {
-                if (computeVirtualGraphicsBounds().contains(gcBounds0.getLocation())) {
+            if (gcBounds0 != null && SwingUtil.isResizable(w)) {
+                if (SwingUtil.computeVirtualGraphicsBounds().contains(gcBounds0.getLocation())) {
                     w.setBounds(windowState.getBounds());
                 } else {
                     w.setSize(windowState.getBounds().getSize());

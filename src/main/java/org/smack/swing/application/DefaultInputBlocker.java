@@ -1,11 +1,9 @@
-
 /*
- * Copyright (C) 2006-2009 Sun Microsystems, Inc. All rights reserved. Use is
- * subject to license terms.
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
+ *
+ * Copyright © 2001-2022 Michael Binz
  */
 package org.smack.swing.application;
-
-import static org.smack.swing.application.util.SwingHelper.findRootPaneContainer;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -40,6 +38,8 @@ import javax.swing.RootPaneContainer;
 import javax.swing.Timer;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.MouseInputListener;
+
+import org.smack.swing.SwingUtil;
 
 final class DefaultInputBlocker extends Task.InputBlocker {
 
@@ -165,7 +165,7 @@ final class DefaultInputBlocker extends Task.InputBlocker {
         Component dialogOwner = (Component) getTarget();
         String taskTitle = getTask().getTitle();
         String dialogTitle = (taskTitle == null) ? "BlockingDialog" : taskTitle;
-        final JDialog dialog = optionPane.createDialog((Component) findRootPaneContainer(dialogOwner), dialogTitle);
+        final JDialog dialog = optionPane.createDialog((Component) SwingUtil.findRootPaneContainer(dialogOwner), dialogTitle);
         dialog.setModal(true);
         dialog.setName("BlockingDialog");
         dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
@@ -275,7 +275,8 @@ final class DefaultInputBlocker extends Task.InputBlocker {
         * RootPaneContainer ancestor.
         * FIXED: BSAF-77
         */
-        RootPaneContainer rpc = findRootPaneContainer((Component) getTarget());
+        RootPaneContainer rpc =
+                SwingUtil.findRootPaneContainer((Component) getTarget());
 
         if (rpc != null) {
             if (f) {
