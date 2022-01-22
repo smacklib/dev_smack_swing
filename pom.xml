@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>micbinz</groupId>
 	<artifactId>smack_swing</artifactId>
-	<version>11.3-SNAPSHOT</version>
+	<version>11.3</version>
 	<name>SmackSwing</name>
 	<description>Smack Swing-specific parts.</description>
 
