@@ -69,7 +69,7 @@
 		<dependency>
 			<groupId>micbinz</groupId>
 			<artifactId>smack</artifactId>
-			<version>11.405-SNAPSHOT</version>
+			<version>11.405</version>
 		</dependency>
 
 		<dependency>
