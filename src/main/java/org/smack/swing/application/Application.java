@@ -28,7 +28,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.jdesktop.util.PlatformType;
-import org.smack.swing.application.util.OSXAdapter;
 import org.smack.swing.beans.AbstractBeanEdt;
 import org.smack.util.ServiceManager;
 import org.smack.util.StringUtil;
@@ -241,14 +240,15 @@ public abstract class Application extends AbstractBeanEdt
                 PlatformType.getPlatform();
 
         // Generic registration with the Mac OS X application menu.
-        if ( PlatformType.OS_X == platform )
-        {
-            try {
-                OSXAdapter.setQuitHandler(application, Application.class.getDeclaredMethod("handleQuit", (Class[])null));
-            } catch (Exception e) {
-                LOG.log(Level.SEVERE, "Cannot set Mac Os X specific handler for Quit event", e);
-            }
-        }
+        // TODO micbinz -- This is not working on M1.
+//        if ( PlatformType.OS_X == platform )
+//        {
+//            try {
+//                OSXAdapter.setQuitHandler(application, Application.class.getDeclaredMethod("handleQuit", (Class[])null));
+//            } catch (Exception e) {
+//                LOG.log(Level.SEVERE, "Cannot set Mac Os X specific handler for Quit event", e);
+//            }
+//        }
 
         return application;
     }
