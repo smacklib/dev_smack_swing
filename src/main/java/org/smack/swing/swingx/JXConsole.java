@@ -738,22 +738,21 @@ public final class JXConsole extends JPanel implements KeyListener {
         return result;
     }
 
-
-    public void actCopy( ActionEvent ae )
+    private void actCopy( ActionEvent ae )
     {
         _text.copy();
     }
     private final Action8 _actCopy =
             new Action8( this::actCopy ).inject( getClass(), "actCopy" );
 
-    public void actPaste( ActionEvent ae )
+    private void actPaste( ActionEvent ae )
     {
         _text.paste();
     }
     private final Action8 _actPaste =
             new Action8( this::actPaste ).inject( getClass(), "actPaste" );
 
-    public void actFont( ActionEvent ae )
+    private void actFont( ActionEvent ae )
     {
         JXFontChooser fc = new JXFontChooser();
         fc.setSelectedFont(getFont());
@@ -767,7 +766,7 @@ public final class JXConsole extends JPanel implements KeyListener {
     @Resource
     private String FILE_EXISTS_MESSAGE;
 
-    public void actSave( ActionEvent ae ) {
+    private void actSave( ActionEvent ae ) {
         if (JXConsole.saveChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
             return;
         }
@@ -795,7 +794,7 @@ public final class JXConsole extends JPanel implements KeyListener {
     private Action8 _actSave =
             new Action8( this::actSave ).inject( getClass(), "actSave" );
 
-    public void actClear( ActionEvent ae )
+    private void actClear( ActionEvent ae )
     {
         Document d = _text.getDocument();
 
@@ -815,7 +814,7 @@ public final class JXConsole extends JPanel implements KeyListener {
      *
      * @param ae
      */
-    public void actScrollLock( ActionEvent ae )
+    private void actScrollLock( ActionEvent ae )
     {
         boolean isSelected =
                 ae.getSource() instanceof JToggleButton &&
