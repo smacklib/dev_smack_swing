@@ -1,15 +1,14 @@
-/* $Id$
+/*
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
  *
- * Common.
- *
- * Released under Gnu Public License
- * Copyright © 2003-15 Michael G. Binz
+ * Copyright © 2003-2023 Michael Binz
  */
 package org.smack.swing.swingx;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -37,7 +36,7 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import org.smack.swing.FontResizer;
-import org.smack.swing.application.Action;
+import org.smack.swing.application.Action8;
 import org.smack.swing.application.Application;
 import org.smack.util.FileUtil;
 import org.smack.util.io.OutputStreamForwarder;
@@ -46,7 +45,6 @@ import org.smack.util.resource.ResourceManager.Resource;
 /**
  * A console ui component. Connects stream oriented in- and output to a text component.
  *
- * @version $Rev$
  * @author Michael Binz
  */
 @SuppressWarnings("serial")
@@ -160,7 +158,7 @@ public final class JXConsole extends JPanel implements KeyListener {
      */
     public JXConsole( boolean showCr ) {
 
-        super( new BorderLayout() );
+        super( (LayoutManager)new BorderLayout() );
 
         _showCr = showCr;
 
@@ -203,11 +201,12 @@ public final class JXConsole extends JPanel implements KeyListener {
         scrollPane.setViewportView( _text );
 
         // create popup menu
-        _menu.add(new JMenuItem( getNamedAction( "actCopy" ) ) );
-        _menu.add(new JMenuItem( getNamedAction( "actPaste" ) ) );
-        _menu.add(new JMenuItem( getNamedAction( "actSave" ) ) );
-        _menu.add(new JMenuItem( getNamedAction( "actFont" ) ) );
-        _menu.add(new JMenuItem( getNamedAction( "actClear" ) ) );
+        _menu.add(new JMenuItem( _actCopy ) );
+        _menu.add(new JMenuItem( _actPaste ) );
+        _menu.add(new JMenuItem( _actSave ) );
+        _menu.add(new JMenuItem( _actFont ) );
+        _menu.add(new JMenuItem( _actClear ) );
+        _menu.add(new JMenuItem( _actScrollLock ) );
 
         _text.setComponentPopupMenu( _menu );
 
@@ -215,8 +214,8 @@ public final class JXConsole extends JPanel implements KeyListener {
 
         add( scrollPane, BorderLayout.CENTER );
 
-        addToolbarAction( getNamedAction( "actClear" ), false );
-        addToolbarAction( getNamedAction( "actScrollLock" ), true );
+        addToolbarAction( _actClear, false );
+        addToolbarAction( _actScrollLock, true );
 
         add( _toolbar, BorderLayout.PAGE_START );
     }
@@ -336,7 +335,7 @@ public final class JXConsole extends JPanel implements KeyListener {
             break;
 
         case (KeyEvent.VK_U): // clear line
-            if ((e.getModifiers() & InputEvent.CTRL_MASK) > 0) {
+            if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) > 0) {
                 replaceEditArea("");
                 this._histLine = 0;
                 e.consume();
@@ -378,7 +377,10 @@ public final class JXConsole extends JPanel implements KeyListener {
         // This takes care that in case a character is entered the cursor gets
         // placed into the command area before the character is actually entered.
         default:
-            if ((e.getModifiers() & (InputEvent.CTRL_MASK | InputEvent.ALT_MASK | InputEvent.META_MASK)) == 0) {
+            if ((e.getModifiersEx() &
+                    (InputEvent.CTRL_DOWN_MASK |
+                            InputEvent.ALT_DOWN_MASK
+                            | InputEvent.META_DOWN_MASK)) == 0) {
                 // plain character
                 forceCaretIntoEditArea();
             }
@@ -736,21 +738,21 @@ public final class JXConsole extends JPanel implements KeyListener {
         return result;
     }
 
-
-    @Action
-    public void actCopy( ActionEvent ae )
+    private void actCopy( ActionEvent ae )
     {
         _text.copy();
     }
+    private final Action8 _actCopy =
+            new Action8( this::actCopy ).inject( getClass(), "actCopy" );
 
-    @Action
-    public void actPaste( ActionEvent ae )
+    private void actPaste( ActionEvent ae )
     {
         _text.paste();
     }
+    private final Action8 _actPaste =
+            new Action8( this::actPaste ).inject( getClass(), "actPaste" );
 
-    @Action
-    public void actFont( ActionEvent ae )
+    private void actFont( ActionEvent ae )
     {
         JXFontChooser fc = new JXFontChooser();
         fc.setSelectedFont(getFont());
@@ -758,12 +760,13 @@ public final class JXConsole extends JPanel implements KeyListener {
             setFont(fc.getSelectedFont());
         }
     }
+    private Action8 _actFont =
+            new Action8( this::actFont ).inject( getClass(), "actFont" );
 
     @Resource
     private String FILE_EXISTS_MESSAGE;
 
-    @Action
-    public void actSave( ActionEvent ae ) {
+    private void actSave( ActionEvent ae ) {
         if (JXConsole.saveChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
             return;
         }
@@ -788,9 +791,10 @@ public final class JXConsole extends JPanel implements KeyListener {
 
         writeFile(f, _text.getText());
     }
+    private Action8 _actSave =
+            new Action8( this::actSave ).inject( getClass(), "actSave" );
 
-    @Action
-    public void actClear( ActionEvent ae )
+    private void actClear( ActionEvent ae )
     {
         Document d = _text.getDocument();
 
@@ -802,14 +806,15 @@ public final class JXConsole extends JPanel implements KeyListener {
             throw new RuntimeException(e);
         }
     }
+    private Action8 _actClear =
+            new Action8( this::actClear ).inject( getClass(), "actClear" );
 
     /**
      * The scroll lock action.
      *
      * @param ae
      */
-    @Action
-    public void actScrollLock( ActionEvent ae )
+    private void actScrollLock( ActionEvent ae )
     {
         boolean isSelected =
                 ae.getSource() instanceof JToggleButton &&
@@ -817,6 +822,8 @@ public final class JXConsole extends JPanel implements KeyListener {
 
         setLocked( isSelected );
     }
+    private Action8 _actScrollLock =
+            new Action8( this::actScrollLock ).inject( getClass(), "actScrollLock" );
 
     private static JFileChooser saveChooser = new JFileChooser();
 
@@ -888,20 +895,6 @@ public final class JXConsole extends JPanel implements KeyListener {
         catch (BadLocationException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Get the action corresponding to the passed name. The action is entered in the component's
-     * action map.
-     */
-    private javax.swing.Action getNamedAction( String actionName )
-    {
-        javax.swing.Action result = Application.getInstance().getContext().getActionMap(this).get( actionName );
-
-        if ( result != null && getActionMap().get( actionName ) == null )
-            getActionMap().put( actionName, result );
-
-        return result;
     }
 
     /**
