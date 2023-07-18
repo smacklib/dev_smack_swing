@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: a323bfbcc5e60d332648edb7a8d0d036ad5eebd2 $
  *
  * Copyright 2004 Sun Microsystems, Inc., 4150 Network Circle,
  * Santa Clara, California 95054, U.S.A. All rights reserved.
@@ -404,8 +404,8 @@ public class JXMultiSplitPane extends JPanel implements BackgroundPaintable {
               }
             }
 
-            oldFloatingDividers = getMultiSplitLayout().getFloatingDividers();
-            getMultiSplitLayout().setFloatingDividers(false);
+            oldFloatingDividers = MultiSplitLayout._floatingDividers_FALSE;
+            //getMultiSplitLayout().setFloatingDividers(false);
             dragUnderway = true;
             }
         }
@@ -511,7 +511,7 @@ public class JXMultiSplitPane extends JPanel implements BackgroundPaintable {
     private void cancelDrag() {
         if (dragUnderway) {
             dragDivider.setBounds(initialDividerBounds);
-            getMultiSplitLayout().setFloatingDividers(oldFloatingDividers);
+            //getMultiSplitLayout().setFloatingDividers(oldFloatingDividers);
             setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             repaint();
             revalidate();
