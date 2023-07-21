@@ -1,7 +1,7 @@
 /*
  * smack_swing @ https://github.com/smacklib/dev_smack_swing
  *
- * Copyright © 2001-2022 Michael Binz
+ * Copyright © 2001-2023 Michael Binz
  */
 package org.smack.swing.application;
 
@@ -234,10 +234,12 @@ public abstract class Application extends AbstractBeanEdt
         T application =
                 ServiceManager.getApplicationService( applicationClass );
 
-        setLookAndFeel( application.getLookAndFeel() );
-
         PlatformType platform =
                 PlatformType.getPlatform();
+
+        // On Mac 2023 M1 do not touch the l&f.
+        if ( PlatformType.OS_X != platform )
+            setLookAndFeel( application.getLookAndFeel() );
 
         // Generic registration with the Mac OS X application menu.
         // TODO micbinz -- This is not working on M1.
