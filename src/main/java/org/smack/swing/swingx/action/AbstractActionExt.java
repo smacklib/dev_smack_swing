@@ -1,24 +1,8 @@
 /*
- * $Id$
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
  *
- * Copyright 2004 Sun Microsystems, Inc., 4150 Network Circle,
- * Santa Clara, California 95054, U.S.A. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Copyright © 2001-2023 Michael Binz
  */
-
 package org.smack.swing.swingx.action;
 
 import java.awt.event.ItemEvent;
@@ -40,7 +24,8 @@ import org.smack.util.StringUtil;
  * allows the action to correctly configured Swing buttons. The {@link #LARGE_ICON} has also been
  * changed to correspond to {@link Action#LARGE_ICON_KEY}.
  *
- * @version $Rev$
+ * @author Michael Binz
+ * @author swingx
  */
 @SuppressWarnings("serial")
 public abstract class AbstractActionExt extends AbstractAction
@@ -117,6 +102,9 @@ public abstract class AbstractActionExt extends AbstractAction
     public String getShortDescription()  {
         return (String)getValue(Action.SHORT_DESCRIPTION);
     }
+    public String shortDescription()  {
+        return getShortDescription();
+    }
 
     /**
      * Sets the short description of the action. This will also
@@ -135,6 +123,10 @@ public abstract class AbstractActionExt extends AbstractAction
             setLongDescription(desc);
         }
     }
+    public AbstractActionExt shortDescription(String desc) {
+        setShortDescription( desc );
+        return this;
+    }
 
     /**
      * Returns the tooltip of the action.
@@ -144,6 +136,9 @@ public abstract class AbstractActionExt extends AbstractAction
      */
     public String getTooltip()  {
         return getShortDescription();
+    }
+    public String tooltip()  {
+        return getTooltip();
     }
 
     /**
@@ -156,6 +151,10 @@ public abstract class AbstractActionExt extends AbstractAction
     public void setTooltip(String desc) {
         setShortDescription( desc );
     }
+    public AbstractActionExt tooltip(String desc) {
+        setTooltip( desc );
+        return this;
+    }
 
     /**
      * Returns a long description of the action.
@@ -164,6 +163,9 @@ public abstract class AbstractActionExt extends AbstractAction
      */
     public String getLongDescription()  {
         return (String)getValue(Action.LONG_DESCRIPTION);
+    }
+    public String longDescription()  {
+        return longDescription();
     }
 
     /**
@@ -183,6 +185,10 @@ public abstract class AbstractActionExt extends AbstractAction
             setShortDescription(desc);
         }
     }
+    public AbstractActionExt longDescription(String desc) {
+        setLongDescription( desc );
+        return this;
+    }
 
     /**
      * Returns a small icon which represents the action.
@@ -191,6 +197,9 @@ public abstract class AbstractActionExt extends AbstractAction
      */
     public Icon getSmallIcon() {
         return (Icon)getValue(SMALL_ICON);
+    }
+    public Icon smallIcon() {
+        return getSmallIcon();
     }
 
     /**
@@ -206,6 +215,10 @@ public abstract class AbstractActionExt extends AbstractAction
     public void setSmallIcon(Icon icon) {
         putValue(SMALL_ICON, icon);
     }
+    public AbstractActionExt smallIcon(Icon icon) {
+        setSmallIcon( icon );
+        return this;
+    }
 
     /**
      * Returns a small icon which represents the action.
@@ -215,6 +228,9 @@ public abstract class AbstractActionExt extends AbstractAction
      */
     public Icon getIcon() {
         return getSmallIcon();
+    }
+    public Icon icon() {
+        return getIcon();
     }
 
     /**
@@ -231,6 +247,10 @@ public abstract class AbstractActionExt extends AbstractAction
     public void setIcon(Icon icon) {
         setSmallIcon( icon );
     }
+    public AbstractActionExt icon(Icon icon) {
+        setIcon( icon );
+        return this;
+    }
 
     /**
      * Returns a large icon which represents the action.
@@ -239,6 +259,9 @@ public abstract class AbstractActionExt extends AbstractAction
      */
     public Icon getLargeIcon() {
         return (Icon)getValue( LARGE_ICON_KEY );
+    }
+    public Icon largeIcon() {
+        return getLargeIcon();
     }
 
     /**
@@ -254,6 +277,22 @@ public abstract class AbstractActionExt extends AbstractAction
     public void setLargeIcon(Icon icon) {
         putValue( LARGE_ICON_KEY, icon );
     }
+    public AbstractActionExt largeIcon(Icon icon) {
+        setLargeIcon( icon );
+        return this;
+    }
+
+    /**
+     * Returns the name of the action.
+     *
+     * @return The name of the Action; can be {@code null}.
+     */
+    public String getName() {
+        return (String)getValue( NAME );
+    }
+    public String name() {
+        return getName();
+    }
 
     /**
      * Sets the name of the action.
@@ -264,14 +303,21 @@ public abstract class AbstractActionExt extends AbstractAction
     public void setName(String name) {
         putValue( NAME, name );
     }
+    public AbstractActionExt name(String name) {
+        setName( name );
+        return this;
+    }
 
     /**
-     * Returns the name of the action.
+     * Returns the name of the action.  Equivalent to {@link #getName()}.
      *
      * @return The name of the Action; can be {@code null}.
      */
-    public String getName() {
-        return (String)getValue( NAME );
+    public String getText() {
+        return getName();
+    }
+    public String text() {
+        return getText();
     }
 
     /**
@@ -283,26 +329,9 @@ public abstract class AbstractActionExt extends AbstractAction
     public void setText(String name) {
         setName( name );
     }
-
-    /**
-     * Returns the name of the action.  Equivalent to {@link #getName()}.
-     *
-     * @return The name of the Action; can be {@code null}.
-     */
-    public String getText() {
-        return getName();
-    }
-
-    /**
-     * Sets the action name of the passed action. This is a convenience method
-     * for {@code putValue()} with the {@code Action.NAME} key.
-     *
-     * @param action the target action.
-     * @param name The name of the Action; can be {@code null}.
-     * @see #setText(String)
-     */
-    public static void setActionText( Action action,  String name ) {
-        action.putValue( NAME, name );
+    public AbstractActionExt text(String name) {
+        setText( name );
+        return this;
     }
 
     /**
@@ -317,10 +346,38 @@ public abstract class AbstractActionExt extends AbstractAction
         return (String) action.getValue( NAME );
     }
 
+    /**
+     * Sets the action name of the passed action. This is a convenience method
+     * for {@code putValue()} with the {@code Action.NAME} key.
+     *
+     * @param action the target action.
+     * @param name The name of the Action; can be {@code null}.
+     * @see #setText(String)
+     */
+    public static void setActionText( Action action,  String name ) {
+        action.putValue( NAME, name );
+    }
+
     public void setMnemonic(String mnemonic) {
         if ( StringUtil.hasContent( mnemonic ) ) {
-            putValue(Action.MNEMONIC_KEY, new Integer(mnemonic.charAt(0)));
+            putValue(Action.MNEMONIC_KEY, Integer.valueOf(mnemonic.charAt(0)));
         }
+    }
+
+    /**
+     * Return the mnemonic key code for the action.
+     *
+     * @return the mnemonic or 0
+     */
+    public int getMnemonic() {
+        Integer value = (Integer)getValue(Action.MNEMONIC_KEY);
+        if (value != null) {
+            return value.intValue();
+        }
+        return '\0';
+    }
+    public int mnemonic() {
+        return getMnemonic();
     }
 
     /**
@@ -339,20 +396,23 @@ public abstract class AbstractActionExt extends AbstractAction
      * @see Action#putValue
      */
     public void setMnemonic(int mnemonic) {
-        putValue(Action.MNEMONIC_KEY, new Integer(mnemonic));
+        putValue(Action.MNEMONIC_KEY, Integer.valueOf(mnemonic));
+    }
+    public AbstractActionExt mnemonic(int mnemonic) {
+        setMnemonic( mnemonic );
+        return this;
     }
 
     /**
-     * Return the mnemonic key code for the action.
+     * Returns the action command.
      *
-     * @return the mnemonic or 0
+     * @return the action command or null
      */
-    public int getMnemonic() {
-        Integer value = (Integer)getValue(Action.MNEMONIC_KEY);
-        if (value != null) {
-            return value.intValue();
-        }
-        return '\0';
+    public String getActionCommand() {
+        return getActionCommand( this );
+    }
+    public String actionCommand() {
+        return getActionCommand();
     }
 
     /**
@@ -369,14 +429,19 @@ public abstract class AbstractActionExt extends AbstractAction
     public void setActionCommand(String key) {
         setActionCommand( this, key );
     }
+    public AbstractActionExt actionCommand(String key) {
+        setActionCommand( key );
+        return this;
+    }
 
     /**
-     * Returns the action command.
+     * Returns the action command of the passed action.
      *
+     * @param action the target action.
      * @return the action command or null
      */
-    public String getActionCommand() {
-        return getActionCommand( this );
+    public static String getActionCommand( Action action ) {
+        return (String) action.getValue(Action.ACTION_COMMAND_KEY);
     }
 
     /**
@@ -396,16 +461,6 @@ public abstract class AbstractActionExt extends AbstractAction
     }
 
     /**
-     * Returns the action command of the passed action.
-     *
-     * @param action the target action.
-     * @return the action command or null
-     */
-    public static String getActionCommand( Action action ) {
-        return (String) action.getValue(Action.ACTION_COMMAND_KEY);
-    }
-
-    /**
      * Returns the key stroke which represents an accelerator
      * for the action.
      *
@@ -413,6 +468,9 @@ public abstract class AbstractActionExt extends AbstractAction
      */
     public KeyStroke getAccelerator() {
         return (KeyStroke)getValue(Action.ACCELERATOR_KEY);
+    }
+    public KeyStroke accelerator() {
+        return getAccelerator();
     }
 
     /**
@@ -429,6 +487,17 @@ public abstract class AbstractActionExt extends AbstractAction
     public void setAccelerator(KeyStroke key) {
         putValue(Action.ACCELERATOR_KEY, key);
     }
+    public AbstractActionExt accelerator(KeyStroke key) {
+        setAccelerator(key);
+        return this;
+    }
+
+    public Object getGroup() {
+        return getValue(GROUP);
+    }
+    public Object group() {
+        return getGroup();
+    }
 
     /**
      * Sets the group identity of the state action. This is used to
@@ -437,25 +506,10 @@ public abstract class AbstractActionExt extends AbstractAction
     public void setGroup(Object group) {
         putValue(GROUP, group);
     }
-
-    public Object getGroup() {
-        return getValue(GROUP);
+    public AbstractActionExt group(Object group) {
+        setGroup( group );
+        return this;
     }
-
-    /**
-     * Will perform cleanup on the object.
-     * Should be called when finished with the Action. This should be used if
-     * a new action is constructed from the properties of an old action.
-     * The old action properties should be disposed.
-     */
-    public void dispose() {
-        PropertyChangeListener[] listeners = getPropertyChangeListeners();
-        for (int i = 0; i < listeners.length; i++) {
-            removePropertyChangeListener(listeners[i]);
-        }
-    }
-
-    // Properties etc....
 
     /**
      * Indicates if this action has states. If this method returns
@@ -470,6 +524,9 @@ public abstract class AbstractActionExt extends AbstractAction
             return state.booleanValue();
         }
         return false;
+    }
+    public boolean stateAction() {
+        return isStateAction();
     }
 
     /**
@@ -487,6 +544,10 @@ public abstract class AbstractActionExt extends AbstractAction
     public void setStateAction(boolean state) {
         putValue(IS_STATE, Boolean.valueOf(state));
     }
+    public AbstractActionExt stateAction(boolean state) {
+        setStateAction( state );
+        return this;
+    }
 
     /**
      * @return true if the action is in the selected state
@@ -500,6 +561,9 @@ public abstract class AbstractActionExt extends AbstractAction
 
         return selected.booleanValue();
     }
+    public boolean selected() {
+        return isSelected();
+    }
 
     /**
      * Changes the state of the action. This is a convenience method for updating the Action via the
@@ -511,6 +575,10 @@ public abstract class AbstractActionExt extends AbstractAction
      */
     public void setSelected(boolean newValue) {
         putValue(SELECTED_KEY, newValue);
+    }
+    public AbstractActionExt selected(boolean newValue) {
+        setSelected( newValue );
+        return this;
     }
 
     @Override
@@ -542,7 +610,7 @@ public abstract class AbstractActionExt extends AbstractAction
      * Callback method as <code>ItemListener</code>. Updates internal state based
      * on the given ItemEvent. <p>
      *
-     * Here: synchs selected property if isStateAction(), does nothing otherwise.
+     * Here: syncs selected property if isStateAction(), does nothing otherwise.
      *
      * @param e the ItemEvent fired by a ItemSelectable on changing the selected
      *    state.
@@ -551,6 +619,19 @@ public abstract class AbstractActionExt extends AbstractAction
     public void itemStateChanged(ItemEvent e) {
         if (isStateAction()) {
             setSelected(ItemEvent.SELECTED == e.getStateChange());
+        }
+    }
+
+    /**
+     * Will perform cleanup on the object.
+     * Should be called when finished with the Action. This should be used if
+     * a new action is constructed from the properties of an old action.
+     * The old action properties should be disposed.
+     */
+    public void dispose() {
+        PropertyChangeListener[] listeners = getPropertyChangeListeners();
+        for (int i = 0; i < listeners.length; i++) {
+            removePropertyChangeListener(listeners[i]);
         }
     }
 }
