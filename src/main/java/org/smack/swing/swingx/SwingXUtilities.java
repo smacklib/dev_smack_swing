@@ -1,22 +1,7 @@
 /*
- * $Id$
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
  *
- * Copyright 2008 Sun Microsystems, Inc., 4150 Network Circle,
- * Santa Clara, California 95054, U.S.A. All rights reserved.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+ * Copyright © 2008-2023 Michael Binz
  */
 package org.smack.swing.swingx;
 
@@ -36,10 +21,16 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -53,29 +44,29 @@ import javax.swing.MenuElement;
 import javax.swing.RepaintManager;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
 import javax.swing.plaf.ComponentInputMapUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.text.html.HTMLDocument;
 
 import org.smack.swing.swingx.painter.Painter;
+import org.smack.util.StringUtil;
 
 /**
  * A collection of utility methods for Swing(X) classes.
- * 
- * <ul>
- * PENDING JW: think about location of this class and/or its methods, Options:
- * 
- *  <li> move this class to the swingx utils package which already has a bunch of xxUtils
- *  <li> move methods between xxUtils classes as appropriate (one window/comp related util)
- *  <li> keep here in swingx (consistent with swingutilities in core)
- * </ul>
+ *
+ * @author Michael Binz
  * @author Karl George Schaefer
  */
-public final class SwingXUtilities {
-    private SwingXUtilities() {
-        //does nothing
-    }
+public final class SwingXUtilities
+{
+    private static Logger LOG =
+            Logger.getLogger( SwingXUtilities.class.getName() );
 
+    private SwingXUtilities()
+    {
+        throw new AssertionError();
+    }
 
     /**
      * A helper for creating and updating key bindings for components with
@@ -86,7 +77,7 @@ public final class SwingXUtilities {
      * MnemonicEnabled} and change signature to {@code public static <T extends
      * JComponent & MnemonicEnabled> void updateMnemonicBinding(T c, String
      * pressed)}
-     * 
+     *
      * @param c
      *            the component bindings to update
      * @param pressed
@@ -98,7 +89,7 @@ public final class SwingXUtilities {
     public static void updateMnemonicBinding(JComponent c, String pressed) {
         updateMnemonicBinding(c, pressed, null);
     }
-    
+
     /**
      * A helper for creating and updating key bindings for components with
      * mnemonics. The {@code pressed} action will be invoked when the mnemonic
@@ -109,7 +100,7 @@ public final class SwingXUtilities {
      * MnemonicEnabled} and change signature to {@code public static <T extends
      * JComponent & MnemonicEnabled> void updateMnemonicBinding(T c, String
      * pressed, String released)}
-     * 
+     *
      * @param c
      *            the component bindings to update
      * @param pressed
@@ -125,7 +116,7 @@ public final class SwingXUtilities {
     public static void updateMnemonicBinding(JComponent c, String pressed, String released) {
         Class<?> clazz = c.getClass();
         int m = -1;
-        
+
         try {
             Method mtd = clazz.getMethod("getMnemonic");
             m = (Integer) mtd.invoke(c);
@@ -134,19 +125,19 @@ public final class SwingXUtilities {
         } catch (Exception e) {
             throw new IllegalArgumentException("unable to access mnemonic", e);
         }
-        
+
         InputMap map = SwingUtilities.getUIInputMap(c,
                 JComponent.WHEN_IN_FOCUSED_WINDOW);
-        
+
         if (m != 0) {
             if (map == null) {
                 map = new ComponentInputMapUIResource(c);
                 SwingUtilities.replaceUIInputMap(c,
                         JComponent.WHEN_IN_FOCUSED_WINDOW, map);
             }
-            
+
             map.clear();
-            
+
             //TODO is ALT_MASK right for all platforms?
             map.put(KeyStroke.getKeyStroke(m,  InputEvent.ALT_MASK, false),
                     pressed);
@@ -159,7 +150,7 @@ public final class SwingXUtilities {
             }
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     static <C extends JComponent & BackgroundPaintable> void paintBackground(C comp, Graphics2D g) {
         // we should be painting the background behind the painter if we have one
@@ -170,9 +161,9 @@ public final class SwingXUtilities {
             g.setColor(comp.getBackground());
             g.fillRect(0, 0, comp.getWidth(), comp.getHeight());
         }
-        
+
         Painter<? super C> painter = comp.getBackgroundPainter();
-        
+
         if (painter != null) {
             if (comp.isPaintBorderInsets()) {
                 painter.paint(g, comp, comp.getWidth(), comp.getHeight());
@@ -185,27 +176,27 @@ public final class SwingXUtilities {
             }
         }
     }
-    
+
     private static Component[] getChildren(Component c) {
         Component[] children = null;
-        
+
         if (c instanceof MenuElement) {
             MenuElement[] elements = ((MenuElement) c).getSubElements();
             children = new Component[elements.length];
-            
+
             for (int i = 0; i < elements.length; i++) {
                 children[i] = elements[i].getComponent();
             }
         } else if (c instanceof Container) {
             children = ((Container) c).getComponents();
         }
-        
+
         return children;
     }
-    
+
     /**
      * Enables or disables of the components in the tree starting with {@code c}.
-     * 
+     *
      * @param c
      *                the starting component
      * @param enabled
@@ -213,20 +204,20 @@ public final class SwingXUtilities {
      */
     public static void setComponentTreeEnabled(Component c, boolean enabled) {
         c.setEnabled(enabled);
-        
+
         Component[] children = getChildren(c);
-            
+
         if (children != null) {
             for(int i = 0; i < children.length; i++) {
                 setComponentTreeEnabled(children[i], enabled);
             }
         }
     }
-    
+
     /**
      * Sets the locale for an entire component hierarchy to the specified
      * locale.
-     * 
+     *
      * @param c
      *                the starting component
      * @param locale
@@ -234,9 +225,9 @@ public final class SwingXUtilities {
      */
     public static void setComponentTreeLocale(Component c, Locale locale) {
         c.setLocale(locale);
-        
+
         Component[] children = getChildren(c);
-        
+
         if (children != null) {
             for(int i = 0; i < children.length; i++) {
                 setComponentTreeLocale(children[i], locale);
@@ -247,7 +238,7 @@ public final class SwingXUtilities {
     /**
      * Sets the background for an entire component hierarchy to the specified
      * color.
-     * 
+     *
      * @param c
      *                the starting component
      * @param color
@@ -255,9 +246,9 @@ public final class SwingXUtilities {
      */
     public static void setComponentTreeBackground(Component c, Color color) {
         c.setBackground(color);
-        
+
         Component[] children = getChildren(c);
-        
+
         if (children != null) {
             for(int i = 0; i < children.length; i++) {
                 setComponentTreeBackground(children[i], color);
@@ -268,7 +259,7 @@ public final class SwingXUtilities {
     /**
      * Sets the foreground for an entire component hierarchy to the specified
      * color.
-     * 
+     *
      * @param c
      *                the starting component
      * @param color
@@ -276,9 +267,9 @@ public final class SwingXUtilities {
      */
     public static void setComponentTreeForeground(Component c, Color color) {
         c.setForeground(color);
-        
+
         Component[] children = getChildren(c);
-        
+
         if (children != null) {
             for(int i = 0; i < children.length; i++) {
                 setComponentTreeForeground(children[i], color);
@@ -288,7 +279,7 @@ public final class SwingXUtilities {
 
     /**
      * Sets the font for an entire component hierarchy to the specified font.
-     * 
+     *
      * @param c
      *            the starting component
      * @param font
@@ -296,9 +287,9 @@ public final class SwingXUtilities {
      */
     public static void setComponentTreeFont(Component c, Font font) {
         c.setFont(font);
-        
+
         Component[] children = getChildren(c);
-        
+
         if (children != null) {
             for(int i = 0; i < children.length; i++) {
                 setComponentTreeFont(children[i], font);
@@ -306,19 +297,19 @@ public final class SwingXUtilities {
         }
     }
 
-    private static String STYLESHEET = 
+    private static String STYLESHEET =
         "body { margin-top: 0; margin-bottom: 0; margin-left: 0; margin-right: 0;"
         + " font-family: %s; font-size: %dpt;  }"
         + "a, p, li { margin-top: 0; margin-bottom: 0; margin-left: 0;"
         + " margin-right: 0; font-family: %s; font-size: %dpt;  }";
-    
+
     /**
      * Sets the font used for HTML displays to the specified font. Components
      * that display HTML do not necessarily honor font properties, since the
      * HTML document can override these values. Calling {@code setHtmlFont}
      * after the data is set will force the HTML display to use the font
      * specified to this method.
-     * 
+     *
      * @param doc
      *            the HTML document to update
      * @param font
@@ -329,7 +320,7 @@ public final class SwingXUtilities {
     public static void setHtmlFont(HTMLDocument doc, Font font) {
         String stylesheet = String.format(STYLESHEET, font.getName(),
                 font.getSize(), font.getName(), font.getSize());
-        
+
         try {
             doc.getStyleSheet().loadRules(new StringReader(stylesheet), null);
         } catch (IOException e) {
@@ -337,17 +328,12 @@ public final class SwingXUtilities {
             throw new IllegalStateException(e);
         }
     }
-    
+
     /**
-     * Updates the componentTreeUI of all top-level windows of the 
+     * Updates the componentTreeUI of all top-level windows of the
      * current application.
-     * 
      */
     public static void updateAllComponentTreeUIs() {
-//        for (Frame frame : Frame.getFrames()) {
-//            updateAllComponentTreeUIs(frame);
-//        }
-        // JW: updated to new 1.6 api - returns all windows, owned and ownerless
         for (Window window: Window.getWindows()) {
             SwingUtilities.updateComponentTreeUI(window);
         }
@@ -358,8 +344,7 @@ public final class SwingXUtilities {
     /**
      * Updates the componentTreeUI of the given window and all its
      * owned windows, recursively.
-     * 
-     * 
+     *
      * @param window the window to update
      */
     public static void updateAllComponentTreeUIs(Window window) {
@@ -371,7 +356,7 @@ public final class SwingXUtilities {
 
     /**
      * A version of {@link SwingUtilities#invokeLater(Runnable)} that supports return values.
-     * 
+     *
      * @param <T>
      *            the return type of the callable
      * @param callable
@@ -381,15 +366,15 @@ public final class SwingXUtilities {
      */
     public static <T> FutureTask<T> invokeLater(Callable<T> callable) {
         FutureTask<T> task = new FutureTask<T>(callable);
-        
+
         SwingUtilities.invokeLater(task);
-        
+
         return task;
     }
 
     /**
      * A version of {@link SwingUtilities#invokeAndWait(Runnable)} that supports return values.
-     * 
+     *
      * @param <T>
      *            the return type of the callable
      * @param callable
@@ -409,7 +394,7 @@ public final class SwingXUtilities {
             return invokeLater(callable).get();
         } catch (ExecutionException e) {
             Throwable t = e.getCause();
-            
+
             if (t instanceof RuntimeException) {
                 throw (RuntimeException) t;
             } else if (t instanceof InvocationTargetException) {
@@ -425,7 +410,7 @@ public final class SwingXUtilities {
      * {@link SwingUtilities#getAncestorOfClass(Class, Component)}. This method
      * traverses {@code JPopupMenu} invoker and uses generics to return an
      * appropriately typed object.
-     * 
+     *
      * @param <T>
      *            the type of ancestor to find
      * @param clazz
@@ -441,25 +426,25 @@ public final class SwingXUtilities {
         if (clazz == null || c == null) {
             return null;
         }
-        
+
         Component parent = c.getParent();
 
         while (parent != null && !(clazz.isInstance(parent))) {
             parent = parent instanceof JPopupMenu
                     ? ((JPopupMenu) parent).getInvoker() : parent.getParent();
         }
-        
+
         return (T) parent;
     }
 
     /**
      * Returns whether the component is part of the parent's
-     * container hierarchy. If a parent in the chain is of type 
+     * container hierarchy. If a parent in the chain is of type
      * JPopupMenu, the parent chain of its invoker is walked.
-     * 
+     *
      * @param focusOwner
      * @param parent
-     * @return true if the component is contained under the parent's 
+     * @return true if the component is contained under the parent's
      *    hierarchy, coping with JPopupMenus.
      */
     public static boolean isDescendingFrom(Component focusOwner, Component parent) {
@@ -484,7 +469,7 @@ public final class SwingXUtilities {
      * {@code ForwardingRepaintManager} that contains a {@code
      * TranslucentRepaintManager}, then the passed in manager is returned.
      * Otherwise a new repaint manager is created and returned.
-     * 
+     *
      * @param delegate
      *            the current repaint manager
      * @return a non-{@code null} {@code TranslucentRepaintManager}
@@ -492,7 +477,7 @@ public final class SwingXUtilities {
      */
     static RepaintManager getTranslucentRepaintManager(RepaintManager delegate) {
         RepaintManager manager = delegate;
-        
+
         while (manager != null && !manager.getClass().isAnnotationPresent(TranslucentRepaintManager.class)) {
             if (manager instanceof ForwardingRepaintManager) {
                 manager = ((ForwardingRepaintManager) manager).getDelegateManager();
@@ -500,30 +485,30 @@ public final class SwingXUtilities {
                 manager = null;
             }
         }
-        
+
         return manager == null ? new RepaintManagerX(delegate) : delegate;
     }
-    
+
     /**
      * Checks and returns whether the given property should be replaced
-     * by the UI's default value. 
-     * 
+     * by the UI's default value.
+     *
      * @param property the property to check.
      * @return true if the given property should be replaced by the UI's
-     *   default value, false otherwise. 
+     *   default value, false otherwise.
      */
     public static boolean isUIInstallable(Object property) {
        return (property == null) || (property instanceof UIResource);
     }
 
 //---- methods c&p'ed from SwingUtilities2 to reduce dependencies on sun packages
-    
+
     /**
      * Updates lead and anchor selection index without changing the selection.
-     * 
+     *
      * Note: this is c&p'ed from SwingUtilities2 to not have any direct
      * dependency.
-     * 
+     *
      * @param selectionModel the selection model to change lead/anchor
      * @param lead the lead selection index
      * @param anchor the anchor selection index
@@ -549,11 +534,11 @@ public final class SwingXUtilities {
     public static boolean shouldIgnore(MouseEvent mouseEvent,
             JComponent component) {
         return ((component == null) || (!(component.isEnabled()))
-                || (!(SwingUtilities.isLeftMouseButton(mouseEvent))) 
+                || (!(SwingUtilities.isLeftMouseButton(mouseEvent)))
                 || (mouseEvent.isConsumed()));
     }
 
-    
+
     public static int loc2IndexFileList(JList list, Point point) {
         int i = list.locationToIndex(point);
         if (i != -1) {
@@ -627,4 +612,57 @@ public final class SwingXUtilities {
         return (i & sourcActions);
     }
 
+    private static HashMap<String, String> getLookAndFeelMap()
+    {
+        var result = new HashMap<String, String>();
+
+        for ( LookAndFeelInfo c : UIManager.getInstalledLookAndFeels() )
+            result.put( c.getName(), c.getClassName() );
+
+        return result;
+
+    }
+    /**
+     * @return A list of look-and-feel names.
+     */
+    public static List<String> getLookAndFeels()
+    {
+        var map =
+                getLookAndFeelMap();
+        var result =
+                new ArrayList<>( map.keySet() );
+
+        Collections.sort( result );
+
+        return result;
+    }
+
+    /**
+     * Set a look-and-feel by name.
+     *
+     * @param name The look-and-feel name.
+     * @see #getLookAndFeels()
+     * @throws IllegalArgumentException if the passed names is empty
+     * or represents no valid look-and-feel name.
+     */
+    public static void setLookAndFeel( String name )
+    {
+        if ( StringUtil.isEmpty( name ) )
+            throw new IllegalArgumentException( "L&F name empty." );
+
+        var map =
+                getLookAndFeelMap();
+        if ( ! map.containsKey( name ) )
+            throw new IllegalArgumentException( "L&F does not exist: " + name );
+
+        try
+        {
+            LOG.log( Level.INFO, "Set L&F: " + name );
+            UIManager.setLookAndFeel( map.get( name ) );
+        }
+        catch ( Exception e )
+        {
+            LOG.log( Level.WARNING, "Failed to set L&F: " + name, e );
+        }
+    }
 }

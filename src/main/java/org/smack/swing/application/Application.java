@@ -25,10 +25,9 @@ import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
 
-import org.jdesktop.util.PlatformType;
 import org.smack.swing.beans.AbstractBeanEdt;
+import org.smack.swing.swingx.SwingXUtilities;
 import org.smack.util.ServiceManager;
 import org.smack.util.StringUtil;
 import org.smack.util.resource.ResourceManager.Resource;
@@ -234,12 +233,7 @@ public abstract class Application extends AbstractBeanEdt
         T application =
                 ServiceManager.getApplicationService( applicationClass );
 
-        PlatformType platform =
-                PlatformType.getPlatform();
-
-        // On Mac 2023 M1 do not touch the l&f.
-        if ( PlatformType.OS_X != platform )
-            setLookAndFeel( application.getLookAndFeel() );
+        setLookAndFeel( application.getLookAndFeel() );
 
         // Generic registration with the Mac OS X application menu.
         // TODO micbinz -- This is not working on M1.
@@ -263,7 +257,7 @@ public abstract class Application extends AbstractBeanEdt
      * If this key is not set, then the system L&F is used.
      * If set to 'default', then no L&F is set.
      * Otherwise the value is used to look up a L&F from
-     * the installed L&Fs by name case insensitive.
+     * the installed L&Fs by name.
      * If not found, then 'system' is used.
      */
     private static void setLookAndFeel( String lnf )
@@ -281,29 +275,11 @@ public abstract class Application extends AbstractBeanEdt
             return;
         }
 
-        String classname = null;
-        for ( LookAndFeelInfo c : UIManager.getInstalledLookAndFeels() )
-            if ( lnf.equalsIgnoreCase( c.getName() ) )
-            {
-                classname = c.getClassName();
-                break;
-            }
-
-        if ( StringUtil.isEmpty( classname ) )
-        {
-            LOG.warning(
-                    "LookAndFeel not found: " +
-                    lnf );
-            return;
-        }
-
         try
         {
-            UIManager.setLookAndFeel(classname);
-        } catch (Exception e) {
-            LOG.warning(
-                    "LookAndFeel failed to load: " +
-                    lnf );
+            SwingXUtilities.setLookAndFeel( lnf );
+        } catch ( Exception e ) {
+            LOG.warning( e.getMessage() );
         }
     }
 
