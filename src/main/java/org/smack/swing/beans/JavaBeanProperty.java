@@ -1,9 +1,7 @@
-/* $Id$
+/*
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
  *
- * Laboratory.
- *
- * Released under Gnu Public License
- * Copyright © 2015 Michael G. Binz
+ * Copyright © 2015-2023 Michael G. Binz
  */
 package org.smack.swing.beans;
 
@@ -15,18 +13,41 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import org.smack.util.JavaUtil;
+import org.smack.util.StringUtil;
+
 /**
  * Support class for implementing java bean properties on components.
  *
- * @version $Rev$
+ * <pre>
+ * class JXDesktop extends AbstractBean // or offers property change support.
+ * {
+ *     ...
+ *
+ *     public final JavaBeanProperty<Image,JXDesktop>  P_BACKGROUND_IMAGE =
+ *         new JavaBeanProperty<Image,JXDesktop>( this, null, "backgroundImage" );
+ *
+ *     public void setBackgroundImage( Image newValue )
+ *     {
+ *         P_BACKGROUND_IMAGE.set( newValue );
+ *     }
+ *
+ *     public Image getBackgroundImage()
+ *     {
+ *        return P_BACKGROUND_IMAGE.get();
+ *     }
+ *     ...
+ * }
+ * </pre>
+ *
  * @author Michael Binz
  */
 public class JavaBeanProperty<T,B> implements PropertyType<T,B>
 {
-    private String _name;
+    private final String _name;
     private T _value;
-    private B _bean;
-    private Class<T> _beantype;
+    private final B _bean;
+    private final Class<T> _beantype;
 
     private final PropertyAdapter _pa;
 
@@ -39,11 +60,16 @@ public class JavaBeanProperty<T,B> implements PropertyType<T,B>
      */
     public JavaBeanProperty( B bean, T initialValue, String propertyName )
     {
+        Objects.requireNonNull( bean );
+        JavaUtil.Assert(
+                StringUtil.hasContent( propertyName ),
+                "Empty propertyName" );
+
         // This internally validates if the host offers the required
         // set and get operations.
         _beantype = new PropertyProxy<T,B>( propertyName, bean ).getType();
 
-        // This internally validates if the bean has the pcl operations
+        // This internally validates if the bean has the pcl operations.
         _pa = new PropertyAdapter( bean );
 
         _bean = bean;
@@ -68,9 +94,7 @@ public class JavaBeanProperty<T,B> implements PropertyType<T,B>
     }
 
     /**
-     * Get the listeners to call.
-     *
-     * @return The listeners to call.
+     * @return The property change listeners listeners to call.
      */
     private List<PropertyChangeListener> getPcls()
     {

@@ -66,21 +66,14 @@ public class ApplicationProperties
 
         Map<String, String> localMap;
 
-        ObjectInputStream is = null;
-        try
+        try ( ObjectInputStream is = new ObjectInputStream(
+                    _localStorage.openInputFile( _fileName ) ) )
         {
-            is = new ObjectInputStream(
-                    _localStorage.openInputFile( _fileName ) );
-
             localMap = (Map<String, String>)is.readObject();
         }
         catch ( Exception e )
         {
             localMap = new HashMap<String, String>();
-        }
-        finally
-        {
-            FileUtil.forceClose( is );
         }
 
         _storage = localMap;
