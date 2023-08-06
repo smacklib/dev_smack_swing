@@ -28,8 +28,13 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 import javax.swing.UIManager;
+
+import org.smack.util.JavaUtil;
+import org.smack.util.MathUtil;
+import org.smack.util.StringUtil;
 
 
 /**
@@ -64,6 +69,8 @@ import javax.swing.UIManager;
 @SuppressWarnings("serial")
 public class MultiSplitLayout implements LayoutManager, Serializable
 {
+    private static Logger LOG = Logger.getLogger( MultiSplitLayout.class.getName() );
+
     public static final int DEFAULT_LAYOUT = 0;
     public static final int NO_MIN_SIZE_LAYOUT = 1;
     public static final int USER_MIN_SIZE_LAYOUT = 2;
@@ -73,7 +80,6 @@ public class MultiSplitLayout implements LayoutManager, Serializable
     private Node model;
     private int dividerSize;
 
-    private static final boolean removfeDividers = true;
     private boolean layoutByWeight = false;
 
     private int layoutMode;
@@ -1303,9 +1309,11 @@ public class MultiSplitLayout implements LayoutManager, Serializable
      * the layout model, and then set the bounds of each child component
      * with a matching Leaf Node.
      */
-    @Override
-    public void layoutContainer(Container parent)
+    public void layoutContainerOld(Container parent)
     {
+        if ( layoutByWeight )
+            doLayoutByWeight( parent );
+
         checkLayout(getModel());
         Insets insets = parent.getInsets();
         Dimension size = parent.getSize();
@@ -1314,6 +1322,140 @@ public class MultiSplitLayout implements LayoutManager, Serializable
         Rectangle bounds = new Rectangle( insets.left, insets.top, width, height);
         layout1(getModel(), bounds);
         layout2(getModel(), bounds);
+    }
+
+    /**
+     *
+     * @param node The node to layout
+     * @param bounds
+     */
+    private void _performLayout( Node node, Rectangle bounds )
+    {
+        if ( node instanceof Leaf )
+            node.setBounds( bounds );
+        else if ( node instanceof ColSplit )
+            _performLayoutColumn( (ColSplit)node, bounds );
+        else if ( node instanceof RowSplit )
+            _performLayoutRow( (RowSplit)node, bounds );
+
+    }
+
+    private void _performLayoutRow( RowSplit node, Rectangle bounds )
+    {
+        var children =  _completeWeights( node.getChildren() );
+
+        double currentPosition = 0.0;
+        for ( var c : children )
+        {
+            // Skip splits.
+            if ( c.getWeight() < 0.0 )
+                continue;
+
+            double w = c.getWeight() * bounds.width;
+
+            Rectangle subBounds = new Rectangle(
+                    MathUtil.round( currentPosition ),
+                    bounds.y,
+                    MathUtil.round( w ),
+                    bounds.height );
+
+            _performLayout( c, subBounds );
+
+            currentPosition += w;
+        }
+    }
+
+    private void _performLayoutColumn( ColSplit node, Rectangle bounds )
+    {
+        var children =  _completeWeights( node.getChildren() );
+
+        double currentPosition = 0.0;
+        for ( var c : children )
+        {
+            // Skip splits.
+            if ( c.getWeight() < 0.0 )
+                continue;
+
+            double h = c.getWeight() * bounds.height;
+
+            Rectangle subBounds = new Rectangle(
+                    bounds.x,
+                    MathUtil.round( currentPosition ),
+                    bounds.width,
+                    MathUtil.round( h ));
+
+            _performLayout( c, subBounds );
+
+            currentPosition += h;
+        }
+    }
+
+    private List<Node> _completeWeights( List<Node> children )
+    {
+        double[] weights = new double[children.size()];
+        for ( int i = 0 ; i < weights.length ; i++ )
+        {
+            var c = children.get( i );
+                weights[i] = c.getWeight();
+        }
+
+        double unsetCount = 0.0;
+        double setPercentage = 0.0;
+        for ( var c : weights )
+        {
+            if ( c == 0.0 )
+                unsetCount += 1.0;
+            else if ( c > 0.0 )
+                setPercentage += c;
+        }
+
+        JavaUtil.Assert( setPercentage <= 1.0 );
+        JavaUtil.Assert( setPercentage >= 0.0 );
+
+        if ( unsetCount == 0.0 && setPercentage == 1.0 )
+            return children;
+
+        if ( unsetCount == 0.0 && setPercentage < 1.0 )
+            throw new IllegalArgumentException( "unsetCount == 0.0 && setPercentage < 1.0" );
+
+        double unsetPercentage = (1.0 - setPercentage) / unsetCount;
+
+        for ( var c : children )
+        {
+            if ( c.weight == 0.0 )
+                c.weight = unsetPercentage;
+        }
+
+        double totalWeight = 0.0;
+        for ( var c : children )
+        {
+            if ( c.weight > 0.0 )
+                totalWeight += c.weight;
+        }
+
+        LOG.info( "totalWeight=" + totalWeight );
+
+        return children;
+    }
+
+    @Override
+    public void layoutContainer(Container parent)
+    {
+        checkLayout(getModel());
+
+        // Compute the net size to be used for layouting.
+        Insets insets = parent.getInsets();
+        Dimension size = parent.getSize();
+        int width = size.width - (insets.left + insets.right);
+        int height = size.height - (insets.top + insets.bottom);
+        Rectangle bounds = new Rectangle( insets.left, insets.top, width, height);
+
+        _performLayout( model, bounds );
+//        if ( layoutByWeight )
+//            doLayoutByWeight( parent );
+//
+//        layout1(getModel(), bounds);
+//        layout2(getModel(), bounds);
     }
 
     private Divider dividerAt(Node root, int x, int y) {
@@ -1607,7 +1749,7 @@ public class MultiSplitLayout implements LayoutManager, Serializable
          * Returns true if the this Split's children are to be
          * laid out in a row: all the same height, left edge
          * equal to the previous Node's right edge.  If false,
-         * children are laid on in a column.
+         * children are laid out in a column.
          *
          * @return the value of the rowLayout property.
          * @see #setRowLayout
@@ -1854,7 +1996,7 @@ public class MultiSplitLayout implements LayoutManager, Serializable
      * Models a java.awt Component child.
      */
     public static class Leaf extends Node {
-        private String name = "";
+        private String name = StringUtil.EMPTY_STRING;
 
         /**
          * Create a Leaf node.  The default value of name is "".
@@ -1870,10 +2012,7 @@ public class MultiSplitLayout implements LayoutManager, Serializable
          * @throws IllegalArgumentException if name is null
          */
         public Leaf(String name) {
-            if (name == null) {
-                throw new IllegalArgumentException("name is null");
-            }
-            this.name = name;
+            this.name = Objects.requireNonNull( name );
         }
 
         /**
@@ -1909,11 +2048,19 @@ public class MultiSplitLayout implements LayoutManager, Serializable
             sb.append(getBounds());
             return sb.toString();
         }
+
+        @Override
+        public void setBounds( Rectangle bounds )
+        {
+            super.setBounds( bounds );
+
+            LOG.info( toString() );
+        }
     }
 
 
     /**
-     * Models a single vertical/horiztonal divider.
+     * Models a single vertical/horizontal divider.
      */
     public static class Divider extends Node {
         /**
@@ -1936,6 +2083,12 @@ public class MultiSplitLayout implements LayoutManager, Serializable
         @Override
         public void setWeight(double weight) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public double getWeight()
+        {
+            return -1.0;
         }
 
         @Override
