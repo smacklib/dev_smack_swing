@@ -12,8 +12,6 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Serializable;
@@ -30,8 +28,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
 
-import javax.swing.UIManager;
+import javax.swing.JSplitPane;
 
+import org.smack.swing.beans.AbstractBean;
+import org.smack.swing.beans.JavaBeanProperty;
 import org.smack.util.JavaUtil;
 import org.smack.util.MathUtil;
 import org.smack.util.StringUtil;
@@ -67,7 +67,11 @@ import org.smack.util.StringUtil;
  */
 
 @SuppressWarnings("serial")
-public class MultiSplitLayout implements LayoutManager, Serializable
+public class MultiSplitLayout
+    extends
+        AbstractBean
+    implements
+        LayoutManager, Serializable
 {
     private static Logger LOG = Logger.getLogger( MultiSplitLayout.class.getName() );
 
@@ -76,9 +80,19 @@ public class MultiSplitLayout implements LayoutManager, Serializable
     public static final int USER_MIN_SIZE_LAYOUT = 2;
 
     private final Map<String, Component> childMap = new HashMap<String, Component>();
-    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    private Node model;
-    private int dividerSize;
+
+//    private Node model;
+    private JavaBeanProperty<Node, MultiSplitLayout> _model =
+            new JavaBeanProperty<>(
+                    this,
+                    new Leaf("default"),
+                    "model" );
+
+    private JavaBeanProperty<Integer, MultiSplitLayout> _dividerSize =
+            new JavaBeanProperty<>(
+                    this,
+                    new JSplitPane().getDividerSize(),
+                    "dividerSize" );
 
     private boolean layoutByWeight = false;
 
@@ -93,7 +107,16 @@ public class MultiSplitLayout implements LayoutManager, Serializable
      */
     public MultiSplitLayout()
     {
-        this(new Leaf("default"));
+    }
+
+    /**
+     * Create a MultiSplitLayout with the specified model.
+     *
+     * #see setModel
+     */
+    public MultiSplitLayout(Node model)
+    {
+        _model.set( model );
     }
 
     /**
@@ -106,7 +129,6 @@ public class MultiSplitLayout implements LayoutManager, Serializable
      */
     public MultiSplitLayout(boolean layoutByWeight)
     {
-        this(new Leaf("default"));
         this.layoutByWeight = layoutByWeight;
     }
 
@@ -135,6 +157,8 @@ public class MultiSplitLayout implements LayoutManager, Serializable
         int height = size.height - (insets.top + insets.bottom);
         Rectangle bounds = new Rectangle(insets.left, insets.top, width, height);
 
+        final var model = getModel();
+
         if (model instanceof Leaf)
             model.setBounds(bounds);
         else if (model instanceof Split)
@@ -154,7 +178,7 @@ public class MultiSplitLayout implements LayoutManager, Serializable
             if ( !splitChild.isVisible())
                 continue;
             else if ( splitChild instanceof Divider ) {
-                dividerSpace += dividerSize;
+                dividerSpace += getDividerSize();
                 continue;
             }
 
@@ -243,6 +267,8 @@ public class MultiSplitLayout implements LayoutManager, Serializable
      */
     public Node getNodeForName( String name )
     {
+        final var model = getModel();
+
         if ( model instanceof Split ) {
             Split split = ((Split)model);
             return getNodeForName( split, name );
@@ -314,40 +340,7 @@ public class MultiSplitLayout implements LayoutManager, Serializable
      */
     public boolean hasModel()
     {
-        return model != null;
-    }
-
-    /**
-     * Create a MultiSplitLayout with the specified model.
-     *
-     * #see setModel
-     */
-    public MultiSplitLayout(Node model) {
-        this.model = model;
-        this.dividerSize = UIManager.getInt("SplitPane.dividerSize");
-        if (this.dividerSize == 0) {
-            this.dividerSize = 7;
-        }
-    }
-
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        if (listener != null) {
-            pcs.addPropertyChangeListener(listener);
-        }
-    }
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        if (listener != null) {
-            pcs.removePropertyChangeListener(listener);
-        }
-    }
-    public PropertyChangeListener[] getPropertyChangeListeners() {
-        return pcs.getPropertyChangeListeners();
-    }
-
-    private void firePCS(String propertyName, Object oldValue, Object newValue) {
-        if (!(oldValue != null && newValue != null && oldValue.equals(newValue))) {
-            pcs.firePropertyChange(propertyName, oldValue, newValue);
-        }
+        return getModel() != null;
     }
 
     /**
@@ -357,7 +350,10 @@ public class MultiSplitLayout implements LayoutManager, Serializable
      * @return the value of the model property
      * @see #setModel
      */
-    public Node getModel() { return model; }
+    public Node getModel()
+    {
+        return _model.get();
+    }
 
     /**
      * Set the root of the tree of Split, Leaf, and Divider nodes
@@ -373,9 +369,7 @@ public class MultiSplitLayout implements LayoutManager, Serializable
         if ((model == null) || (model instanceof Divider)) {
             throw new IllegalArgumentException("invalid model");
         }
-        Node oldModel = getModel();
-        this.model = model;
-        firePCS("model", oldModel, getModel());
+        _model.set( model );
     }
 
     /**
@@ -385,7 +379,10 @@ public class MultiSplitLayout implements LayoutManager, Serializable
      * @return the value of the dividerSize property
      * @see #setDividerSize
      */
-    public int getDividerSize() { return dividerSize; }
+    public int getDividerSize()
+    {
+        return _dividerSize.get();
+    }
 
     /**
      * Sets the width of Dividers in Split rows, and the height of
@@ -396,13 +393,12 @@ public class MultiSplitLayout implements LayoutManager, Serializable
      * @throws IllegalArgumentException if dividerSize < 0
      * @see #getDividerSize
      */
-    public void setDividerSize(int dividerSize) {
-        if (dividerSize < 0) {
+    public void setDividerSize(int dividerSize)
+    {
+        if (dividerSize < 0)
             throw new IllegalArgumentException("invalid dividerSize");
-        }
-        int oldDividerSize = this.dividerSize;
-        this.dividerSize = dividerSize;
-        firePCS("dividerSize",  Integer.valueOf( oldDividerSize ), Integer.valueOf( dividerSize ));
+
+        _dividerSize.set( dividerSize );
     }
 
     /**
@@ -452,6 +448,8 @@ public class MultiSplitLayout implements LayoutManager, Serializable
     {
         Objects.requireNonNull( name );
 
+        final var model = _model.get();
+
         Node n;
         if ( !( model instanceof Split ))
             n = model;
@@ -468,9 +466,9 @@ public class MultiSplitLayout implements LayoutManager, Serializable
                 Split p = s.getParent();
                 if ( p == null ) {
                     if ( s.getChildren().size() > 0 )
-                        model = s.getChildren().get( 0 );
+                        _model.set( s.getChildren().get( 0 ) );
                     else
-                        model = null;
+                        _model.set( null );
                     return;
                 }
                 if ( s.getChildren().size() == 1 ) {
@@ -797,7 +795,7 @@ public class MultiSplitLayout implements LayoutManager, Serializable
                                 double oldWidth = splitChildBounds.getWidth();
                                 double newWidth;
                                 if ( splitChild instanceof Divider ) {
-                                    newWidth = dividerSize;
+                                    newWidth = getDividerSize();
                                 }
                                 else {
                                     double allocatedWidth = Math.rint(splitChildWeight * extraWidth);
@@ -866,7 +864,7 @@ public class MultiSplitLayout implements LayoutManager, Serializable
                             double oldHeight = splitChildBounds.getHeight();
                             double newHeight;
                             if ( splitChild instanceof Divider ) {
-                                newHeight = dividerSize;
+                                newHeight = getDividerSize();
                             }
                             else {
                                 newHeight = Math.max(minSplitChildHeight, bounds.getMaxY() - y);
@@ -881,7 +879,7 @@ public class MultiSplitLayout implements LayoutManager, Serializable
                                 double oldHeight = splitChildBounds.getHeight();
                                 // Prevent the divider from shrinking
                                 if ( splitChild instanceof Divider ) {
-                                    newHeight = dividerSize;
+                                    newHeight = getDividerSize();
                                 }
                                 else {
                                     double allocatedHeight = Math.rint(splitChildWeight * extraHeight);
@@ -1441,7 +1439,7 @@ public class MultiSplitLayout implements LayoutManager, Serializable
     @Override
     public void layoutContainer(Container parent)
     {
-        checkLayout(getModel());
+        checkLayout( _model.get() );
 
         // Compute the net size to be used for layouting.
         Insets insets = parent.getInsets();
@@ -1450,12 +1448,7 @@ public class MultiSplitLayout implements LayoutManager, Serializable
         int height = size.height - (insets.top + insets.bottom);
         Rectangle bounds = new Rectangle( insets.left, insets.top, width, height);
 
-        _performLayout( model, bounds );
-//        if ( layoutByWeight )
-//            doLayoutByWeight( parent );
-//
-//        layout1(getModel(), bounds);
-//        layout2(getModel(), bounds);
+        _performLayout( _model.get(), bounds );
     }
 
     private Divider dividerAt(Node root, int x, int y) {

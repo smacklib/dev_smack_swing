@@ -4,9 +4,14 @@
 package org.smack.swing.swingx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.awt.Container;
 import java.awt.Rectangle;
+import java.beans.PropertyChangeEvent;
+
+import javax.swing.JSplitPane;
 
 import org.junit.jupiter.api.Test;
 import org.smack.swing.swingx.MultiSplitLayout.ColSplit;
@@ -15,6 +20,7 @@ import org.smack.swing.swingx.MultiSplitLayout.Leaf;
 import org.smack.swing.swingx.MultiSplitLayout.RowSplit;
 import org.smack.swing.swingx.MultiSplitLayout.Split;
 import org.smack.swing.test.MockContainer;
+import org.smack.util.Holder;
 import org.smack.util.JavaUtil;
 
 public class MultiSplitLayoutTest
@@ -78,5 +84,53 @@ public class MultiSplitLayoutTest
                 new Rectangle( 0, 50, 200, 50 ),
                 d );
         }
+    }
+
+    @Test
+    public void propDividerSizeTest() throws Exception
+    {
+        Holder<PropertyChangeEvent> pceh = new Holder<>();
+
+        final var mspl = new MultiSplitLayout();
+
+        mspl.addPropertyChangeListener( ce -> pceh.set( ce ) );
+        assertNull( pceh.get() );
+
+        mspl.setDividerSize( 313 );
+
+        assertNotNull( pceh.get() );
+
+        assertEquals( "dividerSize", pceh.get().getPropertyName() );
+        assertEquals( 313, (int)pceh.get().getNewValue() );
+        assertEquals( new JSplitPane().getDividerSize(), (int)pceh.get().getOldValue() );
+        assertEquals( mspl, pceh.get().getSource() );
+    }
+
+    @Test
+    public void propModelTest() throws Exception
+    {
+        Holder<PropertyChangeEvent> pceh = new Holder<>();
+
+        final var mspl = new MultiSplitLayout();
+
+        mspl.addPropertyChangeListener( ce -> pceh.set( ce ) );
+        assertNull( pceh.get() );
+
+        mspl.setModel( new Leaf( "test" ) );
+
+        assertNotNull( pceh.get() );
+
+        assertEquals(
+                "model",
+                pceh.get().getPropertyName() );
+        assertEquals(
+                "test",
+                Leaf.class.cast(pceh.get().getNewValue() ).getName() );
+        assertEquals(
+                "default",
+                Leaf.class.cast(pceh.get().getOldValue() ).getName() );
+        assertEquals(
+                mspl,
+                pceh.get().getSource() );
     }
 }

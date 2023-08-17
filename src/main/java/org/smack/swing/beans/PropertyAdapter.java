@@ -1,4 +1,4 @@
-/* $Id$
+/* $Id: 30ae40b7942629c26df5b02612753a53385a0833 $
  *
  * Released under Gnu Public License
  * Copyright © 2011-15 Michael G. Binz
@@ -197,7 +197,7 @@ public class PropertyAdapter
     public PropertyChangeListener[] getPropertyChangeListeners( String propertyName )
     {
         if ( _getPclsNamed == null )
-            throw new NoSuchMethodError();
+            return new PropertyChangeListener[0];
 
         return (PropertyChangeListener[])ReflectionUtil.invokeQuiet(
                 _getPclsNamed,
