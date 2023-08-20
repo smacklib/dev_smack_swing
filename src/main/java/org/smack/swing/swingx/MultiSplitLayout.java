@@ -1216,6 +1216,7 @@ public class MultiSplitLayout
     }
     private void validateLayout( Node root )
     {
+        // TODO check unique leaf names.
         root.validate();
     }
 
@@ -1650,13 +1651,8 @@ public class MultiSplitLayout
         {
             setChildren(children);
 
-//            _childrenWoDividers = new ArrayList<>();
-//            for ( var c : children )
-//                if ( ! (c instanceof Divider) )
-//                    _childrenWoDividers.add( c );
-
-            _childrenWoDividers =
-                     _children.stream().filter( c -> ! Divider.class.isInstance( c ) ).collect(
+            _childrenWoDividers = _children.stream().filter(
+                    c -> ! Divider.class.isInstance( c ) ).collect(
                              Collectors.toList() );
         }
 
@@ -1900,8 +1896,10 @@ public class MultiSplitLayout
             {
                 double totalWeight = 0.0;
                 for ( var c : _childrenWoDividers )
+                {
+                    c.validate();
                     totalWeight += c.weight;
-
+                }
                 if ( totalWeight > 1.0 )
                     throwInvalidLayout("Split children's total weight > 1.0", this);
             }
