@@ -27,6 +27,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.swing.JSplitPane;
 
@@ -438,94 +439,6 @@ public class MultiSplitLayout
         }
     }
 
-    /**
-     * Removes the specified node from the layout.
-     *
-     * @param name the name of the component to be removed
-     * @see #addLayoutComponent
-     */
-    public void removeLayoutNode(String name)
-    {
-        Objects.requireNonNull( name );
-
-        final var model = _model.get();
-
-        Node n;
-        if ( !( model instanceof Split ))
-            n = model;
-        else
-            n = getNodeForName( name );
-
-        childMap.remove(name);
-
-        if ( n != null ) {
-            Split s = n.getParent();
-            s.remove( n );
-
-            while ( s.getChildren().size() < 2 ) {
-                Split p = s.getParent();
-                if ( p == null ) {
-                    if ( s.getChildren().size() > 0 )
-                        _model.set( s.getChildren().get( 0 ) );
-                    else
-                        _model.set( null );
-                    return;
-                }
-                if ( s.getChildren().size() == 1 ) {
-                    Node next = s.getChildren().get( 0 );
-                    p.replace( s, next );
-                    next.setParent( p );
-                }
-                else
-                    p.remove( s );
-                s = p;
-            }
-
-        }
-        else {
-            childMap.remove( name );
-        }
-
-    }
-
-    /**
-     * Show/Hide nodes. Any dividers that are no longer required due to one of the
-     * nodes being made visible/invisible are also shown/hidden. The visibility of
-     * the component managed by the node is also changed by this method
-     * @param name the node name
-     * @param visible the new node visible state
-     */
-    public void displayNode( String name, boolean visible )
-    {
-        Node node = getNodeForName( name );
-        if ( node != null ) {
-            Component comp = getComponentForNode( node );
-            comp.setVisible( visible );
-            node.setVisible( visible );
-
-            MultiSplitLayout.Split p = node.getParent();
-            if ( !visible ) {
-                p.hide( node );
-                if ( !p.isVisible())
-                    p.getParent().hide( p );
-
-                p.checkDividers( p );
-                // If the split has become invisible then the parent may also have a
-                // divider that needs to be hidden.
-                while ( !p.isVisible()) {
-                    p = p.getParent();
-                    if ( p != null )
-                        p.checkDividers( p );
-                    else
-                        break;
-                }
-            }
-            else
-                p.restoreDividers( p );
-        }
-        //        setFloatingDividers( false );
-    }
-
     private Component childForNode(Node node) {
         if (node instanceof Leaf) {
             Leaf leaf = (Leaf)node;
@@ -631,7 +544,7 @@ public class MultiSplitLayout
     }
 
     /**
-     * Get the maximum size of this node. Sums the minumum sizes of rows or
+     * Get the maximum size of this node. Sums the minimum sizes of rows or
      * columns to get the overall maximum size for the layout node, including the
      * dividers.
      * @param root the node whose size is required.
@@ -1264,7 +1177,7 @@ public class MultiSplitLayout
         public Node getNode() { return node; }
     }
 
-    private void throwInvalidLayout(String msg, Node node) {
+    private static void throwInvalidLayout(String msg, Node node) {
         throw new InvalidLayoutException(msg, node);
     }
 
@@ -1301,6 +1214,10 @@ public class MultiSplitLayout
             }
         }
     }
+    private void validateLayout( Node root )
+    {
+        root.validate();
+    }
 
     /**
      * Compute the bounds of all of the Split/Divider/Leaf Nodes in
@@ -1335,7 +1252,6 @@ public class MultiSplitLayout
             _performLayoutColumn( (ColSplit)node, bounds );
         else if ( node instanceof RowSplit )
             _performLayoutRow( (RowSplit)node, bounds );
-
     }
 
     private void _performLayoutRow( RowSplit node, Rectangle bounds )
@@ -1601,6 +1517,16 @@ public class MultiSplitLayout
          * @see #setWeight
          */
         public double getWeight() { return weight; }
+        /**
+         * Fluent API.
+         * @param weight
+         * @return
+         */
+        public Node weight( double weight )
+        {
+            setWeight( weight );
+            return this;
+        }
 
         /**
          * The weight property is a between 0.0 and 1.0 used to
@@ -1658,6 +1584,8 @@ public class MultiSplitLayout
         public Node previousSibling() {
             return siblingAtOffset(-1);
         }
+
+        abstract void validate();
     }
 
     public static class RowSplit extends Split {
@@ -1703,16 +1631,33 @@ public class MultiSplitLayout
     }
 
     /**
-     * Defines a vertical or horizontal subdivision into two or more
-     * tiles.
+     * Defines a vertical or horizontal subdivision into two or more tiles.
      */
     public static class Split extends Node {
-        private List<Node> children = Collections.emptyList();
+        private List<Node> _children =
+                Collections.emptyList();
+        private List<Node> _childrenWoDividers =
+                Collections.emptyList();
         private boolean rowLayout = true;
         private String name;
 
-        public Split(Node... children) {
+        /**
+         * @deprecated Use Vertical Horizontal ctor.
+         * @param children
+         */
+        @Deprecated
+        public Split(Node... children)
+        {
             setChildren(children);
+
+//            _childrenWoDividers = new ArrayList<>();
+//            for ( var c : children )
+//                if ( ! (c instanceof Divider) )
+//                    _childrenWoDividers.add( c );
+
+            _childrenWoDividers =
+                     _children.stream().filter( c -> ! Divider.class.isInstance( c ) ).collect(
+                             Collectors.toList() );
         }
 
         /**
@@ -1720,6 +1665,11 @@ public class MultiSplitLayout
          * Resulting instance of Split is invalid until setChildren() is called.
          */
         public Split() {
+        }
+
+        public int size()
+        {
+            return _childrenWoDividers.size();
         }
 
         /**
@@ -1731,7 +1681,7 @@ public class MultiSplitLayout
          */
         @Override
         public boolean isVisible() {
-            for(Node child : children) {
+            for(Node child : _children) {
                 if ( child.isVisible() && !( child instanceof Divider ))
                     return true;
             }
@@ -1771,53 +1721,10 @@ public class MultiSplitLayout
          * @see #setChildren
          */
         public List<Node> getChildren() {
-            return new ArrayList<Node>(children);
+            return new ArrayList<Node>(_children);
         }
-
-
-        /**
-         * Remove a node from the layout. Any sibling dividers will also be removed
-         * @param n the node to be removed
-         */
-        public void remove( Node n ) {
-            if ( n.nextSibling() instanceof Divider )
-                children.remove( n.nextSibling() );
-            else if ( n.previousSibling() instanceof Divider )
-                children.remove( n.previousSibling() );
-            children.remove( n );
-        }
-
-        /**
-         * Replace one node with another. This method is used when a child is removed
-         * from a split and the split is no longer required, in which case the
-         * remaining node in the child split can replace the split in the parent
-         * node
-         * @param target the node being replaced
-         * @param replacement the replacement node
-         */
-        public void replace( Node target, Node replacement ) {
-            int idx = children.indexOf( target );
-            children.remove( target );
-            children.add( idx, replacement );
-
-            replacement.setParent ( this );
-            target.setParent( this );
-        }
-
-        /**
-         * Change a node to being hidden. Any associated divider nodes are also hidden
-         * @param target the node to hide
-         */
-        public void hide( Node target ){
-            Node next = target.nextSibling();
-            if ( next instanceof Divider )
-                next.setVisible( false );
-            else {
-                Node prev = target.previousSibling();
-                if ( prev instanceof Divider )
-                    prev.setVisible( false );
-            }
-            target.setVisible( false );
+        public List<Node> getChildren2() {
+            return new ArrayList<Node>(_childrenWoDividers);
         }
 
         /**
@@ -1903,12 +1810,12 @@ public class MultiSplitLayout
             if (children == null) {
                 throw new IllegalArgumentException("children must be a non-null List");
             }
-            for(Node child : this.children) {
+            for(Node child : this._children) {
                 child.setParent(null);
             }
 
-            this.children = new ArrayList<Node>(children);
-            for(Node child : this.children) {
+            this._children = new ArrayList<Node>(children);
+            for(Node child : this._children) {
                 child.setParent(this);
             }
         }
@@ -1982,20 +1889,38 @@ public class MultiSplitLayout
             sb.append(getBounds());
             return sb.toString();
         }
-    }
 
+        @Override
+        final void validate()
+        {
+            if (getChildren().size() <= 2) {
+                throwInvalidLayout("Split must have > 2 children", this);
+            }
+
+            {
+                double totalWeight = 0.0;
+                for ( var c : _childrenWoDividers )
+                    totalWeight += c.weight;
+
+                if ( totalWeight > 1.0 )
+                    throwInvalidLayout("Split children's total weight > 1.0", this);
+            }
+        }
+    }
 
     /**
      * Models a java.awt Component child.
      */
-    public static class Leaf extends Node {
-        private String name = StringUtil.EMPTY_STRING;
+    public static class Leaf extends Node
+    {
+        private String _name = StringUtil.EMPTY_STRING;
 
         /**
          * Create a Leaf node.  The default value of name is "".
          */
-        public Leaf() { }
-
+        public Leaf()
+        {
+        }
 
         /**
          * Create a Leaf node with the specified name.  Name can not
@@ -2005,7 +1930,7 @@ public class MultiSplitLayout
          * @throws IllegalArgumentException if name is null
          */
         public Leaf(String name) {
-            this.name = Objects.requireNonNull( name );
+            _name = Objects.requireNonNull( name );
         }
 
         /**
@@ -2014,7 +1939,7 @@ public class MultiSplitLayout
          * @return the value of the name property.
          * @see #setName
          */
-        public String getName() { return name; }
+        public String getName() { return _name; }
 
         /**
          * Set the value of the name property.  Name may not be null.
@@ -2026,7 +1951,7 @@ public class MultiSplitLayout
             if (name == null) {
                 throw new IllegalArgumentException("name is null");
             }
-            this.name = name;
+            _name = name;
         }
 
         @Override
@@ -2049,12 +1974,20 @@ public class MultiSplitLayout
 
             LOG.info( toString() );
         }
-    }
 
+
+        @Override
+        void validate()
+        {
+        }
+    }
 
     /**
      * Models a single vertical/horizontal divider.
+     *
+     * @deprecated micbinz : Not needed in final design.
      */
+    @Deprecated
     public static class Divider extends Node {
         /**
          * Convenience method, returns true if the Divider's parent
@@ -2087,6 +2020,11 @@ public class MultiSplitLayout
         @Override
         public String toString() {
             return "MultiSplitLayout.Divider " + getBounds().toString();
+        }
+
+        @Override
+        void validate()
+        {
         }
     }
 
@@ -2233,7 +2171,7 @@ public class MultiSplitLayout
      * </pre>
      *
      * <p> Dividers should not be included in the string,
-     * they're added automatcially as needed.  Because
+     * they're added automatically as needed.  Because
      * Leaf nodes often only need to specify a name, one
      * can specify a Leaf by just providing the name.
      * The previous example can be written like this:

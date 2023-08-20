@@ -16,7 +16,9 @@ import javax.swing.JSplitPane;
 import org.junit.jupiter.api.Test;
 import org.smack.swing.swingx.MultiSplitLayout.ColSplit;
 import org.smack.swing.swingx.MultiSplitLayout.Divider;
+import org.smack.swing.swingx.MultiSplitLayout.InvalidLayoutException;
 import org.smack.swing.swingx.MultiSplitLayout.Leaf;
+import org.smack.swing.swingx.MultiSplitLayout.Node;
 import org.smack.swing.swingx.MultiSplitLayout.RowSplit;
 import org.smack.swing.swingx.MultiSplitLayout.Split;
 import org.smack.swing.test.MockContainer;
@@ -132,5 +134,104 @@ public class MultiSplitLayoutTest
         assertEquals(
                 mspl,
                 pceh.get().getSource() );
+    }
+
+
+    @Test
+    public void Split_validate_lessThanTwoNodes() throws Exception
+    {
+        final int count = 0;
+
+        Node[] nodes = new Node[]
+        {
+            new Leaf( "one" ),
+        };
+
+        Split split = new Split( nodes );
+
+        try {
+            split.validate();
+        }
+        catch ( InvalidLayoutException e )
+        {
+            assertEquals( split, e.getNode() );
+        }
+    }
+
+    @Test
+    public void Split_children_weightExceeds100() throws Exception
+    {
+        final int count = 1;
+
+        Node[] nodes = new Node[]
+        {
+            new Leaf( "one" ).weight( .8 ),
+            new Divider(),
+            new Leaf( "two" ).weight( .9 )
+        };
+
+        Split split = new Split( nodes );
+
+        try {
+            split.validate();
+        }
+        catch ( InvalidLayoutException e )
+        {
+            assertEquals( split, e.getNode() );
+        }
+    }
+
+    @Test
+    public void Split_children_0() throws Exception
+    {
+        final int count = 0;
+
+        Node[] nodes = new Node[]
+        {
+            new Leaf( "one" ),
+        };
+
+        Split split = new Split( nodes );
+
+        assertEquals( nodes.length, split.getChildren().size() );
+        assertEquals( nodes.length-count, split.size() );
+    }
+
+    @Test
+    public void Split_children_1() throws Exception
+    {
+        final int count = 1;
+
+        Node[] nodes = new Node[]
+        {
+            new Leaf( "one" ),
+            new Divider(),
+            new Leaf( "two" )
+        };
+
+        Split split = new Split( nodes );
+
+        assertEquals( nodes.length, split.getChildren().size() );
+        assertEquals( nodes.length-count, split.size() );
+    }
+
+    @Test
+    public void Split_children_2() throws Exception
+    {
+        int count = 2;
+
+        Node[] nodes = new Node[]
+        {
+            new Leaf( "one" ),
+            new Divider(),
+            new Leaf( "two" ),
+            new Divider(),
+            new Leaf( "three" )
+        };
+
+        Split split = new Split( nodes );
+
+        assertEquals( nodes.length, split.getChildren().size() );
+        assertEquals( nodes.length-count, split.size() );
     }
 }
