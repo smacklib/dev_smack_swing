@@ -80,9 +80,12 @@ public class MultiSplitLayout
     public static final int NO_MIN_SIZE_LAYOUT = 1;
     public static final int USER_MIN_SIZE_LAYOUT = 2;
 
-    private final Map<String, Component> childMap = new HashMap<String, Component>();
+    /**
+     * A map holding the component-to-name mappings.
+     */
+    private final Map<String, Component> _childMap =
+            new HashMap<String, Component>();
 
-//    private Node model;
     private JavaBeanProperty<Node, MultiSplitLayout> _model =
             new JavaBeanProperty<>(
                     this,
@@ -258,7 +261,7 @@ public class MultiSplitLayout
     private Component getComponentForNode( Node n )
     {
         String name = ((Leaf)n).getName();
-        return (name != null) ? (Component)childMap.get(name) : null;
+        return (name != null) ? (Component)_childMap.get(name) : null;
     }
 
     /**
@@ -292,7 +295,7 @@ public class MultiSplitLayout
     public String getNameForComponent( Component child )
     {
         String name = null;
-        for(Map.Entry<String,Component> kv : childMap.entrySet()) {
+        for(Map.Entry<String,Component> kv : _childMap.entrySet()) {
             if (kv.getValue() == child) {
                 name = kv.getKey();
                 break;
@@ -421,7 +424,7 @@ public class MultiSplitLayout
         if (name == null) {
             throw new IllegalArgumentException("name not specified");
         }
-        childMap.put(name, child);
+        _childMap.put(name, child);
     }
 
     /**
@@ -435,7 +438,7 @@ public class MultiSplitLayout
         String name = getNameForComponent( child );
 
         if ( name != null ) {
-            childMap.remove( name );
+            _childMap.remove( name );
         }
     }
 
@@ -443,7 +446,7 @@ public class MultiSplitLayout
         if (node instanceof Leaf) {
             Leaf leaf = (Leaf)node;
             String name = leaf.getName();
-            return (name != null) ? childMap.get(name) : null;
+            return (name != null) ? _childMap.get(name) : null;
         }
         return null;
     }
@@ -1181,6 +1184,7 @@ public class MultiSplitLayout
         throw new InvalidLayoutException(msg, node);
     }
 
+    @Deprecated
     private void checkLayout(Node root) {
         if (root instanceof Split) {
             Split split = (Split)root;
@@ -1218,6 +1222,8 @@ public class MultiSplitLayout
     {
         // TODO check unique leaf names.
         root.validate();
+
+
     }
 
     /**
@@ -1356,6 +1362,7 @@ public class MultiSplitLayout
     @Override
     public void layoutContainer(Container parent)
     {
+        validateLayout( _model.get() );
         checkLayout( _model.get() );
 
         // Compute the net size to be used for layouting.
@@ -1921,7 +1928,7 @@ public class MultiSplitLayout
         }
 
         /**
-         * Create a Leaf node with the specified name.  Name can not
+         * Create a Leaf node with the specified name.  Name cannot
          * be null.
          *
          * @param name value of the Leaf's name property
