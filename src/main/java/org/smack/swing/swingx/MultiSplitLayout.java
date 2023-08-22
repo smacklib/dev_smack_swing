@@ -1248,70 +1248,15 @@ public class MultiSplitLayout
 
     /**
      *
-     * @param node The node to layout
+     * @param node The node to layout.
      * @param bounds
      */
     private void _performLayout( Node node, Rectangle bounds )
     {
-        if ( node instanceof Leaf )
-            node.setBounds( bounds );
-        else if ( node instanceof ColSplit )
-            _performLayoutColumn( (ColSplit)node, bounds );
-        else if ( node instanceof RowSplit )
-            _performLayoutRow( (RowSplit)node, bounds );
+        node.layout( bounds );
     }
 
-    private void _performLayoutRow( RowSplit node, Rectangle bounds )
-    {
-        var children =  _completeWeights( node.getChildren() );
-
-        double currentPosition = 0.0;
-        for ( var c : children )
-        {
-            // Skip splits.
-            if ( c.getWeight() < 0.0 )
-                continue;
-
-            double w = c.getWeight() * bounds.width;
-
-            Rectangle subBounds = new Rectangle(
-                    MathUtil.round( currentPosition ),
-                    bounds.y,
-                    MathUtil.round( w ),
-                    bounds.height );
-
-            _performLayout( c, subBounds );
-
-            currentPosition += w;
-        }
-    }
-
-    private void _performLayoutColumn( ColSplit node, Rectangle bounds )
-    {
-        var children =  _completeWeights( node.getChildren() );
-
-        double currentPosition = 0.0;
-        for ( var c : children )
-        {
-            // Skip splits.
-            if ( c.getWeight() < 0.0 )
-                continue;
-
-            double h = c.getWeight() * bounds.height;
-
-            Rectangle subBounds = new Rectangle(
-                    bounds.x,
-                    MathUtil.round( currentPosition ),
-                    bounds.width,
-                    MathUtil.round( h ));
-
-            _performLayout( c, subBounds );
-
-            currentPosition += h;
-        }
-    }
-
-    private List<Node> _completeWeights( List<Node> children )
+    private static List<Node> _completeWeights( List<Node> children )
     {
         double[] weights = new double[children.size()];
         for ( int i = 0 ; i < weights.length ; i++ )
@@ -1359,20 +1304,33 @@ public class MultiSplitLayout
         return children;
     }
 
+    // TODO utility candidate.
+    public static Rectangle calculateInnerArea(Container c)
+    {
+        Objects.requireNonNull( c );
+
+        Insets insets =
+                c.getInsets();
+        Rectangle result =
+                new Rectangle();
+
+        result.x = insets.left;
+        result.y = insets.top;
+        result.width = c.getWidth() - insets.left - insets.right;
+        result.height = c.getHeight() - insets.top - insets.bottom;
+
+        return result;
+    }
+
     @Override
     public void layoutContainer(Container parent)
     {
         validateLayout( _model.get() );
         checkLayout( _model.get() );
 
-        // Compute the net size to be used for layouting.
-        Insets insets = parent.getInsets();
-        Dimension size = parent.getSize();
-        int width = size.width - (insets.left + insets.right);
-        int height = size.height - (insets.top + insets.bottom);
-        Rectangle bounds = new Rectangle( insets.left, insets.top, width, height);
-
-        _performLayout( _model.get(), bounds );
+        _performLayout(
+                _model.get(),
+                calculateInnerArea( parent ) );
     }
 
     private Divider dividerAt(Node root, int x, int y) {
@@ -1594,6 +1552,8 @@ public class MultiSplitLayout
         }
 
         abstract void validate();
+
+        abstract void layout( Rectangle bounds );
     }
 
     public static class RowSplit extends Split {
@@ -1601,7 +1561,8 @@ public class MultiSplitLayout
         }
 
         public RowSplit(Node... children) {
-            setChildren(children);
+            super( children );
+            setRowLayout( true );
         }
 
         /**
@@ -1615,6 +1576,32 @@ public class MultiSplitLayout
          */
         @Override
         public final boolean isRowLayout() { return true; }
+
+        @Override
+        public void layout( Rectangle bounds )
+        {
+            var children =  _completeWeights( getChildren2() );
+
+            double currentPosition = 0.0;
+            for ( var c : children )
+            {
+                // Skip splits.
+                if ( c.getWeight() < 0.0 )
+                    continue;
+
+                double w = c.getWeight() * bounds.width;
+
+                Rectangle subBounds = new Rectangle(
+                        MathUtil.round( currentPosition ),
+                        bounds.y,
+                        MathUtil.round( w ),
+                        bounds.height );
+
+                c.layout( subBounds );
+
+                currentPosition += w;
+            }
+        }
     }
 
     public static class ColSplit extends Split {
@@ -1622,7 +1609,8 @@ public class MultiSplitLayout
         }
 
         public ColSplit(Node... children) {
-            setChildren(children);
+            super(children);
+            setRowLayout( false );
         }
 
         /**
@@ -1636,6 +1624,28 @@ public class MultiSplitLayout
          */
         @Override
         public final boolean isRowLayout() { return false; }
+
+        @Override
+        public void layout( Rectangle bounds )
+        {
+            var children =  _completeWeights( getChildren2() );
+
+            double currentPosition = 0.0;
+            for ( var c : children )
+            {
+                double h = c.getWeight() * bounds.height;
+
+                Rectangle subBounds = new Rectangle(
+                        bounds.x,
+                        MathUtil.round( currentPosition ),
+                        bounds.width,
+                        MathUtil.round( h ));
+
+                c.layout( subBounds );
+
+                currentPosition += h;
+            }
+        }
     }
 
     /**
@@ -1911,6 +1921,12 @@ public class MultiSplitLayout
                     throwInvalidLayout("Split children's total weight > 1.0", this);
             }
         }
+
+        @Override
+        void layout( Rectangle bounds )
+        {
+            throw new AssertionError( "Unexpected." );
+        }
     }
 
     /**
@@ -1985,6 +2001,12 @@ public class MultiSplitLayout
         void validate()
         {
         }
+
+        @Override
+        void layout( Rectangle bounds )
+        {
+            setBounds( bounds );
+        }
     }
 
     /**
@@ -2031,8 +2053,13 @@ public class MultiSplitLayout
         void validate()
         {
         }
-    }
 
+        @Override
+        void layout( Rectangle bounds )
+        {
+            throw new AssertionError("Unexpected");
+        }
+    }
 
     private static void throwParseException(StreamTokenizer st, String msg) throws Exception {
         throw new Exception("MultiSplitLayout.parseModel Error: " + msg);

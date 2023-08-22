@@ -34,6 +34,18 @@ public class MockContainer extends Container
     }
 
     @Override
+    public int getWidth()
+    {
+        return _dimension.width;
+    }
+
+    @Override
+    public int getHeight()
+    {
+        return _dimension.height;
+    }
+
+    @Override
     public Insets getInsets()
     {
         return _insets;
