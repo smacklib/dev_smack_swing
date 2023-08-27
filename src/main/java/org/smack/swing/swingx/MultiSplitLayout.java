@@ -77,9 +77,6 @@ public class MultiSplitLayout
     private static Logger LOG = Logger.getLogger( MultiSplitLayout.class.getName() );
 
     public enum LayoutMode { DEFAULT_LAYOUT, NO_MIN_SIZE_LAYOUT, USER_MIN_SIZE_LAYOUT };
-    public static final int DEFAULT_LAYOUT = 0;
-    public static final int NO_MIN_SIZE_LAYOUT = 1;
-    public static final int USER_MIN_SIZE_LAYOUT = 2;
 
     /**
      * A map holding the component-to-name mappings.
@@ -1412,7 +1409,7 @@ public class MultiSplitLayout
      */
     public static abstract class Node implements Serializable {
         private Split parent = null;
-        private Rectangle bounds = new Rectangle();
+        private final Rectangle _bounds = new Rectangle();
         private double weight = 0.0;
         private boolean isVisible = true;
         public void setVisible( boolean b ) {
@@ -1450,13 +1447,20 @@ public class MultiSplitLayout
         }
 
         /**
-         * Returns the bounding Rectangle for this Node.
-         *
-         * @return the value of the bounds property.
+         * @return A copy of the value of the bounds property.
          * @see #setBounds
          */
         public Rectangle getBounds() {
-            return new Rectangle(this.bounds);
+            return new Rectangle(this._bounds);
+        }
+
+        /**
+         * @return The bounds property.
+         */
+        protected Rectangle bounds()
+        {
+            return _bounds;
+
         }
 
         /**
@@ -1472,7 +1476,7 @@ public class MultiSplitLayout
             if (bounds == null) {
                 throw new IllegalArgumentException("null bounds");
             }
-            this.bounds = new Rectangle(bounds);
+            _bounds.setBounds( bounds );
         }
 
         /**
@@ -1586,6 +1590,8 @@ public class MultiSplitLayout
         @Override
         public void layout( Rectangle bounds, int dividerSize )
         {
+            setBounds( bounds );
+
             var children =  _completeWeights( getChildren2() );
 
             final int dividerCount =
@@ -1614,6 +1620,28 @@ public class MultiSplitLayout
                 currentPosition +=
                         (w + dividerSize);
             }
+
+            if ( extent() != bounds.width )
+            {
+                // Correct the node positions.
+                int error = extent() - bounds.width;
+
+                LOG.warning( String.format(
+                        "Expected width %d not %d.  Error=%d", extent(), bounds.width, error ) );
+
+                for ( int i = children.size()-1 ; error > 0 ; i-- )
+                {
+                    Node c = children.get( i );
+                    c.bounds().x -= error;
+                    error--;
+                }
+            }
+
+            if ( extent() != bounds.width )
+            {
+                LOG.warning( String.format(
+                        "Corrected width %d not %d.", extent(), bounds.width ) );
+            }
         }
 
         @Override
@@ -1625,7 +1653,7 @@ public class MultiSplitLayout
                     children.get(
                             children.size()-1 );
             var bounds =
-                    lastNode.bounds;
+                    lastNode._bounds;
 
             return bounds.x + bounds.width;
         }
@@ -1673,6 +1701,21 @@ public class MultiSplitLayout
                 currentPosition += h;
             }
         }
+
+        @Override
+        public int extent()
+        {
+            var children =
+                    getChildren2();
+            var lastNode =
+                    children.get(
+                            children.size()-1 );
+            var bounds =
+                    lastNode._bounds;
+
+            return bounds.y + bounds.height;
+        }
+
     }
 
     /**
@@ -1712,6 +1755,9 @@ public class MultiSplitLayout
             return _childrenWoDividers.size();
         }
 
+        /**
+         * @return The splits extent after layouting.
+         */
         public int extent()
         {
             return -1;

@@ -90,6 +90,130 @@ public class MultiSplitLayoutTest
     }
 
     @Test
+    public void basicTest_rounding() throws Exception
+    {
+        ///////////////////
+        // left // right //
+        ///////////////////
+        //  bottom       //
+        ///////////////////
+
+        Split row = JavaUtil.make( () -> {
+            var left = new Leaf("left");
+            left.setWeight( .5 );
+            var right = new Leaf( "right" );
+            right.setWeight( .5 );
+
+            return new RowSplit(
+                    left,
+                    new Divider(),
+                    right );
+        });
+
+        Split column = JavaUtil.make( () -> {
+            var bottom = new Leaf( "bottom" );
+            bottom.setWeight( .5 );
+            row.setWeight( .5 );
+
+            var result = new ColSplit(
+                    row,
+                    new Divider(),
+                    bottom );
+            result.setRowLayout( false );
+
+            return result;
+        });
+
+        var mspl = new MultiSplitLayout( column );
+        mspl.setDividerSize( 10 );
+
+        final int WIDTH = 201;
+        final int HEIGHT = 101;
+        Container container = new MockContainer( WIDTH, HEIGHT );
+
+        mspl.layoutContainer( container );
+
+        {
+            var d = mspl.getNodeForName( "left" ).getBounds();
+            assertEquals(
+                new Rectangle( 0, 0, 96, 51 ),
+                d );
+        }
+        {
+            var d = mspl.getNodeForName( "right" ).getBounds();
+            assertEquals(
+                new Rectangle( 105, 0, 96, 51 ),
+                d );
+        }
+        {
+            var d = mspl.getNodeForName( "bottom" ).getBounds();
+            assertEquals(
+                new Rectangle( 0, 51, 201, 51 ),
+                d );
+        }
+        {
+            assertEquals(
+                    WIDTH,
+                    mspl.getNodeForName( "left" ).getParent().extent() );
+        }
+    }
+
+    @Test
+    public void basicTest_rounding2() throws Exception
+    {
+        RowSplit row = JavaUtil.make( () -> {
+            var one = new Leaf("1");
+            one.setWeight( .3 );
+            var two = new Leaf( "2" );
+            two.setWeight( .3 );
+            // TODO validate names.
+            var three = new Leaf( "3" );
+            three.setWeight( .0 );
+
+            return new RowSplit(
+                    one,
+                    new Divider(),
+                    two,
+                    new Divider(),
+                    three );
+
+        });
+
+        var mspl = new MultiSplitLayout( row );
+        mspl.setDividerSize( 10 );
+
+        final int WIDTH = 201;
+        final int HEIGHT = 101;
+        Container container = new MockContainer( WIDTH, HEIGHT );
+
+        mspl.layoutContainer( container );
+
+        {
+            var d = mspl.getNodeForName( "1" ).getBounds();
+            assertEquals(
+                new Rectangle( 0, 0, 54, 101 ),
+                d );
+        }
+        {
+            var d = mspl.getNodeForName( "2" ).getBounds();
+            assertEquals(
+                new Rectangle( 64, 0, 54, 101 ),
+                d );
+        }
+        {
+            var d = mspl.getNodeForName( "3" ).getBounds();
+            assertEquals(
+                new Rectangle( 129, 0, 72, 101 ),
+                d );
+        }
+        {
+            assertEquals(
+                    WIDTH,
+                    row.extent() );
+        }
+    }
+
+    @Test
     public void propDividerSizeTest() throws Exception
     {
         Holder<PropertyChangeEvent> pceh = new Holder<>();
