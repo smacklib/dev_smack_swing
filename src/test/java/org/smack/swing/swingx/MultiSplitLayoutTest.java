@@ -63,6 +63,7 @@ public class MultiSplitLayoutTest
         });
 
         var mspl = new MultiSplitLayout( column );
+        mspl.setDividerSize( 10 );
 
         Container container = new MockContainer( 200, 100 );
 
@@ -71,13 +72,13 @@ public class MultiSplitLayoutTest
         {
             var d = mspl.getNodeForName( "left" ).getBounds();
             assertEquals(
-                new Rectangle( 0, 0, 100, 50 ),
+                new Rectangle( 0, 0, 95, 50 ),
                 d );
         }
         {
             var d = mspl.getNodeForName( "right" ).getBounds();
             assertEquals(
-                new Rectangle( 100, 0, 100, 50 ),
+                new Rectangle( 105, 0, 95, 50 ),
                 d );
         }
         {

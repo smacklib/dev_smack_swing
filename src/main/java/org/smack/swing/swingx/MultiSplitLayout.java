@@ -1253,7 +1253,7 @@ public class MultiSplitLayout
      */
     private void _performLayout( Node node, Rectangle bounds )
     {
-        node.layout( bounds );
+        node.layout( bounds, getDividerSize() );
     }
 
     private static List<Node> _completeWeights( List<Node> children )
@@ -1553,9 +1553,14 @@ public class MultiSplitLayout
 
         abstract void validate();
 
-        abstract void layout( Rectangle bounds );
+        abstract void layout(
+                Rectangle bounds,
+                int dividerSize );
     }
 
+    /**
+     *
+     */
     public static class RowSplit extends Split {
         public RowSplit() {
         }
@@ -1566,7 +1571,7 @@ public class MultiSplitLayout
         }
 
         /**
-         * Returns true if the this Split's children are to be
+         * Returns true if this Split's children are to be
          * laid out in a row: all the same height, left edge
          * equal to the previous Node's right edge.  If false,
          * children are laid on in a column.
@@ -1578,18 +1583,22 @@ public class MultiSplitLayout
         public final boolean isRowLayout() { return true; }
 
         @Override
-        public void layout( Rectangle bounds )
+        public void layout( Rectangle bounds, int dividerSize )
         {
             var children =  _completeWeights( getChildren2() );
 
-            double currentPosition = 0.0;
-            for ( var c : children )
-            {
-                // Skip splits.
-                if ( c.getWeight() < 0.0 )
-                    continue;
+            final int dividerCount =
+                    children.size() -1;
+            final int netRowWidth =
+                    bounds.width - dividerCount * dividerSize;
 
-                double w = c.getWeight() * bounds.width;
+            double currentPosition = 0.0;
+
+            for ( int i = 0 ; i < children.size() ; i++ )
+            {
+                var c = children.get( i );
+
+                double w = c.getWeight() * netRowWidth;
 
                 Rectangle subBounds = new Rectangle(
                         MathUtil.round( currentPosition ),
@@ -1597,10 +1606,27 @@ public class MultiSplitLayout
                         MathUtil.round( w ),
                         bounds.height );
 
-                c.layout( subBounds );
+                c.layout(
+                        subBounds,
+                        dividerSize );
 
-                currentPosition += w;
+                currentPosition +=
+                        (w + dividerSize);
             }
+        }
+
+        @Override
+        public int extent()
+        {
+            var children =
+                    getChildren2();
+            var lastNode =
+                    children.get(
+                            children.size()-1 );
+            var bounds =
+                    lastNode.bounds;
+
+            return bounds.x + bounds.width;
         }
     }
 
@@ -1626,7 +1652,7 @@ public class MultiSplitLayout
         public final boolean isRowLayout() { return false; }
 
         @Override
-        public void layout( Rectangle bounds )
+        public void layout( Rectangle bounds, int dividerSize )
         {
             var children =  _completeWeights( getChildren2() );
 
@@ -1641,7 +1667,7 @@ public class MultiSplitLayout
                         bounds.width,
                         MathUtil.round( h ));
 
-                c.layout( subBounds );
+                c.layout( subBounds, dividerSize );
 
                 currentPosition += h;
             }
@@ -1683,6 +1709,11 @@ public class MultiSplitLayout
         public int size()
         {
             return _childrenWoDividers.size();
+        }
+
+        public int extent()
+        {
+            return -1;
         }
 
         /**
@@ -1923,7 +1954,7 @@ public class MultiSplitLayout
         }
 
         @Override
-        void layout( Rectangle bounds )
+        void layout( Rectangle bounds, int dividerSize )
         {
             throw new AssertionError( "Unexpected." );
         }
@@ -2003,7 +2034,7 @@ public class MultiSplitLayout
         }
 
         @Override
-        void layout( Rectangle bounds )
+        void layout( Rectangle bounds, int dividerSize )
         {
             setBounds( bounds );
         }
@@ -2055,7 +2086,7 @@ public class MultiSplitLayout
         }
 
         @Override
-        void layout( Rectangle bounds )
+        void layout( Rectangle bounds, int dividerSize )
         {
             throw new AssertionError("Unexpected");
         }
