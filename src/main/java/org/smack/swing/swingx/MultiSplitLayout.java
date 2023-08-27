@@ -21,11 +21,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -1218,10 +1220,7 @@ public class MultiSplitLayout
     }
     private void validateLayout( Node root )
     {
-        // TODO check unique leaf names.
-        root.validate();
-
-
+        root.validate( new HashSet<>() );
     }
 
     /**
@@ -1303,7 +1302,7 @@ public class MultiSplitLayout
     }
 
     // TODO utility candidate.
-    public static Rectangle calculateInnerArea(Container c)
+    public static Rectangle calculateInnerArea( Container c )
     {
         Objects.requireNonNull( c );
 
@@ -1324,7 +1323,6 @@ public class MultiSplitLayout
     public void layoutContainer(Container parent)
     {
         validateLayout( _model.get() );
-        checkLayout( _model.get() );
 
         _performLayout(
                 _model.get(),
@@ -1556,7 +1554,7 @@ public class MultiSplitLayout
             return siblingAtOffset(-1);
         }
 
-        abstract void validate();
+        abstract void validate( Set<String> nameCollector );
 
         abstract void layout(
                 Rectangle bounds,
@@ -1982,7 +1980,7 @@ public class MultiSplitLayout
         }
 
         @Override
-        final void validate()
+        final void validate( Set<String> nameCollector )
         {
             if (getChildren().size() <= 2) {
                 throwInvalidLayout("Split must have > 2 children", this);
@@ -1992,7 +1990,7 @@ public class MultiSplitLayout
                 double totalWeight = 0.0;
                 for ( var c : _childrenWoDividers )
                 {
-                    c.validate();
+                    c.validate( nameCollector );
                     totalWeight += c.weight;
                 }
                 if ( totalWeight > 1.0 )
@@ -2076,8 +2074,11 @@ public class MultiSplitLayout
 
 
         @Override
-        void validate()
+        void validate( Set<String> nameCollector )
         {
+            if ( nameCollector.contains( _name ) )
+               throw new InvalidLayoutException( "Duplicate name: " + _name, this );
+            nameCollector.add( _name );
         }
 
         @Override
@@ -2128,7 +2129,7 @@ public class MultiSplitLayout
         }
 
         @Override
-        void validate()
+        void validate( Set<String> nameCollector )
         {
         }
 

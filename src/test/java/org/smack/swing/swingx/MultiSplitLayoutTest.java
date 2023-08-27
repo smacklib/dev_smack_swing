@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import java.awt.Container;
 import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
+import java.util.HashSet;
 
 import javax.swing.JSplitPane;
 
@@ -272,10 +273,10 @@ public class MultiSplitLayoutTest
             new Leaf( "one" ),
         };
 
-        Split split = new Split( nodes );
+        Split split = new ColSplit( nodes );
 
         try {
-            split.validate();
+            split.validate( new HashSet<>() );
         }
         catch ( InvalidLayoutException e )
         {
@@ -286,8 +287,6 @@ public class MultiSplitLayoutTest
     @Test
     public void Split_children_weightExceeds100() throws Exception
     {
-        final int count = 1;
-
         Node[] nodes = new Node[]
         {
             new Leaf( "one" ).weight( .8 ),
@@ -295,14 +294,35 @@ public class MultiSplitLayoutTest
             new Leaf( "two" ).weight( .9 )
         };
 
-        Split split = new Split( nodes );
+        Split split = new ColSplit( nodes );
 
         try {
-            split.validate();
+            split.validate( new HashSet<>() );
         }
         catch ( InvalidLayoutException e )
         {
             assertEquals( split, e.getNode() );
+        }
+    }
+
+    @Test
+    public void Split_children_duplicateName() throws Exception
+    {
+        Node[] nodes = new Node[]
+        {
+            new Leaf( "one" ).weight( .8 ),
+            new Divider(),
+            new Leaf( "one" ).weight( .0 )
+        };
+
+        Split split = new RowSplit( nodes );
+
+        try {
+            split.validate( new HashSet<>() );
+        }
+        catch ( InvalidLayoutException e )
+        {
+            assertEquals( nodes[2], e.getNode() );
         }
     }
 
@@ -334,7 +354,7 @@ public class MultiSplitLayoutTest
             new Leaf( "two" )
         };
 
-        Split split = new Split( nodes );
+        Split split = new ColSplit( nodes );
 
         assertEquals( nodes.length, split.getChildren().size() );
         assertEquals( nodes.length-count, split.size() );
@@ -354,7 +374,7 @@ public class MultiSplitLayoutTest
             new Leaf( "three" )
         };
 
-        Split split = new Split( nodes );
+        Split split = new RowSplit( nodes );
 
         assertEquals( nodes.length, split.getChildren().size() );
         assertEquals( nodes.length-count, split.size() );
