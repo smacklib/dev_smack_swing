@@ -260,18 +260,18 @@ public final class JXMultiSplitPane extends JPanel
                     dragMin = prevNodeBounds.x;
                     dragMax = nextNodeBounds.x + nextNodeBounds.width;
                     dragMax -= dragDivider.getBounds().width;
-                    if ( msl.getLayoutMode() == MultiSplitLayout.USER_MIN_SIZE_LAYOUT )
+                    if ( msl.getLayoutMode() == MultiSplitLayout.LayoutMode.USER_MIN_SIZE_LAYOUT )
                         dragMax -= msl.getUserMinSize();
                 }
                 else {
                     dragMin = prevNodeBounds.y;
                     dragMax = nextNodeBounds.y + nextNodeBounds.height;
                     dragMax -= dragDivider.getBounds().height;
-                    if ( msl.getLayoutMode() == MultiSplitLayout.USER_MIN_SIZE_LAYOUT )
+                    if ( msl.getLayoutMode() == MultiSplitLayout.LayoutMode.USER_MIN_SIZE_LAYOUT )
                         dragMax -= msl.getUserMinSize();
                 }
 
-                if ( msl.getLayoutMode() == MultiSplitLayout.USER_MIN_SIZE_LAYOUT ) {
+                if ( msl.getLayoutMode() == MultiSplitLayout.LayoutMode.USER_MIN_SIZE_LAYOUT ) {
                     dragMin = dragMin + msl.getUserMinSize();
                 }
                 else {
@@ -293,8 +293,6 @@ public final class JXMultiSplitPane extends JPanel
                     }
                 }
 
-                //oldFloatingDividers = false;
-                //getMultiSplitLayout().setFloatingDividers(false);
                 dragUnderway = true;
             }
         }
