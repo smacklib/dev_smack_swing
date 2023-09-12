@@ -15,7 +15,7 @@ import java.util.HashSet;
 import javax.swing.JSplitPane;
 
 import org.junit.jupiter.api.Test;
-import org.smack.swing.swingx.MultiSplitLayout.ColSplit;
+import org.smack.swing.swingx.MultiSplitLayout.Column;
 import org.smack.swing.swingx.MultiSplitLayout.Divider;
 import org.smack.swing.swingx.MultiSplitLayout.InvalidLayoutException;
 import org.smack.swing.swingx.MultiSplitLayout.Leaf;
@@ -54,7 +54,7 @@ public class MultiSplitLayoutTest
             bottom.setWeight( .5 );
             row.setWeight( .5 );
 
-            var result = new ColSplit(
+            var result = new Column(
                     row,
                     new Divider(),
                     bottom );
@@ -116,7 +116,7 @@ public class MultiSplitLayoutTest
             bottom.setWeight( .5 );
             row.setWeight( .5 );
 
-            var result = new ColSplit(
+            var result = new Column(
                     row,
                     new Divider(),
                     bottom );
@@ -273,7 +273,7 @@ public class MultiSplitLayoutTest
             new Leaf( "one" ),
         };
 
-        Split split = new ColSplit( nodes );
+        Split split = new Column( nodes );
 
         try {
             split.validate( new HashSet<>() );
@@ -294,7 +294,7 @@ public class MultiSplitLayoutTest
             new Leaf( "two" ).weight( .9 )
         };
 
-        Split split = new ColSplit( nodes );
+        Split split = new Column( nodes );
 
         try {
             split.validate( new HashSet<>() );
@@ -354,7 +354,7 @@ public class MultiSplitLayoutTest
             new Leaf( "two" )
         };
 
-        Split split = new ColSplit( nodes );
+        Split split = new Column( nodes );
 
         assertEquals( nodes.length, split.getChildren().size() );
         assertEquals( nodes.length-count, split.size() );

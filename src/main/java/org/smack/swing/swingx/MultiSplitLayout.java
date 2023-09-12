@@ -1657,11 +1657,11 @@ public class MultiSplitLayout
         }
     }
 
-    public static class ColSplit extends Split {
-        public ColSplit() {
+    public static class Column extends Split {
+        public Column() {
         }
 
-        public ColSplit(Node... children) {
+        public Column(Node... children) {
             super(children);
             setRowLayout( false );
         }

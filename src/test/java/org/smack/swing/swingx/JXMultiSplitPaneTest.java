@@ -6,7 +6,7 @@ package org.smack.swing.swingx;
 import javax.swing.JLabel;
 
 import org.junit.jupiter.api.Test;
-import org.smack.swing.swingx.MultiSplitLayout.ColSplit;
+import org.smack.swing.swingx.MultiSplitLayout.Column;
 import org.smack.swing.swingx.MultiSplitLayout.Divider;
 import org.smack.swing.swingx.MultiSplitLayout.Leaf;
 import org.smack.swing.swingx.MultiSplitLayout.RowSplit;
@@ -41,7 +41,7 @@ public class JXMultiSplitPaneTest
             bottom.setWeight( .5 );
             row.setWeight( .5 );
 
-            var result = new ColSplit(
+            var result = new Column(
                     row,
                     new Divider(),
                     bottom );
