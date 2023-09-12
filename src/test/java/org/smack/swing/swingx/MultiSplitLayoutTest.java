@@ -20,7 +20,7 @@ import org.smack.swing.swingx.MultiSplitLayout.Divider;
 import org.smack.swing.swingx.MultiSplitLayout.InvalidLayoutException;
 import org.smack.swing.swingx.MultiSplitLayout.Leaf;
 import org.smack.swing.swingx.MultiSplitLayout.Node;
-import org.smack.swing.swingx.MultiSplitLayout.RowSplit;
+import org.smack.swing.swingx.MultiSplitLayout.Row;
 import org.smack.swing.swingx.MultiSplitLayout.Split;
 import org.smack.swing.test.MockContainer;
 import org.smack.util.Holder;
@@ -43,7 +43,7 @@ public class MultiSplitLayoutTest
             var right = new Leaf( "right" );
             right.setWeight( .5 );
 
-            return new RowSplit(
+            return new Row(
                     left,
                     new Divider(),
                     right );
@@ -105,7 +105,7 @@ public class MultiSplitLayoutTest
             var right = new Leaf( "right" );
             right.setWeight( .5 );
 
-            return new RowSplit(
+            return new Row(
                     left,
                     new Divider(),
                     right );
@@ -162,7 +162,7 @@ public class MultiSplitLayoutTest
     @Test
     public void basicTest_rounding2() throws Exception
     {
-        RowSplit row = JavaUtil.make( () -> {
+        Row row = JavaUtil.make( () -> {
             var one = new Leaf("1");
             one.setWeight( .3 );
             var two = new Leaf( "2" );
@@ -171,7 +171,7 @@ public class MultiSplitLayoutTest
             var three = new Leaf( "3" );
             three.setWeight( .0 );
 
-            return new RowSplit(
+            return new Row(
                     one,
                     new Divider(),
                     two,
@@ -315,7 +315,7 @@ public class MultiSplitLayoutTest
             new Leaf( "one" ).weight( .0 )
         };
 
-        Split split = new RowSplit( nodes );
+        Split split = new Row( nodes );
 
         try {
             split.validate( new HashSet<>() );
@@ -374,7 +374,7 @@ public class MultiSplitLayoutTest
             new Leaf( "three" )
         };
 
-        Split split = new RowSplit( nodes );
+        Split split = new Row( nodes );
 
         assertEquals( nodes.length, split.getChildren().size() );
         assertEquals( nodes.length-count, split.size() );

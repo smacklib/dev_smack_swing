@@ -1564,11 +1564,11 @@ public class MultiSplitLayout
     /**
      *
      */
-    public static class RowSplit extends Split {
-        public RowSplit() {
+    public static class Row extends Split {
+        public Row() {
         }
 
-        public RowSplit(Node... children) {
+        public Row(Node... children) {
             super( children );
             setRowLayout( true );
         }

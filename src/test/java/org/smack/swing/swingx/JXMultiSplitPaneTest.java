@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.smack.swing.swingx.MultiSplitLayout.Column;
 import org.smack.swing.swingx.MultiSplitLayout.Divider;
 import org.smack.swing.swingx.MultiSplitLayout.Leaf;
-import org.smack.swing.swingx.MultiSplitLayout.RowSplit;
+import org.smack.swing.swingx.MultiSplitLayout.Row;
 import org.smack.swing.swingx.MultiSplitLayout.Split;
 import org.smack.util.JavaUtil;
 
@@ -30,7 +30,7 @@ public class JXMultiSplitPaneTest
             var right = new Leaf( "right" );
             right.setWeight( .5 );
 
-            return new RowSplit(
+            return new Row(
                     left,
                     new Divider(),
                     right );
