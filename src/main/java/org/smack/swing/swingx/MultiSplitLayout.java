@@ -1402,6 +1402,101 @@ public class MultiSplitLayout
     }
 
 
+    public static class Node
+    {
+        private final double _weight;
+
+        protected Node( double weight )
+        {
+            if ( weight < 0.0 )
+                throw new IllegalArgumentException(
+                        "Negative weight:" + weight );
+
+            _weight = weight;
+        }
+
+        public double weight()
+        {
+            return _weight;
+        }
+    }
+
+    private static class Split extends Node
+    {
+        private final List<Node> _nodes;
+
+        protected Split( Node... nodes )
+        {
+            super( 0.0 );
+            _nodes = Arrays.asList( nodes );
+        }
+
+        protected Split( double weight, Node... nodes )
+        {
+            super( weight );
+
+            var totalWeights =
+                    totalWeights(
+                            Objects.requireNonNull( nodes ) );
+
+            if ( totalWeights > 1.0 )
+                throw new IllegalArgumentException(
+                        "Total weights > 0: " + totalWeights );
+
+            _nodes = Arrays.asList( nodes );
+        }
+
+        private double totalWeights( Node... nodes )
+        {
+            var result = 0.0;
+
+            for ( var c : nodes )
+                result += c.weight();
+
+            return result;
+        }
+    }
+
+    public static class Column extends Split
+    {
+        public Column( double weight, Node... nodes )
+        {
+            super( weight, nodes );
+        }
+        public Column( Node... nodes )
+        {
+            super( nodes );
+        }
+    }
+
+    public static class Row extends Split
+    {
+        public Row( double weight, Node... nodes )
+        {
+            super( weight, nodes );
+        }
+        public Row( Node... nodes )
+        {
+            super( nodes );
+        }
+    }
+
+    public static class Leaf extends Node
+    {
+        private final String _name;
+
+        public Leaf( double weight, String name )
+        {
+            super( weight );
+            _name = name;
+        }
+
+        public String name()
+        {
+            return _name;
+        }
+    }
+
     /**
      * Base class for the nodes that model a MultiSplitLayout.
      */

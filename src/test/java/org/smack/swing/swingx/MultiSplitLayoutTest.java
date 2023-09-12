@@ -6,6 +6,7 @@ package org.smack.swing.swingx;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Container;
 import java.awt.Rectangle;
@@ -15,11 +16,14 @@ import java.util.HashSet;
 import javax.swing.JSplitPane;
 
 import org.junit.jupiter.api.Test;
+import org.smack.swing.swingx.MultiSplitLayout.Column;
 import org.smack.swing.swingx.MultiSplitLayout.ColumnImpl;
 import org.smack.swing.swingx.MultiSplitLayout.DividerImpl;
 import org.smack.swing.swingx.MultiSplitLayout.InvalidLayoutException;
+import org.smack.swing.swingx.MultiSplitLayout.Leaf;
 import org.smack.swing.swingx.MultiSplitLayout.LeafImpl;
 import org.smack.swing.swingx.MultiSplitLayout.NodeImpl;
+import org.smack.swing.swingx.MultiSplitLayout.Row;
 import org.smack.swing.swingx.MultiSplitLayout.RowImpl;
 import org.smack.swing.swingx.MultiSplitLayout.SplitImpl;
 import org.smack.swing.test.MockContainer;
@@ -378,5 +382,49 @@ public class MultiSplitLayoutTest
 
         assertEquals( nodes.length, split.getChildren().size() );
         assertEquals( nodes.length-count, split.size() );
+    }
+
+    @Test
+    public void new_names() throws Exception
+    {
+        var model = new Column(
+                new Row(
+                        .5,
+                        new Leaf( 0.5, "left" ),
+                        new Leaf( 0.5, "right" ) ),
+                new Leaf(
+                        .5,
+                        "bottom" ) );
+
+        assertNotNull( model );
+    }
+
+    @Test
+    public void new_node_validation() throws Exception
+    {
+        try
+        {
+            new Leaf( -1.0, "negative" );
+            fail();
+        }
+        catch ( IllegalArgumentException e )
+        {
+        }
+    }
+
+    @Test
+    public void new_node_split_validation() throws Exception
+    {
+        try
+        {
+            new Row(
+                    .5,
+                    new Leaf( 0.6, "left" ),
+                    new Leaf( 0.5, "right" ) );
+            fail();
+        }
+        catch ( IllegalArgumentException e )
+        {
+        }
     }
 }
