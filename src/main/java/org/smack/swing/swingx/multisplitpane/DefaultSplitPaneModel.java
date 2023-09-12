@@ -1,5 +1,5 @@
 /*
- * $Id$
+ * $Id: 19800350656bd23f120c4fe8d2afcd89d69584ca $
  *
  * Copyright 2006 Sun Microsystems, Inc., 4150 Network Circle,
  * Santa Clara, California 95054, U.S.A. All rights reserved.
@@ -20,9 +20,9 @@
  */
 package org.smack.swing.swingx.multisplitpane;
 
-import org.smack.swing.swingx.MultiSplitLayout.Divider;
-import org.smack.swing.swingx.MultiSplitLayout.Leaf;
-import org.smack.swing.swingx.MultiSplitLayout.Split;
+import org.smack.swing.swingx.MultiSplitLayout.DividerImpl;
+import org.smack.swing.swingx.MultiSplitLayout.LeafImpl;
+import org.smack.swing.swingx.MultiSplitLayout.SplitImpl;
 /**
  * A simplified SplitPaneLayout for common split pane needs. A common multi splitpane
  * need is:
@@ -35,18 +35,18 @@ import org.smack.swing.swingx.MultiSplitLayout.Split;
  *
  * @author rbair
  */
-public class DefaultSplitPaneModel extends Split {
+public class DefaultSplitPaneModel extends SplitImpl {
     public static final String LEFT = "left";
     public static final String TOP = "top";
     public static final String BOTTOM = "bottom";
     
     /** Creates a new instance of DefaultSplitPaneLayout */
     public DefaultSplitPaneModel() {
-        Split row = new Split();
-        Split col = new Split();
+        SplitImpl row = new SplitImpl();
+        SplitImpl col = new SplitImpl();
         col.setRowLayout(false);
-        setChildren(new Leaf(LEFT), new Divider(), col);
-        col.setChildren(new Leaf(TOP), new Divider(), new Leaf(BOTTOM));
+        setChildren(new LeafImpl(LEFT), new DividerImpl(), col);
+        col.setChildren(new LeafImpl(TOP), new DividerImpl(), new LeafImpl(BOTTOM));
     }
     
 }

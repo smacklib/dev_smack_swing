@@ -86,10 +86,10 @@ public class MultiSplitLayout
     private final Map<String, Component> _childMap =
             new HashMap<String, Component>();
 
-    private JavaBeanProperty<Node, MultiSplitLayout> _model =
+    private JavaBeanProperty<NodeImpl, MultiSplitLayout> _model =
             new JavaBeanProperty<>(
                     this,
-                    new Leaf("default"),
+                    new LeafImpl("default"),
                     "model" );
 
     private JavaBeanProperty<Integer, MultiSplitLayout> _dividerSize =
@@ -118,7 +118,7 @@ public class MultiSplitLayout
      *
      * #see setModel
      */
-    public MultiSplitLayout(Node model)
+    public MultiSplitLayout(NodeImpl model)
     {
         _model.set( model );
     }
@@ -163,25 +163,25 @@ public class MultiSplitLayout
 
         final var model = getModel();
 
-        if (model instanceof Leaf)
+        if (model instanceof LeafImpl)
             model.setBounds(bounds);
-        else if (model instanceof Split)
+        else if (model instanceof SplitImpl)
             doLayoutByWeight( model, bounds );
     }
 
-    private void doLayoutByWeight( Node node, Rectangle bounds )
+    private void doLayoutByWeight( NodeImpl node, Rectangle bounds )
     {
         int width = bounds.width;
         int height = bounds.height;
-        Split split = (Split)node;
-        List<Node> splitChildren = split.getChildren();
+        SplitImpl split = (SplitImpl)node;
+        List<NodeImpl> splitChildren = split.getChildren();
         double distributableWeight = 1.0;
         int unweightedComponents = 0;
         int dividerSpace = 0;
-        for( Node splitChild : splitChildren ) {
+        for( NodeImpl splitChild : splitChildren ) {
             if ( !splitChild.isVisible())
                 continue;
-            else if ( splitChild instanceof Divider ) {
+            else if ( splitChild instanceof DividerImpl ) {
                 dividerSpace += getDividerSize();
                 continue;
             }
@@ -196,8 +196,8 @@ public class MultiSplitLayout
         if ( split.isRowLayout()) {
             width -= dividerSpace;
             double distributableWidth = width * distributableWeight;
-            for( Node splitChild : splitChildren ) {
-                if ( !splitChild.isVisible() || ( splitChild instanceof Divider ))
+            for( NodeImpl splitChild : splitChildren ) {
+                if ( !splitChild.isVisible() || ( splitChild instanceof DividerImpl ))
                     continue;
 
                 double weight = splitChild.getWeight();
@@ -213,7 +213,7 @@ public class MultiSplitLayout
 
                 splitChild.setBounds( splitChildBounds );
 
-                if ( splitChild instanceof Split )
+                if ( splitChild instanceof SplitImpl )
                     doLayoutByWeight( splitChild, splitChildBounds );
                 else {
                     Component comp = getComponentForNode( splitChild );
@@ -225,8 +225,8 @@ public class MultiSplitLayout
         else {
             height -= dividerSpace;
             double distributableHeight = height * distributableWeight;
-            for( Node splitChild : splitChildren ) {
-                if ( !splitChild.isVisible() || ( splitChild instanceof Divider ))
+            for( NodeImpl splitChild : splitChildren ) {
+                if ( !splitChild.isVisible() || ( splitChild instanceof DividerImpl ))
                     continue;
 
                 double weight = splitChild.getWeight();
@@ -242,7 +242,7 @@ public class MultiSplitLayout
 
                 splitChild.setBounds( splitChildBounds );
 
-                if ( splitChild instanceof Split )
+                if ( splitChild instanceof SplitImpl )
                     doLayoutByWeight( splitChild, splitChildBounds );
                 else {
                     Component comp = getComponentForNode( splitChild );
@@ -258,9 +258,9 @@ public class MultiSplitLayout
      * @param n the layout node
      * @return the component handled by the layout or null if not found
      */
-    private Component getComponentForNode( Node n )
+    private Component getComponentForNode( NodeImpl n )
     {
-        String name = ((Leaf)n).getName();
+        String name = ((LeafImpl)n).getName();
         return (name != null) ? (Component)_childMap.get(name) : null;
     }
 
@@ -269,15 +269,15 @@ public class MultiSplitLayout
      * @param name the name used to associate a component with the layout
      * @return the node associated with the component
      */
-    public Node getNodeForName( String name )
+    public NodeImpl getNodeForName( String name )
     {
         final var model = getModel();
 
-        if ( model instanceof Split ) {
-            Split split = ((Split)model);
+        if ( model instanceof SplitImpl ) {
+            SplitImpl split = ((SplitImpl)model);
             return getNodeForName( split, name );
-        } else if (model instanceof Leaf) {
-            if (((Leaf) model).getName().equals(name)) {
+        } else if (model instanceof LeafImpl) {
+            if (((LeafImpl) model).getName().equals(name)) {
                 return model;
             } else {
                 return null;
@@ -311,7 +311,7 @@ public class MultiSplitLayout
      * @param comp the component being positioned by the layout
      * @return the node associated with the component
      */
-    public Node getNodeForComponent( Split split, Component comp )
+    public NodeImpl getNodeForComponent( SplitImpl split, Component comp )
     {
         return getNodeForName( split, getNameForComponent( comp ));
     }
@@ -322,15 +322,15 @@ public class MultiSplitLayout
      * @param name the name used to associate a component with the layout
      * @return the node associated with the component
      */
-    public Node getNodeForName( Split split, String name )
+    public NodeImpl getNodeForName( SplitImpl split, String name )
     {
-        for(Node n : split.getChildren()) {
-            if ( n instanceof Leaf ) {
-                if ( ((Leaf)n).getName().equals( name ))
+        for(NodeImpl n : split.getChildren()) {
+            if ( n instanceof LeafImpl ) {
+                if ( ((LeafImpl)n).getName().equals( name ))
                     return n;
             }
-            else if ( n instanceof Split ) {
-                Node n1 = getNodeForName( (Split)n, name );
+            else if ( n instanceof SplitImpl ) {
+                NodeImpl n1 = getNodeForName( (SplitImpl)n, name );
                 if ( n1 != null )
                     return n1;
             }
@@ -354,7 +354,7 @@ public class MultiSplitLayout
      * @return the value of the model property
      * @see #setModel
      */
-    public Node getModel()
+    public NodeImpl getModel()
     {
         return _model.get();
     }
@@ -369,8 +369,8 @@ public class MultiSplitLayout
      * @throws IllegalArgumentException if model is a Divider or null
      * @see #getModel
      */
-    public void setModel(Node model) {
-        if ((model == null) || (model instanceof Divider)) {
+    public void setModel(NodeImpl model) {
+        if ((model == null) || (model instanceof DividerImpl)) {
             throw new IllegalArgumentException("invalid model");
         }
         _model.set( model );
@@ -442,9 +442,9 @@ public class MultiSplitLayout
         }
     }
 
-    private Component childForNode(Node node) {
-        if (node instanceof Leaf) {
-            Leaf leaf = (Leaf)node;
+    private Component childForNode(NodeImpl node) {
+        if (node instanceof LeafImpl) {
+            LeafImpl leaf = (LeafImpl)node;
             String name = leaf.getName();
             return (name != null) ? _childMap.get(name) : null;
         }
@@ -452,7 +452,7 @@ public class MultiSplitLayout
     }
 
 
-    private Dimension preferredComponentSize(Node node) {
+    private Dimension preferredComponentSize(NodeImpl node) {
         if ( layoutMode == LayoutMode.NO_MIN_SIZE_LAYOUT )
             return new Dimension(0, 0);
 
@@ -460,23 +460,23 @@ public class MultiSplitLayout
         return ((child != null) && child.isVisible() ) ? child.getPreferredSize() : new Dimension(0, 0);
     }
 
-    private Dimension preferredNodeSize(Node root) {
-        if (root instanceof Leaf) {
+    private Dimension preferredNodeSize(NodeImpl root) {
+        if (root instanceof LeafImpl) {
             return preferredComponentSize(root);
         }
-        else if (root instanceof Divider) {
-            if ( !((Divider)root).isVisible())
+        else if (root instanceof DividerImpl) {
+            if ( !((DividerImpl)root).isVisible())
                 return new Dimension(0,0);
             int divSize = getDividerSize();
             return new Dimension(divSize, divSize);
         }
         else {
-            Split split = (Split)root;
-            List<Node> splitChildren = split.getChildren();
+            SplitImpl split = (SplitImpl)root;
+            List<NodeImpl> splitChildren = split.getChildren();
             int width = 0;
             int height = 0;
             if (split.isRowLayout()) {
-                for(Node splitChild : splitChildren) {
+                for(NodeImpl splitChild : splitChildren) {
                     if ( !splitChild.isVisible())
                         continue;
                     Dimension size = preferredNodeSize(splitChild);
@@ -485,7 +485,7 @@ public class MultiSplitLayout
                 }
             }
             else {
-                for(Node splitChild : splitChildren) {
+                for(NodeImpl splitChild : splitChildren) {
                     if ( !splitChild.isVisible())
                         continue;
                     Dimension size = preferredNodeSize(splitChild);
@@ -504,28 +504,28 @@ public class MultiSplitLayout
      * @param root the node whose size is required.
      * @return the minimum size.
      */
-    public Dimension minimumNodeSize(Node root) {
+    public Dimension minimumNodeSize(NodeImpl root) {
         assert( root.isVisible );
-        if (root instanceof Leaf) {
+        if (root instanceof LeafImpl) {
             if ( layoutMode == LayoutMode.NO_MIN_SIZE_LAYOUT )
                 return new Dimension(0, 0);
 
             Component child = childForNode(root);
             return ((child != null) && child.isVisible() ) ? child.getMinimumSize() : new Dimension(0, 0);
         }
-        else if (root instanceof Divider) {
-            if ( !((Divider)root).isVisible()  )
+        else if (root instanceof DividerImpl) {
+            if ( !((DividerImpl)root).isVisible()  )
                 return new Dimension(0,0);
             int divSize = getDividerSize();
             return new Dimension(divSize, divSize);
         }
         else {
-            Split split = (Split)root;
-            List<Node> splitChildren = split.getChildren();
+            SplitImpl split = (SplitImpl)root;
+            List<NodeImpl> splitChildren = split.getChildren();
             int width = 0;
             int height = 0;
             if (split.isRowLayout()) {
-                for(Node splitChild : splitChildren) {
+                for(NodeImpl splitChild : splitChildren) {
                     if ( !splitChild.isVisible())
                         continue;
                     Dimension size = minimumNodeSize(splitChild);
@@ -534,7 +534,7 @@ public class MultiSplitLayout
                 }
             }
             else {
-                for(Node splitChild : splitChildren) {
+                for(NodeImpl splitChild : splitChildren) {
                     if ( !splitChild.isVisible())
                         continue;
                     Dimension size = minimumNodeSize(splitChild);
@@ -553,25 +553,25 @@ public class MultiSplitLayout
      * @param root the node whose size is required.
      * @return the minimum size.
      */
-    public Dimension maximumNodeSize(Node root) {
+    public Dimension maximumNodeSize(NodeImpl root) {
         assert( root.isVisible );
-        if (root instanceof Leaf) {
+        if (root instanceof LeafImpl) {
             Component child = childForNode(root);
             return ((child != null) && child.isVisible() ) ? child.getMaximumSize() : new Dimension(0, 0);
         }
-        else if (root instanceof Divider) {
-            if ( !((Divider)root).isVisible()  )
+        else if (root instanceof DividerImpl) {
+            if ( !((DividerImpl)root).isVisible()  )
                 return new Dimension(0,0);
             int divSize = getDividerSize();
             return new Dimension(divSize, divSize);
         }
         else {
-            Split split = (Split)root;
-            List<Node> splitChildren = split.getChildren();
+            SplitImpl split = (SplitImpl)root;
+            List<NodeImpl> splitChildren = split.getChildren();
             int width = Integer.MAX_VALUE;
             int height = Integer.MAX_VALUE;
             if (split.isRowLayout()) {
-                for(Node splitChild : splitChildren) {
+                for(NodeImpl splitChild : splitChildren) {
                     if ( !splitChild.isVisible())
                         continue;
                     Dimension size = maximumNodeSize(splitChild);
@@ -580,7 +580,7 @@ public class MultiSplitLayout
                 }
             }
             else {
-                for(Node splitChild : splitChildren) {
+                for(NodeImpl splitChild : splitChildren) {
                     if ( !splitChild.isVisible())
                         continue;
                     Dimension size = maximumNodeSize(splitChild);
@@ -625,11 +625,11 @@ public class MultiSplitLayout
     }
 
 
-    private void minimizeSplitBounds(Split split, Rectangle bounds) {
+    private void minimizeSplitBounds(SplitImpl split, Rectangle bounds) {
         assert ( split.isVisible());
         Rectangle splitBounds = new Rectangle(bounds.x, bounds.y, 0, 0);
-        List<Node> splitChildren = split.getChildren();
-        Node lastChild = null;
+        List<NodeImpl> splitChildren = split.getChildren();
+        NodeImpl lastChild = null;
         int lastVisibleChildIdx = splitChildren.size();
         do  {
             lastVisibleChildIdx--;
@@ -653,21 +653,21 @@ public class MultiSplitLayout
     }
 
 
-    private void layoutShrink(Split split, Rectangle bounds) {
+    private void layoutShrink(SplitImpl split, Rectangle bounds) {
         Rectangle splitBounds = split.getBounds();
-        ListIterator<Node> splitChildren = split.getChildren().listIterator();
+        ListIterator<NodeImpl> splitChildren = split.getChildren().listIterator();
         //Node lastWeightedChild = split.lastWeightedChild();
 
         if (split.isRowLayout()) {
             int totalWidth = 0;          // sum of the children's widths
             int minWeightedWidth = 0;    // sum of the weighted childrens' min widths
             int totalWeightedWidth = 0;  // sum of the weighted childrens' widths
-            for(Node splitChild : split.getChildren()) {
+            for(NodeImpl splitChild : split.getChildren()) {
                 if ( !splitChild.isVisible())
                     continue;
                 int nodeWidth = splitChild.getBounds().width;
                 int nodeMinWidth = 0;
-                if (( layoutMode == LayoutMode.USER_MIN_SIZE_LAYOUT ) && !( splitChild instanceof Divider ))
+                if (( layoutMode == LayoutMode.USER_MIN_SIZE_LAYOUT ) && !( splitChild instanceof DividerImpl ))
                     nodeMinWidth = _userMinSize;
                 else if ( layoutMode == LayoutMode.DEFAULT_LAYOUT )
                     nodeMinWidth = Math.min(nodeWidth, minimumNodeSize(splitChild).width);
@@ -685,7 +685,7 @@ public class MultiSplitLayout
                     (totalWeightedWidth - minWeightedWidth) > extraWidth;
 
                     while(splitChildren.hasNext()) {
-                        Node splitChild = splitChildren.next();
+                        NodeImpl splitChild = splitChildren.next();
                         if ( !splitChild.isVisible()) {
                             if ( splitChildren.hasNext())
                                 splitChildren.next();
@@ -693,7 +693,7 @@ public class MultiSplitLayout
                         }
                         Rectangle splitChildBounds = splitChild.getBounds();
                         double minSplitChildWidth = 0.0;
-                        if (( layoutMode == LayoutMode.USER_MIN_SIZE_LAYOUT ) && !( splitChild instanceof Divider ))
+                        if (( layoutMode == LayoutMode.USER_MIN_SIZE_LAYOUT ) && !( splitChild instanceof DividerImpl ))
                             minSplitChildWidth = _userMinSize;
                         else if ( layoutMode == LayoutMode.DEFAULT_LAYOUT )
                             minSplitChildWidth = minimumNodeSize(splitChild).getWidth();
@@ -710,7 +710,7 @@ public class MultiSplitLayout
                             if ((availableWidth > 0.0) && (splitChildWeight > 0.0)) {
                                 double oldWidth = splitChildBounds.getWidth();
                                 double newWidth;
-                                if ( splitChild instanceof Divider ) {
+                                if ( splitChild instanceof DividerImpl ) {
                                     newWidth = getDividerSize();
                                 }
                                 else {
@@ -735,12 +735,12 @@ public class MultiSplitLayout
             int totalHeight = 0;          // sum of the children's heights
             int minWeightedHeight = 0;    // sum of the weighted childrens' min heights
             int totalWeightedHeight = 0;  // sum of the weighted childrens' heights
-            for(Node splitChild : split.getChildren()) {
+            for(NodeImpl splitChild : split.getChildren()) {
                 if ( !splitChild.isVisible())
                     continue;
                 int nodeHeight = splitChild.getBounds().height;
                 int nodeMinHeight = 0;
-                if (( layoutMode == LayoutMode.USER_MIN_SIZE_LAYOUT ) && !( splitChild instanceof Divider ))
+                if (( layoutMode == LayoutMode.USER_MIN_SIZE_LAYOUT ) && !( splitChild instanceof DividerImpl ))
                     nodeMinHeight = _userMinSize;
                 else if ( layoutMode == LayoutMode.DEFAULT_LAYOUT )
                     nodeMinHeight = Math.min(nodeHeight, minimumNodeSize(splitChild).height);
@@ -758,7 +758,7 @@ public class MultiSplitLayout
                     (totalWeightedHeight - minWeightedHeight) > extraHeight;
 
                     while(splitChildren.hasNext()) {
-                        Node splitChild = splitChildren.next();
+                        NodeImpl splitChild = splitChildren.next();
                         if ( !splitChild.isVisible()) {
                             if ( splitChildren.hasNext())
                                 splitChildren.next();
@@ -766,7 +766,7 @@ public class MultiSplitLayout
                         }
                         Rectangle splitChildBounds = splitChild.getBounds();
                         double minSplitChildHeight = 0.0;
-                        if (( layoutMode == LayoutMode.USER_MIN_SIZE_LAYOUT ) && !( splitChild instanceof Divider ))
+                        if (( layoutMode == LayoutMode.USER_MIN_SIZE_LAYOUT ) && !( splitChild instanceof DividerImpl ))
                             minSplitChildHeight = _userMinSize;
                         else if ( layoutMode == LayoutMode.DEFAULT_LAYOUT )
                             minSplitChildHeight = minimumNodeSize(splitChild).getHeight();
@@ -779,7 +779,7 @@ public class MultiSplitLayout
                         if ( !hasMoreVisibleSiblings( splitChild )) {
                             double oldHeight = splitChildBounds.getHeight();
                             double newHeight;
-                            if ( splitChild instanceof Divider ) {
+                            if ( splitChild instanceof DividerImpl ) {
                                 newHeight = getDividerSize();
                             }
                             else {
@@ -794,7 +794,7 @@ public class MultiSplitLayout
                                 double newHeight;
                                 double oldHeight = splitChildBounds.getHeight();
                                 // Prevent the divider from shrinking
-                                if ( splitChild instanceof Divider ) {
+                                if ( splitChild instanceof DividerImpl ) {
                                     newHeight = getDividerSize();
                                 }
                                 else {
@@ -829,8 +829,8 @@ public class MultiSplitLayout
      * @param splitChild the node to check
      * @param true if there are visible children following
      */
-    private boolean hasMoreVisibleSiblings( Node splitChild ) {
-        Node next = splitChild.nextSibling();
+    private boolean hasMoreVisibleSiblings( NodeImpl splitChild ) {
+        NodeImpl next = splitChild.nextSibling();
         if ( next == null )
             return false;
 
@@ -843,10 +843,10 @@ public class MultiSplitLayout
         return false;
     }
 
-    private void layoutGrow(Split split, Rectangle bounds) {
+    private void layoutGrow(SplitImpl split, Rectangle bounds) {
         Rectangle splitBounds = split.getBounds();
-        ListIterator<Node> splitChildren = split.getChildren().listIterator();
-        Node lastWeightedChild = split.lastWeightedChild();
+        ListIterator<NodeImpl> splitChildren = split.getChildren().listIterator();
+        NodeImpl lastWeightedChild = split.lastWeightedChild();
 
         /* Layout the Split's child Nodes' along the X axis.  The bounds
          * of each child will have the same y coordinate and height as the
@@ -863,7 +863,7 @@ public class MultiSplitLayout
             double availableWidth = extraWidth;
 
             while(splitChildren.hasNext()) {
-                Node splitChild = splitChildren.next();
+                NodeImpl splitChild = splitChildren.next();
                 if ( !splitChild.isVisible()) {
                     continue;
                 }
@@ -908,7 +908,7 @@ public class MultiSplitLayout
             double availableHeight = extraHeight;
 
             while(splitChildren.hasNext()) {
-                Node splitChild = splitChildren.next();
+                NodeImpl splitChild = splitChildren.next();
                 if ( !splitChild.isVisible()) {
                     continue;
                 }
@@ -943,19 +943,19 @@ public class MultiSplitLayout
     /* Second pass of the layout algorithm: branch to layoutGrow/Shrink
      * as needed.
      */
-    private void layout2(Node root, Rectangle bounds) {
-        if (root instanceof Leaf) {
+    private void layout2(NodeImpl root, Rectangle bounds) {
+        if (root instanceof LeafImpl) {
             Component child = childForNode(root);
             if (child != null) {
                 child.setBounds(bounds);
             }
             root.setBounds(bounds);
         }
-        else if (root instanceof Divider) {
+        else if (root instanceof DividerImpl) {
             root.setBounds(bounds);
         }
-        else if (root instanceof Split) {
-            Split split = (Split)root;
+        else if (root instanceof SplitImpl) {
+            SplitImpl split = (SplitImpl)root;
             boolean grow = split.isRowLayout()
                     ? (split.getBounds().width <= bounds.width)
                             : (split.getBounds().height <= bounds.height);
@@ -984,13 +984,13 @@ public class MultiSplitLayout
      * (java.awt.Component) children.  That's done in the second pass,
      * see layoutGrow() and layoutShrink().
      */
-    private void layout1(Node root, Rectangle bounds) {
-        if (root instanceof Leaf) {
+    private void layout1(NodeImpl root, Rectangle bounds) {
+        if (root instanceof LeafImpl) {
             root.setBounds(bounds);
         }
-        else if (root instanceof Split) {
-            Split split = (Split)root;
-            Iterator<Node> splitChildren = split.getChildren().iterator();
+        else if (root instanceof SplitImpl) {
+            SplitImpl split = (SplitImpl)root;
+            Iterator<NodeImpl> splitChildren = split.getChildren().iterator();
             Rectangle childBounds = null;
             int divSize = getDividerSize();
             boolean initSplit = false;
@@ -1006,14 +1006,14 @@ public class MultiSplitLayout
             if (split.isRowLayout()) {
                 double x = bounds.getX();
                 while(splitChildren.hasNext()) {
-                    Node splitChild = splitChildren.next();
+                    NodeImpl splitChild = splitChildren.next();
                     if ( !splitChild.isVisible()) {
                         if ( splitChildren.hasNext())
                             splitChildren.next();
                         continue;
                     }
-                    Divider dividerChild =
-                            (splitChildren.hasNext()) ? (Divider)(splitChildren.next()) : null;
+                    DividerImpl dividerChild =
+                            (splitChildren.hasNext()) ? (DividerImpl)(splitChildren.next()) : null;
 
                     double childWidth = 0.0;
 
@@ -1053,14 +1053,14 @@ public class MultiSplitLayout
                 double y = bounds.getY();
                 while(splitChildren.hasNext())
                 {
-                    Node splitChild = splitChildren.next();
+                    NodeImpl splitChild = splitChildren.next();
 
                     if ( !splitChild.isVisible()) {
                         continue;
                     }
 
-                    Divider dividerChild = (splitChildren.hasNext()) ?
-                            (Divider)(splitChildren.next()) :
+                    DividerImpl dividerChild = (splitChildren.hasNext()) ?
+                            (DividerImpl)(splitChildren.next()) :
                                 null;
 
                     double childHeight = 0.0;
@@ -1169,44 +1169,44 @@ public class MultiSplitLayout
      * incorrectly.
      */
     public static class InvalidLayoutException extends RuntimeException {
-        private final Node node;
-        public InvalidLayoutException(String msg, Node node) {
+        private final NodeImpl node;
+        public InvalidLayoutException(String msg, NodeImpl node) {
             super(msg);
             this.node = node;
         }
         /**
          * @return the invalid Node.
          */
-        public Node getNode() { return node; }
+        public NodeImpl getNode() { return node; }
     }
 
-    private static void throwInvalidLayout(String msg, Node node) {
+    private static void throwInvalidLayout(String msg, NodeImpl node) {
         throw new InvalidLayoutException(msg, node);
     }
 
     @Deprecated
-    private void checkLayout(Node root) {
-        if (root instanceof Split) {
-            Split split = (Split)root;
+    private void checkLayout(NodeImpl root) {
+        if (root instanceof SplitImpl) {
+            SplitImpl split = (SplitImpl)root;
             if (split.getChildren().size() <= 2) {
                 throwInvalidLayout("Split must have > 2 children", root);
             }
-            Iterator<Node> splitChildren = split.getChildren().iterator();
+            Iterator<NodeImpl> splitChildren = split.getChildren().iterator();
             double weight = 0.0;
             while(splitChildren.hasNext())       {
-                Node splitChild = splitChildren.next();
+                NodeImpl splitChild = splitChildren.next();
                 if ( !splitChild.isVisible()) {
                     if ( splitChildren.hasNext())
                         splitChildren.next();
                     continue;
                 }
-                if (splitChild instanceof Divider) {
+                if (splitChild instanceof DividerImpl) {
                     continue;
                     //throwInvalidLayout("expected a Split or Leaf Node", splitChild);
                 }
                 if (splitChildren.hasNext()) {
-                    Node dividerChild = splitChildren.next();
-                    if (!(dividerChild instanceof Divider)) {
+                    NodeImpl dividerChild = splitChildren.next();
+                    if (!(dividerChild instanceof DividerImpl)) {
                         throwInvalidLayout("expected a Divider Node", dividerChild);
                     }
                 }
@@ -1218,7 +1218,7 @@ public class MultiSplitLayout
             }
         }
     }
-    private void validateLayout( Node root )
+    private void validateLayout( NodeImpl root )
     {
         root.validate( new HashSet<>() );
     }
@@ -1248,12 +1248,12 @@ public class MultiSplitLayout
      * @param node The node to layout.
      * @param bounds
      */
-    private void _performLayout( Node node, Rectangle bounds )
+    private void _performLayout( NodeImpl node, Rectangle bounds )
     {
         node.layout( bounds, getDividerSize() );
     }
 
-    private static List<Node> _completeWeights( List<Node> children )
+    private static List<NodeImpl> _completeWeights( List<NodeImpl> children )
     {
         double[] weights = new double[children.size()];
         for ( int i = 0 ; i < weights.length ; i++ )
@@ -1329,14 +1329,14 @@ public class MultiSplitLayout
                 calculateInnerArea( parent ) );
     }
 
-    private Divider dividerAt(Node root, int x, int y) {
-        if (root instanceof Divider) {
-            Divider divider = (Divider)root;
+    private DividerImpl dividerAt(NodeImpl root, int x, int y) {
+        if (root instanceof DividerImpl) {
+            DividerImpl divider = (DividerImpl)root;
             return (divider.getBounds().contains(x, y)) ? divider : null;
         }
-        else if (root instanceof Split) {
-            Split split = (Split)root;
-            for(Node child : split.getChildren()) {
+        else if (root instanceof SplitImpl) {
+            SplitImpl split = (SplitImpl)root;
+            for(NodeImpl child : split.getChildren()) {
                 if ( !child.isVisible())
                     continue;
                 if (child.getBounds().contains(x, y)) {
@@ -1355,27 +1355,27 @@ public class MultiSplitLayout
      * @param y y coordinate
      * @return the Divider at x,y
      */
-    public Divider dividerAt(int x, int y) {
+    public DividerImpl dividerAt(int x, int y) {
         return dividerAt(getModel(), x, y);
     }
 
-    private boolean nodeOverlapsRectangle(Node node, Rectangle r2) {
+    private boolean nodeOverlapsRectangle(NodeImpl node, Rectangle r2) {
         Rectangle r1 = node.getBounds();
         return
                 (r1.x <= (r2.x + r2.width)) && ((r1.x + r1.width) >= r2.x) &&
                 (r1.y <= (r2.y + r2.height)) && ((r1.y + r1.height) >= r2.y);
     }
 
-    private List<Divider> dividersThatOverlap(Node root, Rectangle r) {
-        if (nodeOverlapsRectangle(root, r) && (root instanceof Split)) {
-            List<Divider> dividers = new ArrayList<Divider>();
-            for(Node child : ((Split)root).getChildren()) {
-                if (child instanceof Divider) {
+    private List<DividerImpl> dividersThatOverlap(NodeImpl root, Rectangle r) {
+        if (nodeOverlapsRectangle(root, r) && (root instanceof SplitImpl)) {
+            List<DividerImpl> dividers = new ArrayList<DividerImpl>();
+            for(NodeImpl child : ((SplitImpl)root).getChildren()) {
+                if (child instanceof DividerImpl) {
                     if (nodeOverlapsRectangle(child, r)) {
-                        dividers.add((Divider)child);
+                        dividers.add((DividerImpl)child);
                     }
                 }
-                else if (child instanceof Split) {
+                else if (child instanceof SplitImpl) {
                     dividers.addAll(dividersThatOverlap(child, r));
                 }
             }
@@ -1394,7 +1394,7 @@ public class MultiSplitLayout
      * @return the Dividers that overlap r
      * @throws IllegalArgumentException if the Rectangle is null
      */
-    public List<Divider> dividersThatOverlap(Rectangle r) {
+    public List<DividerImpl> dividersThatOverlap(Rectangle r) {
         if (r == null) {
             throw new IllegalArgumentException("null Rectangle");
         }
@@ -1405,8 +1405,8 @@ public class MultiSplitLayout
     /**
      * Base class for the nodes that model a MultiSplitLayout.
      */
-    public static abstract class Node implements Serializable {
-        private Split parent = null;
+    public static abstract class NodeImpl implements Serializable {
+        private SplitImpl parent = null;
         private final Rectangle _bounds = new Rectangle();
         private double weight = 0.0;
         private boolean isVisible = true;
@@ -1431,7 +1431,7 @@ public class MultiSplitLayout
          * @return the value of the parent property.
          * @see #setParent
          */
-        public Split getParent() { return parent; }
+        public SplitImpl getParent() { return parent; }
 
         /**
          * Set the value of this Node's parent property.  The default
@@ -1440,7 +1440,7 @@ public class MultiSplitLayout
          * @param parent a Split or null
          * @see #getParent
          */
-        public void setParent(Split parent) {
+        public void setParent(SplitImpl parent) {
             this.parent = parent;
         }
 
@@ -1491,7 +1491,7 @@ public class MultiSplitLayout
          * @param weight
          * @return
          */
-        public Node weight( double weight )
+        public NodeImpl weight( double weight )
         {
             setWeight( weight );
             return this;
@@ -1518,10 +1518,10 @@ public class MultiSplitLayout
             this.weight = weight;
         }
 
-        private Node siblingAtOffset(int offset) {
-            Split p = getParent();
+        private NodeImpl siblingAtOffset(int offset) {
+            SplitImpl p = getParent();
             if (p == null) { return null; }
-            List<Node> siblings = p.getChildren();
+            List<NodeImpl> siblings = p.getChildren();
             int index = siblings.indexOf(this);
             if (index == -1) { return null; }
             index += offset;
@@ -1537,7 +1537,7 @@ public class MultiSplitLayout
          * @see #previousSibling
          * @see #getParent
          */
-        public Node nextSibling() {
+        public NodeImpl nextSibling() {
             return siblingAtOffset(+1);
         }
 
@@ -1550,7 +1550,7 @@ public class MultiSplitLayout
          * @see #nextSibling
          * @see #getParent
          */
-        public Node previousSibling() {
+        public NodeImpl previousSibling() {
             return siblingAtOffset(-1);
         }
 
@@ -1564,11 +1564,11 @@ public class MultiSplitLayout
     /**
      *
      */
-    public static class Row extends Split {
-        public Row() {
+    public static class RowImpl extends SplitImpl {
+        public RowImpl() {
         }
 
-        public Row(Node... children) {
+        public RowImpl(NodeImpl... children) {
             super( children );
             setRowLayout( true );
         }
@@ -1629,7 +1629,7 @@ public class MultiSplitLayout
 
                 for ( int i = children.size()-1 ; error > 0 ; i-- )
                 {
-                    Node c = children.get( i );
+                    NodeImpl c = children.get( i );
                     c.bounds().x -= error;
                     error--;
                 }
@@ -1657,11 +1657,11 @@ public class MultiSplitLayout
         }
     }
 
-    public static class Column extends Split {
-        public Column() {
+    public static class ColumnImpl extends SplitImpl {
+        public ColumnImpl() {
         }
 
-        public Column(Node... children) {
+        public ColumnImpl(NodeImpl... children) {
             super(children);
             setRowLayout( false );
         }
@@ -1719,10 +1719,10 @@ public class MultiSplitLayout
     /**
      * Defines a vertical or horizontal subdivision into two or more tiles.
      */
-    public static class Split extends Node {
-        private List<Node> _children =
+    public static class SplitImpl extends NodeImpl {
+        private List<NodeImpl> _children =
                 Collections.emptyList();
-        private List<Node> _childrenWoDividers =
+        private List<NodeImpl> _childrenWoDividers =
                 Collections.emptyList();
         private boolean rowLayout = true;
         private String name;
@@ -1732,12 +1732,12 @@ public class MultiSplitLayout
          * @param children
          */
         @Deprecated
-        public Split(Node... children)
+        public SplitImpl(NodeImpl... children)
         {
             setChildren(children);
 
             _childrenWoDividers = _children.stream().filter(
-                    c -> ! Divider.class.isInstance( c ) ).collect(
+                    c -> ! DividerImpl.class.isInstance( c ) ).collect(
                              Collectors.toList() );
         }
 
@@ -1745,7 +1745,7 @@ public class MultiSplitLayout
          * Default constructor to support xml (de)serialization and other bean spec dependent ops.
          * Resulting instance of Split is invalid until setChildren() is called.
          */
-        public Split() {
+        public SplitImpl() {
         }
 
         public int size()
@@ -1770,8 +1770,8 @@ public class MultiSplitLayout
          */
         @Override
         public boolean isVisible() {
-            for(Node child : _children) {
-                if ( child.isVisible() && !( child instanceof Divider ))
+            for(NodeImpl child : _children) {
+                if ( child.isVisible() && !( child instanceof DividerImpl ))
                     return true;
             }
             return false;
@@ -1809,11 +1809,11 @@ public class MultiSplitLayout
          * @return the value of the children property.
          * @see #setChildren
          */
-        public List<Node> getChildren() {
-            return new ArrayList<Node>(_children);
+        public List<NodeImpl> getChildren() {
+            return new ArrayList<NodeImpl>(_children);
         }
-        public List<Node> getChildren2() {
-            return new ArrayList<Node>(_childrenWoDividers);
+        public List<NodeImpl> getChildren2() {
+            return new ArrayList<NodeImpl>(_childrenWoDividers);
         }
 
         /**
@@ -1823,18 +1823,18 @@ public class MultiSplitLayout
          * appear next to one another.
          * @param split the split to check
          */
-        public void checkDividers( Split split ) {
-            ListIterator<Node> splitChildren = split.getChildren().listIterator();
+        public void checkDividers( SplitImpl split ) {
+            ListIterator<NodeImpl> splitChildren = split.getChildren().listIterator();
             while( splitChildren.hasNext()) {
-                Node splitChild = splitChildren.next();
+                NodeImpl splitChild = splitChildren.next();
                 if ( !splitChild.isVisible()) {
                     continue;
                 }
                 else if ( splitChildren.hasNext()) {
-                    Node dividerChild = splitChildren.next();
-                    if ( dividerChild instanceof Divider ) {
+                    NodeImpl dividerChild = splitChildren.next();
+                    if ( dividerChild instanceof DividerImpl ) {
                         if ( splitChildren.hasNext()) {
-                            Node rightChild = splitChildren.next();
+                            NodeImpl rightChild = splitChildren.next();
                             while ( !rightChild.isVisible()) {
                                 rightChild = rightChild.nextSibling();
                                 if ( rightChild == null ) {
@@ -1846,11 +1846,11 @@ public class MultiSplitLayout
 
                             // A visible child is found but it's a divider and therefore
                             // we have two visible and adjacent dividers - so we hide one
-                            if (( rightChild != null ) && ( rightChild instanceof Divider ))
+                            if (( rightChild != null ) && ( rightChild instanceof DividerImpl ))
                                 dividerChild.setVisible( false );
                         }
                     }
-                    else if (( splitChild instanceof Divider ) && ( dividerChild instanceof Divider )) {
+                    else if (( splitChild instanceof DividerImpl ) && ( dividerChild instanceof DividerImpl )) {
                         splitChild.setVisible( false );
                     }
                 }
@@ -1861,15 +1861,15 @@ public class MultiSplitLayout
          * Restore any of the hidden dividers that are required to separate visible nodes
          * @param split the node to check
          */
-        public void restoreDividers( Split split ) {
+        public void restoreDividers( SplitImpl split ) {
 
-            ListIterator<Node> splitChildren = split.getChildren().listIterator();
+            ListIterator<NodeImpl> splitChildren = split.getChildren().listIterator();
             while( splitChildren.hasNext()) {
-                Node splitChild = splitChildren.next();
-                if ( splitChild instanceof Divider ) {
-                    Node prev = splitChild.previousSibling();
+                NodeImpl splitChild = splitChildren.next();
+                if ( splitChild instanceof DividerImpl ) {
+                    NodeImpl prev = splitChild.previousSibling();
                     if ( prev.isVisible()) {
-                        Node next = splitChild.nextSibling();
+                        NodeImpl next = splitChild.nextSibling();
                         while ( next != null ) {
                             if ( next.isVisible()) {
                                 splitChild.setVisible( true );
@@ -1895,16 +1895,16 @@ public class MultiSplitLayout
          * @see #getChildren
          * @throws IllegalArgumentException if children is null
          */
-        public void setChildren(List<Node> children) {
+        public void setChildren(List<NodeImpl> children) {
             if (children == null) {
                 throw new IllegalArgumentException("children must be a non-null List");
             }
-            for(Node child : this._children) {
+            for(NodeImpl child : this._children) {
                 child.setParent(null);
             }
 
-            this._children = new ArrayList<Node>(children);
-            for(Node child : this._children) {
+            this._children = new ArrayList<NodeImpl>(children);
+            for(NodeImpl child : this._children) {
                 child.setParent(this);
             }
         }
@@ -1919,7 +1919,7 @@ public class MultiSplitLayout
          * @see #getChildren
          * @throws IllegalArgumentException if children is null
          */
-        public void setChildren(Node... children) {
+        public void setChildren(NodeImpl... children) {
             setChildren(children == null ? null : Arrays.asList(children));
         }
 
@@ -1929,12 +1929,12 @@ public class MultiSplitLayout
          *
          * @return the last child whose weight is > 0.0.
          * @see #getChildren
-         * @see Node#getWeight
+         * @see NodeImpl#getWeight
          */
-        public final Node lastWeightedChild() {
-            List<Node> kids = getChildren();
-            Node weightedChild = null;
-            for(Node child : kids) {
+        public final NodeImpl lastWeightedChild() {
+            List<NodeImpl> kids = getChildren();
+            NodeImpl weightedChild = null;
+            for(NodeImpl child : kids) {
                 if ( !child.isVisible())
                     continue;
                 if (child.getWeight() > 0.0) {
@@ -2008,14 +2008,14 @@ public class MultiSplitLayout
     /**
      * Models a java.awt Component child.
      */
-    public static class Leaf extends Node
+    public static class LeafImpl extends NodeImpl
     {
         private String _name = StringUtil.EMPTY_STRING;
 
         /**
          * Create a Leaf node.  The default value of name is "".
          */
-        public Leaf()
+        public LeafImpl()
         {
         }
 
@@ -2026,7 +2026,7 @@ public class MultiSplitLayout
          * @param name value of the Leaf's name property
          * @throws IllegalArgumentException if name is null
          */
-        public Leaf(String name) {
+        public LeafImpl(String name) {
             _name = Objects.requireNonNull( name );
         }
 
@@ -2094,7 +2094,7 @@ public class MultiSplitLayout
      * @deprecated micbinz : Not needed in final design.
      */
     @Deprecated
-    public static class Divider extends Node {
+    public static class DividerImpl extends NodeImpl {
         /**
          * Convenience method, returns true if the Divider's parent
          * is a Split row (a Split with isRowLayout() true), false
@@ -2104,7 +2104,7 @@ public class MultiSplitLayout
          * @return true if this Divider is part of a Split row.
          */
         public final boolean isVertical() {
-            Split parent = getParent();
+            SplitImpl parent = getParent();
             return (parent != null) ? parent.isRowLayout() : false;
         }
 
@@ -2144,7 +2144,7 @@ public class MultiSplitLayout
         throw new Exception("MultiSplitLayout.parseModel Error: " + msg);
     }
 
-    private static void parseAttribute(String name, StreamTokenizer st, Node node) throws Exception {
+    private static void parseAttribute(String name, StreamTokenizer st, NodeImpl node) throws Exception {
         if ((st.nextToken() != '=')) {
             throwParseException(st, "expected '=' after " + name);
         }
@@ -2158,11 +2158,11 @@ public class MultiSplitLayout
         }
         else if (name.equalsIgnoreCase("NAME")) {
             if (st.nextToken() == StreamTokenizer.TT_WORD) {
-                if (node instanceof Leaf) {
-                    ((Leaf)node).setName(st.sval);
+                if (node instanceof LeafImpl) {
+                    ((LeafImpl)node).setName(st.sval);
                 }
-                else if (node instanceof Split) {
-                    ((Split)node).setName(st.sval);
+                else if (node instanceof SplitImpl) {
+                    ((SplitImpl)node).setName(st.sval);
                 }
                 else {
                     throwParseException(st, "can't specify name for " + node);
@@ -2177,20 +2177,20 @@ public class MultiSplitLayout
         }
     }
 
-    private static void addSplitChild(Split parent, Node child) {
-        List<Node> children = new ArrayList<Node>(parent.getChildren());
+    private static void addSplitChild(SplitImpl parent, NodeImpl child) {
+        List<NodeImpl> children = new ArrayList<NodeImpl>(parent.getChildren());
         if (children.size() == 0) {
             children.add(child);
         }
         else {
-            children.add(new Divider());
+            children.add(new DividerImpl());
             children.add(child);
         }
         parent.setChildren(children);
     }
 
-    private static void parseLeaf(StreamTokenizer st, Split parent) throws Exception {
-        Leaf leaf = new Leaf();
+    private static void parseLeaf(StreamTokenizer st, SplitImpl parent) throws Exception {
+        LeafImpl leaf = new LeafImpl();
         int token;
         while ((token = st.nextToken()) != StreamTokenizer.TT_EOF) {
             if (token == ')') {
@@ -2206,7 +2206,7 @@ public class MultiSplitLayout
         addSplitChild(parent, leaf);
     }
 
-    private static void parseSplit(StreamTokenizer st, Split parent) throws Exception {
+    private static void parseSplit(StreamTokenizer st, SplitImpl parent) throws Exception {
         int token;
         while ((token = st.nextToken()) != StreamTokenizer.TT_EOF) {
             if (token == ')') {
@@ -2220,7 +2220,7 @@ public class MultiSplitLayout
                     parseAttribute(st.sval, st, parent);
                 }
                 else {
-                    addSplitChild(parent, new Leaf(st.sval));
+                    addSplitChild(parent, new LeafImpl(st.sval));
                 }
             }
             else if (token == '(') {
@@ -2232,7 +2232,7 @@ public class MultiSplitLayout
                     parseLeaf(st, parent);
                 }
                 else if (nodeType.equals("ROW") || nodeType.equals("COLUMN")) {
-                    Split split = new Split();
+                    SplitImpl split = new SplitImpl();
                     split.setRowLayout(nodeType.equals("ROW"));
                     addSplitChild(parent, split);
                     parseSplit(st, split);
@@ -2244,10 +2244,10 @@ public class MultiSplitLayout
         }
     }
 
-    private static Node parseModel(Reader r) {
+    private static NodeImpl parseModel(Reader r) {
         StreamTokenizer st = new StreamTokenizer(r);
         try {
-            Split root = new Split();
+            SplitImpl root = new SplitImpl();
             parseSplit(st, root);
             return root.getChildren().get(0);
         }
@@ -2306,16 +2306,16 @@ public class MultiSplitLayout
      *
      * @return the Node root of a tree based on s.
      */
-    public static Node parseModel(String s) {
+    public static NodeImpl parseModel(String s) {
         return parseModel(new StringReader(s));
     }
 
 
-    private static void printModel(String indent, Node root) {
-        if (root instanceof Split) {
-            Split split = (Split)root;
+    private static void printModel(String indent, NodeImpl root) {
+        if (root instanceof SplitImpl) {
+            SplitImpl split = (SplitImpl)root;
             System.out.println(indent + split);
-            for(Node child : split.getChildren()) {
+            for(NodeImpl child : split.getChildren()) {
                 printModel(indent + "  ", child);
             }
         }
@@ -2327,7 +2327,7 @@ public class MultiSplitLayout
     /**
      * Print the tree with enough detail for simple debugging.
      */
-    public static void printModel(Node root) {
+    public static void printModel(NodeImpl root) {
         printModel("", root);
     }
 }

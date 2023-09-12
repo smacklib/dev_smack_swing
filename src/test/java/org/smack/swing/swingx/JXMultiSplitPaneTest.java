@@ -6,11 +6,11 @@ package org.smack.swing.swingx;
 import javax.swing.JLabel;
 
 import org.junit.jupiter.api.Test;
-import org.smack.swing.swingx.MultiSplitLayout.Column;
-import org.smack.swing.swingx.MultiSplitLayout.Divider;
-import org.smack.swing.swingx.MultiSplitLayout.Leaf;
-import org.smack.swing.swingx.MultiSplitLayout.Row;
-import org.smack.swing.swingx.MultiSplitLayout.Split;
+import org.smack.swing.swingx.MultiSplitLayout.ColumnImpl;
+import org.smack.swing.swingx.MultiSplitLayout.DividerImpl;
+import org.smack.swing.swingx.MultiSplitLayout.LeafImpl;
+import org.smack.swing.swingx.MultiSplitLayout.RowImpl;
+import org.smack.swing.swingx.MultiSplitLayout.SplitImpl;
 import org.smack.util.JavaUtil;
 
 public class JXMultiSplitPaneTest
@@ -24,26 +24,26 @@ public class JXMultiSplitPaneTest
         //  bottom       //
         ///////////////////
 
-        Split row = JavaUtil.make( () -> {
-            var left = new Leaf("left");
+        SplitImpl row = JavaUtil.make( () -> {
+            var left = new LeafImpl("left");
             left.setWeight( .5 );
-            var right = new Leaf( "right" );
+            var right = new LeafImpl( "right" );
             right.setWeight( .5 );
 
-            return new Row(
+            return new RowImpl(
                     left,
-                    new Divider(),
+                    new DividerImpl(),
                     right );
         });
 
-        Split column = JavaUtil.make( () -> {
-            var bottom = new Leaf( "bottom" );
+        SplitImpl column = JavaUtil.make( () -> {
+            var bottom = new LeafImpl( "bottom" );
             bottom.setWeight( .5 );
             row.setWeight( .5 );
 
-            var result = new Column(
+            var result = new ColumnImpl(
                     row,
-                    new Divider(),
+                    new DividerImpl(),
                     bottom );
             result.setRowLayout( false );
 

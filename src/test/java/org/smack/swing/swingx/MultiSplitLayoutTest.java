@@ -15,13 +15,13 @@ import java.util.HashSet;
 import javax.swing.JSplitPane;
 
 import org.junit.jupiter.api.Test;
-import org.smack.swing.swingx.MultiSplitLayout.Column;
-import org.smack.swing.swingx.MultiSplitLayout.Divider;
+import org.smack.swing.swingx.MultiSplitLayout.ColumnImpl;
+import org.smack.swing.swingx.MultiSplitLayout.DividerImpl;
 import org.smack.swing.swingx.MultiSplitLayout.InvalidLayoutException;
-import org.smack.swing.swingx.MultiSplitLayout.Leaf;
-import org.smack.swing.swingx.MultiSplitLayout.Node;
-import org.smack.swing.swingx.MultiSplitLayout.Row;
-import org.smack.swing.swingx.MultiSplitLayout.Split;
+import org.smack.swing.swingx.MultiSplitLayout.LeafImpl;
+import org.smack.swing.swingx.MultiSplitLayout.NodeImpl;
+import org.smack.swing.swingx.MultiSplitLayout.RowImpl;
+import org.smack.swing.swingx.MultiSplitLayout.SplitImpl;
 import org.smack.swing.test.MockContainer;
 import org.smack.util.Holder;
 import org.smack.util.JavaUtil;
@@ -37,26 +37,26 @@ public class MultiSplitLayoutTest
         //  bottom       //
         ///////////////////
 
-        Split row = JavaUtil.make( () -> {
-            var left = new Leaf("left");
+        SplitImpl row = JavaUtil.make( () -> {
+            var left = new LeafImpl("left");
             left.setWeight( .5 );
-            var right = new Leaf( "right" );
+            var right = new LeafImpl( "right" );
             right.setWeight( .5 );
 
-            return new Row(
+            return new RowImpl(
                     left,
-                    new Divider(),
+                    new DividerImpl(),
                     right );
         });
 
-        Split column = JavaUtil.make( () -> {
-            var bottom = new Leaf( "bottom" );
+        SplitImpl column = JavaUtil.make( () -> {
+            var bottom = new LeafImpl( "bottom" );
             bottom.setWeight( .5 );
             row.setWeight( .5 );
 
-            var result = new Column(
+            var result = new ColumnImpl(
                     row,
-                    new Divider(),
+                    new DividerImpl(),
                     bottom );
             result.setRowLayout( false );
 
@@ -99,26 +99,26 @@ public class MultiSplitLayoutTest
         //  bottom       //
         ///////////////////
 
-        Split row = JavaUtil.make( () -> {
-            var left = new Leaf("left");
+        SplitImpl row = JavaUtil.make( () -> {
+            var left = new LeafImpl("left");
             left.setWeight( .5 );
-            var right = new Leaf( "right" );
+            var right = new LeafImpl( "right" );
             right.setWeight( .5 );
 
-            return new Row(
+            return new RowImpl(
                     left,
-                    new Divider(),
+                    new DividerImpl(),
                     right );
         });
 
-        Split column = JavaUtil.make( () -> {
-            var bottom = new Leaf( "bottom" );
+        SplitImpl column = JavaUtil.make( () -> {
+            var bottom = new LeafImpl( "bottom" );
             bottom.setWeight( .5 );
             row.setWeight( .5 );
 
-            var result = new Column(
+            var result = new ColumnImpl(
                     row,
-                    new Divider(),
+                    new DividerImpl(),
                     bottom );
             result.setRowLayout( false );
 
@@ -162,20 +162,20 @@ public class MultiSplitLayoutTest
     @Test
     public void basicTest_rounding2() throws Exception
     {
-        Row row = JavaUtil.make( () -> {
-            var one = new Leaf("1");
+        RowImpl row = JavaUtil.make( () -> {
+            var one = new LeafImpl("1");
             one.setWeight( .3 );
-            var two = new Leaf( "2" );
+            var two = new LeafImpl( "2" );
             two.setWeight( .3 );
             // TODO validate names.
-            var three = new Leaf( "3" );
+            var three = new LeafImpl( "3" );
             three.setWeight( .0 );
 
-            return new Row(
+            return new RowImpl(
                     one,
-                    new Divider(),
+                    new DividerImpl(),
                     two,
-                    new Divider(),
+                    new DividerImpl(),
                     three );
 
         });
@@ -244,7 +244,7 @@ public class MultiSplitLayoutTest
         mspl.addPropertyChangeListener( ce -> pceh.set( ce ) );
         assertNull( pceh.get() );
 
-        mspl.setModel( new Leaf( "test" ) );
+        mspl.setModel( new LeafImpl( "test" ) );
 
         assertNotNull( pceh.get() );
 
@@ -253,10 +253,10 @@ public class MultiSplitLayoutTest
                 pceh.get().getPropertyName() );
         assertEquals(
                 "test",
-                Leaf.class.cast(pceh.get().getNewValue() ).getName() );
+                LeafImpl.class.cast(pceh.get().getNewValue() ).getName() );
         assertEquals(
                 "default",
-                Leaf.class.cast(pceh.get().getOldValue() ).getName() );
+                LeafImpl.class.cast(pceh.get().getOldValue() ).getName() );
         assertEquals(
                 mspl,
                 pceh.get().getSource() );
@@ -268,12 +268,12 @@ public class MultiSplitLayoutTest
     {
         final int count = 0;
 
-        Node[] nodes = new Node[]
+        NodeImpl[] nodes = new NodeImpl[]
         {
-            new Leaf( "one" ),
+            new LeafImpl( "one" ),
         };
 
-        Split split = new Column( nodes );
+        SplitImpl split = new ColumnImpl( nodes );
 
         try {
             split.validate( new HashSet<>() );
@@ -287,14 +287,14 @@ public class MultiSplitLayoutTest
     @Test
     public void Split_children_weightExceeds100() throws Exception
     {
-        Node[] nodes = new Node[]
+        NodeImpl[] nodes = new NodeImpl[]
         {
-            new Leaf( "one" ).weight( .8 ),
-            new Divider(),
-            new Leaf( "two" ).weight( .9 )
+            new LeafImpl( "one" ).weight( .8 ),
+            new DividerImpl(),
+            new LeafImpl( "two" ).weight( .9 )
         };
 
-        Split split = new Column( nodes );
+        SplitImpl split = new ColumnImpl( nodes );
 
         try {
             split.validate( new HashSet<>() );
@@ -308,14 +308,14 @@ public class MultiSplitLayoutTest
     @Test
     public void Split_children_duplicateName() throws Exception
     {
-        Node[] nodes = new Node[]
+        NodeImpl[] nodes = new NodeImpl[]
         {
-            new Leaf( "one" ).weight( .8 ),
-            new Divider(),
-            new Leaf( "one" ).weight( .0 )
+            new LeafImpl( "one" ).weight( .8 ),
+            new DividerImpl(),
+            new LeafImpl( "one" ).weight( .0 )
         };
 
-        Split split = new Row( nodes );
+        SplitImpl split = new RowImpl( nodes );
 
         try {
             split.validate( new HashSet<>() );
@@ -331,12 +331,12 @@ public class MultiSplitLayoutTest
     {
         final int count = 0;
 
-        Node[] nodes = new Node[]
+        NodeImpl[] nodes = new NodeImpl[]
         {
-            new Leaf( "one" ),
+            new LeafImpl( "one" ),
         };
 
-        Split split = new Split( nodes );
+        SplitImpl split = new SplitImpl( nodes );
 
         assertEquals( nodes.length, split.getChildren().size() );
         assertEquals( nodes.length-count, split.size() );
@@ -347,14 +347,14 @@ public class MultiSplitLayoutTest
     {
         final int count = 1;
 
-        Node[] nodes = new Node[]
+        NodeImpl[] nodes = new NodeImpl[]
         {
-            new Leaf( "one" ),
-            new Divider(),
-            new Leaf( "two" )
+            new LeafImpl( "one" ),
+            new DividerImpl(),
+            new LeafImpl( "two" )
         };
 
-        Split split = new Column( nodes );
+        SplitImpl split = new ColumnImpl( nodes );
 
         assertEquals( nodes.length, split.getChildren().size() );
         assertEquals( nodes.length-count, split.size() );
@@ -365,16 +365,16 @@ public class MultiSplitLayoutTest
     {
         int count = 2;
 
-        Node[] nodes = new Node[]
+        NodeImpl[] nodes = new NodeImpl[]
         {
-            new Leaf( "one" ),
-            new Divider(),
-            new Leaf( "two" ),
-            new Divider(),
-            new Leaf( "three" )
+            new LeafImpl( "one" ),
+            new DividerImpl(),
+            new LeafImpl( "two" ),
+            new DividerImpl(),
+            new LeafImpl( "three" )
         };
 
-        Split split = new Row( nodes );
+        SplitImpl split = new RowImpl( nodes );
 
         assertEquals( nodes.length, split.getChildren().size() );
         assertEquals( nodes.length-count, split.size() );
