@@ -12,11 +12,7 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
-import java.io.IOException;
-import java.io.Reader;
 import java.io.Serializable;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -85,12 +81,20 @@ public class MultiSplitLayout
      */
     private final Map<String, Component> _childMap =
             new HashMap<String, Component>();
+    private final Map<String, LeafImpl> _leafMap =
+            new HashMap<>();
 
     private JavaBeanProperty<NodeImpl, MultiSplitLayout> _model =
             new JavaBeanProperty<>(
                     this,
-                    new LeafImpl("default"),
+                    new LeafImpl( "default" ),
                     "model" );
+
+//    private JavaBeanProperty<Node, MultiSplitLayout> _modelNew =
+//            new JavaBeanProperty<>(
+//                    this,
+//                    new Leaf( 0.0, "default" ),
+//                    "modelNew" );
 
     private JavaBeanProperty<Integer, MultiSplitLayout> _dividerSize =
             new JavaBeanProperty<>(
@@ -374,6 +378,13 @@ public class MultiSplitLayout
             throw new IllegalArgumentException("invalid model");
         }
         _model.set( model );
+    }
+
+    public void setModel(Node model)
+    {
+        NodeImpl internalModel = model.convert( this );
+
+        _model.set( internalModel );
     }
 
     /**
@@ -1250,7 +1261,7 @@ public class MultiSplitLayout
      */
     private void _performLayout( NodeImpl node, Rectangle bounds )
     {
-        node.layout( bounds, getDividerSize() );
+        node.layout( bounds, this );
     }
 
     private static List<NodeImpl> _completeWeights( List<NodeImpl> children )
@@ -1402,7 +1413,7 @@ public class MultiSplitLayout
     }
 
 
-    public static class Node
+    public static abstract class Node
     {
         private final double _weight;
 
@@ -1419,9 +1430,11 @@ public class MultiSplitLayout
         {
             return _weight;
         }
+
+        abstract NodeImpl convert( MultiSplitLayout host );
     }
 
-    private static class Split extends Node
+    private static abstract class Split extends Node
     {
         private final List<Node> _nodes;
 
@@ -1467,6 +1480,12 @@ public class MultiSplitLayout
         {
             super( nodes );
         }
+
+        @Override
+        ColumnImpl convert( MultiSplitLayout host )
+        {
+            return new ColumnImpl( this, host );
+        }
     }
 
     public static class Row extends Split
@@ -1478,6 +1497,12 @@ public class MultiSplitLayout
         public Row( Node... nodes )
         {
             super( nodes );
+        }
+
+        @Override
+        RowImpl convert( MultiSplitLayout host )
+        {
+            return new RowImpl( this, host );
         }
     }
 
@@ -1494,6 +1519,16 @@ public class MultiSplitLayout
         public String name()
         {
             return _name;
+        }
+
+        @Override
+        LeafImpl convert( MultiSplitLayout host )
+        {
+            var result = new LeafImpl( this );
+
+            host._leafMap.put( _name, result );
+
+            return result;
         }
     }
 
@@ -1562,14 +1597,11 @@ public class MultiSplitLayout
          * is equal to <code>new Rectangle(0,0,0,0)</code>.
          *
          * @param bounds the new value of the bounds property
-         * @throws IllegalArgumentException if bounds is null
+         * @throws NullPointerException if bounds is null
          * @see #getBounds
          */
         public void setBounds(Rectangle bounds) {
-            if (bounds == null) {
-                throw new IllegalArgumentException("null bounds");
-            }
-            _bounds.setBounds( bounds );
+            _bounds.setBounds( Objects.requireNonNull( bounds ) );
         }
 
         /**
@@ -1653,7 +1685,7 @@ public class MultiSplitLayout
 
         abstract void layout(
                 Rectangle bounds,
-                int dividerSize );
+                MultiSplitLayout host );
     }
 
     /**
@@ -1661,6 +1693,11 @@ public class MultiSplitLayout
      */
     public static class RowImpl extends SplitImpl {
         public RowImpl() {
+        }
+
+        public RowImpl( Row column, MultiSplitLayout host )
+        {
+            super( column, host );
         }
 
         public RowImpl(NodeImpl... children) {
@@ -1681,7 +1718,7 @@ public class MultiSplitLayout
         public final boolean isRowLayout() { return true; }
 
         @Override
-        public void layout( Rectangle bounds, int dividerSize )
+        public void subLayout( Rectangle bounds, MultiSplitLayout host )
         {
             setBounds( bounds );
 
@@ -1690,28 +1727,44 @@ public class MultiSplitLayout
             final int dividerCount =
                     children.size() -1;
             final int netRowWidth =
-                    bounds.width - dividerCount * dividerSize;
+                    bounds.width - dividerCount * host.getDividerSize();
 
             double currentPosition = 0.0;
 
-            for ( int i = 0 ; i < children.size() ; i++ )
+            for ( int i = 0 ; i < getChildren().size() ; i++ )
             {
-                var c = children.get( i );
+                // Toggle between splits and dividers.
+                if ( MathUtil.isEven( i ) )
+                {
+                    var c = getChildren().get( i );
+                    double w = c.getWeight() * netRowWidth;
 
-                double w = c.getWeight() * netRowWidth;
+                    Rectangle subBounds = new Rectangle(
+                            MathUtil.round( currentPosition ),
+                            bounds.y,
+                            MathUtil.round( w ),
+                            bounds.height );
 
-                Rectangle subBounds = new Rectangle(
-                        MathUtil.round( currentPosition ),
-                        bounds.y,
-                        MathUtil.round( w ),
-                        bounds.height );
+                    c.layout(
+                            subBounds,
+                            host );
 
-                c.layout(
-                        subBounds,
-                        dividerSize );
+                    currentPosition += w;
+                }
+                else
+                {
+                    DividerImpl divider = (DividerImpl)getChildren().get( i );
 
-                currentPosition +=
-                        (w + dividerSize);
+                    Rectangle subBounds = new Rectangle(
+                            MathUtil.round( currentPosition ),
+                            bounds.y,
+                            host.getDividerSize(),
+                            bounds.height );
+
+                    divider.setBounds( subBounds );
+                    currentPosition += host.getDividerSize();
+
+                }
             }
 
             if ( extent() != bounds.width )
@@ -1756,6 +1809,11 @@ public class MultiSplitLayout
         public ColumnImpl() {
         }
 
+        public ColumnImpl( Column column, MultiSplitLayout host )
+        {
+            super( column, host );
+        }
+
         public ColumnImpl(NodeImpl... children) {
             super(children);
             setRowLayout( false );
@@ -1774,25 +1832,94 @@ public class MultiSplitLayout
         public final boolean isRowLayout() { return false; }
 
         @Override
-        public void layout( Rectangle bounds, int dividerSize )
+        public void subLayout( Rectangle bounds, MultiSplitLayout host )
         {
+            setBounds( bounds );
+
             var children =  _completeWeights( getChildren2() );
 
+            final int dividerCount =
+                    children.size() -1;
+            final int netRowHeigth =
+                    bounds.height - dividerCount * host.getDividerSize();
+
             double currentPosition = 0.0;
-            for ( var c : children )
+
+            for ( int i = 0 ; i < getChildren().size() ; i++ )
             {
-                double h = c.getWeight() * bounds.height;
+                // Toggle between splits and dividers.
+                if ( MathUtil.isEven( i ) )
+                {
+                    var c = getChildren().get( i );
+                    double h = c.getWeight() * netRowHeigth;
 
-                Rectangle subBounds = new Rectangle(
-                        bounds.x,
-                        MathUtil.round( currentPosition ),
-                        bounds.width,
-                        MathUtil.round( h ));
+                    Rectangle subBounds = new Rectangle(
+                            bounds.x, // MathUtil.round( currentPosition ),
+                            MathUtil.round( currentPosition ), // bounds.y,
+                            bounds.width, // MathUtil.round( w ),
+                            MathUtil.round( h ) ); // bounds.height );
 
-                c.layout( subBounds, dividerSize );
+                    c.layout(
+                            subBounds,
+                            host );
 
-                currentPosition += h;
+                    currentPosition += h;
+                }
+                else
+                {
+                    DividerImpl divider = (DividerImpl)getChildren().get( i );
+
+                    Rectangle subBounds = new Rectangle(
+                            bounds.x, // MathUtil.round( currentPosition ),
+                            MathUtil.round( currentPosition ),
+                            bounds.width,
+                            host.getDividerSize()
+                            );
+
+                    divider.setBounds( subBounds );
+                    currentPosition += host.getDividerSize();
+
+                }
             }
+
+            if ( extent() != bounds.width )
+            {
+                // Correct the node positions.
+                int error = extent() - bounds.height;
+
+                LOG.warning( String.format(
+                        "Expected width %d not %d.  Error=%d", extent(), bounds.height, error ) );
+
+                for ( int i = children.size()-1 ; error > 0 ; i-- )
+                {
+                    NodeImpl c = children.get( i );
+                    c.bounds().y -= error;
+                    error--;
+                }
+            }
+
+            if ( extent() != bounds.height )
+            {
+                LOG.warning( String.format(
+                        "Corrected width %d not %d.", extent(), bounds.height ) );
+            }
+//            var children =  _completeWeights( getChildren2() );
+//
+//            double currentPosition = 0.0;
+//            for ( var c : children )
+//            {
+//                double h = c.getWeight() * bounds.height;
+//
+//                Rectangle subBounds = new Rectangle(
+//                        bounds.x,
+//                        MathUtil.round( currentPosition ),
+//                        bounds.width,
+//                        MathUtil.round( h ));
+//
+//                c.layout( subBounds, host );
+//
+//                currentPosition += h;
+//            }
         }
 
         @Override
@@ -1814,7 +1941,7 @@ public class MultiSplitLayout
     /**
      * Defines a vertical or horizontal subdivision into two or more tiles.
      */
-    public static class SplitImpl extends NodeImpl {
+    public static abstract class SplitImpl extends NodeImpl {
         private List<NodeImpl> _children =
                 Collections.emptyList();
         private List<NodeImpl> _childrenWoDividers =
@@ -1829,6 +1956,40 @@ public class MultiSplitLayout
         @Deprecated
         public SplitImpl(NodeImpl... children)
         {
+            setChildren(children);
+
+            _childrenWoDividers = _children.stream().filter(
+                    c -> ! DividerImpl.class.isInstance( c ) ).collect(
+                             Collectors.toList() );
+        }
+        public SplitImpl( Split split, MultiSplitLayout host )
+        {
+            var splitChildCount =
+                    split._nodes.size();
+
+            JavaUtil.Assert( splitChildCount > 0 );
+
+            List<NodeImpl> children =
+                    new ArrayList<>(
+                            splitChildCount +
+                            splitChildCount -1 );
+
+            int nodesIdx = 0;
+            for ( int i = 0 ; i < children.size() ; i++ )
+            {
+                if ( MathUtil.isEven(i) )
+                {
+                    children.set(
+                            i,
+                            split._nodes.get( nodesIdx++ ).convert( host ) );
+                }
+                else
+                {
+                    children.set( i, new DividerImpl() );
+                }
+
+            }
+
             setChildren(children);
 
             _childrenWoDividers = _children.stream().filter(
@@ -2093,10 +2254,14 @@ public class MultiSplitLayout
             }
         }
 
+        abstract void subLayout( Rectangle bounds, MultiSplitLayout host );
+
         @Override
-        void layout( Rectangle bounds, int dividerSize )
+        final void layout( Rectangle bounds, MultiSplitLayout host )
         {
-            throw new AssertionError( "Unexpected." );
+            setBounds( bounds );
+
+            subLayout( bounds, host );
         }
     }
 
@@ -2110,7 +2275,16 @@ public class MultiSplitLayout
         /**
          * Create a Leaf node.  The default value of name is "".
          */
-        public LeafImpl()
+        public LeafImpl( Leaf leaf )
+        {
+            _name = Objects.requireNonNull( leaf.name() );
+        }
+
+        /**
+         * Create a Leaf node.  The default value of name is "".
+         */
+        @Deprecated
+        public LeafImpl( )
         {
         }
 
@@ -2177,9 +2351,11 @@ public class MultiSplitLayout
         }
 
         @Override
-        void layout( Rectangle bounds, int dividerSize )
+        void layout( Rectangle bounds, MultiSplitLayout host )
         {
             setBounds( bounds );
+
+            host.getComponentForNode( this ).setBounds( bounds );
         }
     }
 
@@ -2229,182 +2405,11 @@ public class MultiSplitLayout
         }
 
         @Override
-        void layout( Rectangle bounds, int dividerSize )
+        void layout( Rectangle bounds, MultiSplitLayout host )
         {
             throw new AssertionError("Unexpected");
         }
     }
-
-    private static void throwParseException(StreamTokenizer st, String msg) throws Exception {
-        throw new Exception("MultiSplitLayout.parseModel Error: " + msg);
-    }
-
-    private static void parseAttribute(String name, StreamTokenizer st, NodeImpl node) throws Exception {
-        if ((st.nextToken() != '=')) {
-            throwParseException(st, "expected '=' after " + name);
-        }
-        if (name.equalsIgnoreCase("WEIGHT")) {
-            if (st.nextToken() == StreamTokenizer.TT_NUMBER) {
-                node.setWeight(st.nval);
-            }
-            else {
-                throwParseException(st, "invalid weight");
-            }
-        }
-        else if (name.equalsIgnoreCase("NAME")) {
-            if (st.nextToken() == StreamTokenizer.TT_WORD) {
-                if (node instanceof LeafImpl) {
-                    ((LeafImpl)node).setName(st.sval);
-                }
-                else if (node instanceof SplitImpl) {
-                    ((SplitImpl)node).setName(st.sval);
-                }
-                else {
-                    throwParseException(st, "can't specify name for " + node);
-                }
-            }
-            else {
-                throwParseException(st, "invalid name");
-            }
-        }
-        else {
-            throwParseException(st, "unrecognized attribute \"" + name + "\"");
-        }
-    }
-
-    private static void addSplitChild(SplitImpl parent, NodeImpl child) {
-        List<NodeImpl> children = new ArrayList<NodeImpl>(parent.getChildren());
-        if (children.size() == 0) {
-            children.add(child);
-        }
-        else {
-            children.add(new DividerImpl());
-            children.add(child);
-        }
-        parent.setChildren(children);
-    }
-
-    private static void parseLeaf(StreamTokenizer st, SplitImpl parent) throws Exception {
-        LeafImpl leaf = new LeafImpl();
-        int token;
-        while ((token = st.nextToken()) != StreamTokenizer.TT_EOF) {
-            if (token == ')') {
-                break;
-            }
-            if (token == StreamTokenizer.TT_WORD) {
-                parseAttribute(st.sval, st, leaf);
-            }
-            else {
-                throwParseException(st, "Bad Leaf: " + leaf);
-            }
-        }
-        addSplitChild(parent, leaf);
-    }
-
-    private static void parseSplit(StreamTokenizer st, SplitImpl parent) throws Exception {
-        int token;
-        while ((token = st.nextToken()) != StreamTokenizer.TT_EOF) {
-            if (token == ')') {
-                break;
-            }
-            else if (token == StreamTokenizer.TT_WORD) {
-                if (st.sval.equalsIgnoreCase("WEIGHT")) {
-                    parseAttribute(st.sval, st, parent);
-                }
-                else if (st.sval.equalsIgnoreCase("NAME")) {
-                    parseAttribute(st.sval, st, parent);
-                }
-                else {
-                    addSplitChild(parent, new LeafImpl(st.sval));
-                }
-            }
-            else if (token == '(') {
-                if ((token = st.nextToken()) != StreamTokenizer.TT_WORD) {
-                    throwParseException(st, "invalid node type");
-                }
-                String nodeType = st.sval.toUpperCase();
-                if (nodeType.equals("LEAF")) {
-                    parseLeaf(st, parent);
-                }
-                else if (nodeType.equals("ROW") || nodeType.equals("COLUMN")) {
-                    SplitImpl split = new SplitImpl();
-                    split.setRowLayout(nodeType.equals("ROW"));
-                    addSplitChild(parent, split);
-                    parseSplit(st, split);
-                }
-                else {
-                    throwParseException(st, "unrecognized node type '" + nodeType + "'");
-                }
-            }
-        }
-    }
-
-    private static NodeImpl parseModel(Reader r) {
-        StreamTokenizer st = new StreamTokenizer(r);
-        try {
-            SplitImpl root = new SplitImpl();
-            parseSplit(st, root);
-            return root.getChildren().get(0);
-        }
-        catch (Exception e) {
-            System.err.println(e);
-        }
-        finally {
-            try { r.close(); } catch (IOException ignore) {}
-        }
-        return null;
-    }
-
-    /**
-     * A convenience method that converts a string to a
-     * MultiSplitLayout model (a tree of Nodes) using a
-     * a simple syntax.  Nodes are represented by
-     * parenthetical expressions whose first token
-     * is one of ROW/COLUMN/LEAF.  ROW and COLUMN specify
-     * horizontal and vertical Split nodes respectively,
-     * LEAF specifies a Leaf node.  A Leaf's name and
-     * weight can be specified with attributes,
-     * name=<i>myLeafName</i> weight=<i>myLeafWeight</i>.
-     * Similarly, a Split's weight can be specified with
-     * weight=<i>mySplitWeight</i>.
-     *
-     * <p> For example, the following expression generates
-     * a horizontal Split node with three children:
-     * the Leafs named left and right, and a Divider in
-     * between:
-     * <pre>
-     * (ROW (LEAF name=left) (LEAF name=right weight=1.0))
-     * </pre>
-     *
-     * <p> Dividers should not be included in the string,
-     * they're added automatically as needed.  Because
-     * Leaf nodes often only need to specify a name, one
-     * can specify a Leaf by just providing the name.
-     * The previous example can be written like this:
-     * <pre>
-     * (ROW left (LEAF name=right weight=1.0))
-     * </pre>
-     *
-     * <p>Here's a more complex example.  One row with
-     * three elements, the first and last of which are columns
-     * with two leaves each:
-     * <pre>
-     * (ROW (COLUMN weight=0.5 left.top left.bottom)
-     *      (LEAF name=middle)
-     *      (COLUMN weight=0.5 right.top right.bottom))
-     * </pre>
-     *
-     *
-     * <p> This syntax is not intended for archiving or
-     * configuration files .  It's just a convenience for
-     * examples and tests.
-     *
-     * @return the Node root of a tree based on s.
-     */
-    public static NodeImpl parseModel(String s) {
-        return parseModel(new StringReader(s));
-    }
-
 
     private static void printModel(String indent, NodeImpl root) {
         if (root instanceof SplitImpl) {

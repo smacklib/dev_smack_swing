@@ -340,7 +340,7 @@ public class MultiSplitLayoutTest
             new LeafImpl( "one" ),
         };
 
-        SplitImpl split = new SplitImpl( nodes );
+        SplitImpl split = new RowImpl( nodes );
 
         assertEquals( nodes.length, split.getChildren().size() );
         assertEquals( nodes.length-count, split.size() );

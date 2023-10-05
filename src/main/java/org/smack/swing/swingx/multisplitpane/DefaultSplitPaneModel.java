@@ -20,8 +20,10 @@
  */
 package org.smack.swing.swingx.multisplitpane;
 
+import org.smack.swing.swingx.MultiSplitLayout.ColumnImpl;
 import org.smack.swing.swingx.MultiSplitLayout.DividerImpl;
 import org.smack.swing.swingx.MultiSplitLayout.LeafImpl;
+import org.smack.swing.swingx.MultiSplitLayout.RowImpl;
 import org.smack.swing.swingx.MultiSplitLayout.SplitImpl;
 /**
  * A simplified SplitPaneLayout for common split pane needs. A common multi splitpane
@@ -35,18 +37,19 @@ import org.smack.swing.swingx.MultiSplitLayout.SplitImpl;
  *
  * @author rbair
  */
-public class DefaultSplitPaneModel extends SplitImpl {
+public class DefaultSplitPaneModel extends RowImpl {
     public static final String LEFT = "left";
     public static final String TOP = "top";
     public static final String BOTTOM = "bottom";
-    
+
     /** Creates a new instance of DefaultSplitPaneLayout */
     public DefaultSplitPaneModel() {
-        SplitImpl row = new SplitImpl();
-        SplitImpl col = new SplitImpl();
+        setRowLayout( true );
+        //SplitImpl row = new RowImpl();
+        SplitImpl col = new ColumnImpl();
         col.setRowLayout(false);
         setChildren(new LeafImpl(LEFT), new DividerImpl(), col);
         col.setChildren(new LeafImpl(TOP), new DividerImpl(), new LeafImpl(BOTTOM));
     }
-    
+
 }
