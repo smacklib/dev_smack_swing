@@ -11,11 +11,13 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 import javax.accessibility.AccessibleContext;
 import javax.accessibility.AccessibleRole;
@@ -39,6 +41,8 @@ import org.smack.swing.swingx.painter.AbstractPainter;
 @SuppressWarnings("serial")
 public final class JXMultiSplitPane extends JPanel
 {
+    private static final Logger LOG = Logger.getLogger( JXMultiSplitPane.class.getName() );
+
     private AccessibleContext accessibleContext = null;
     private boolean continuousLayout = true;
     private DividerPainter dividerPainter = new DefaultDividerPainter();
@@ -238,67 +242,114 @@ public final class JXMultiSplitPane extends JPanel
     private int dragMin = -1;
     private int dragMax = -1;
 
-    private void startDrag(int mx, int my) {
+    private Point _dragPoint = null;
+
+    private void startDrag( Point p ) {
         requestFocusInWindow();
         MultiSplitLayout msl = getMultiSplitLayout();
-        MultiSplitLayout.DividerImpl divider = msl.dividerAt(mx, my);
-        if (divider != null) {
-            MultiSplitLayout.NodeImpl prevNode = divider.previousSibling();
-            MultiSplitLayout.NodeImpl nextNode = divider.nextSibling();
-            if ((prevNode == null) || (nextNode == null)) {
-                dragUnderway = false;
-            }
-            else {
-                initialDividerBounds = divider.getBounds();
-                dragOffsetX = mx - initialDividerBounds.x;
-                dragOffsetY = my - initialDividerBounds.y;
-                dragDivider  = divider;
+        dragDivider = msl.dividerAt( p.x, p.y );
 
-                Rectangle prevNodeBounds = prevNode.getBounds();
-                Rectangle nextNodeBounds = nextNode.getBounds();
-                if (dragDivider.isVertical()) {
-                    dragMin = prevNodeBounds.x;
-                    dragMax = nextNodeBounds.x + nextNodeBounds.width;
-                    dragMax -= dragDivider.getBounds().width;
-                    if ( msl.getLayoutMode() == MultiSplitLayout.LayoutMode.USER_MIN_SIZE_LAYOUT )
-                        dragMax -= msl.getUserMinSize();
-                }
-                else {
-                    dragMin = prevNodeBounds.y;
-                    dragMax = nextNodeBounds.y + nextNodeBounds.height;
-                    dragMax -= dragDivider.getBounds().height;
-                    if ( msl.getLayoutMode() == MultiSplitLayout.LayoutMode.USER_MIN_SIZE_LAYOUT )
-                        dragMax -= msl.getUserMinSize();
-                }
-
-                if ( msl.getLayoutMode() == MultiSplitLayout.LayoutMode.USER_MIN_SIZE_LAYOUT ) {
-                    dragMin = dragMin + msl.getUserMinSize();
-                }
-                else {
-                    if (dragDivider.isVertical()) {
-                        dragMin = Math.max( dragMin, dragMin + getMinNodeSize(msl,prevNode).width );
-                        dragMax = Math.min( dragMax, dragMax - getMinNodeSize(msl,nextNode).width );
-
-                        Dimension maxDim = getMaxNodeSize(msl,prevNode);
-                        if ( maxDim != null )
-                            dragMax = Math.min( dragMax, prevNodeBounds.x + maxDim.width );
-                    }
-                    else {
-                        dragMin = Math.max( dragMin, dragMin + getMinNodeSize(msl,prevNode).height );
-                        dragMax = Math.min( dragMax, dragMax - getMinNodeSize(msl,nextNode).height );
-
-                        Dimension maxDim  = getMaxNodeSize(msl,prevNode);
-                        if ( maxDim != null )
-                            dragMax = Math.min( dragMax, prevNodeBounds.y + maxDim.height );
-                    }
-                }
-
-                dragUnderway = true;
-            }
-        }
-        else {
+        if ( dragDivider == null ) {
+            LOG.warning( "No divider." );
             dragUnderway = false;
+            return;
         }
+
+        _dragPoint = p;
+
+        LOG.info( "Start drag: " + _dragPoint );
+
+        dragUnderway = true;
+
+//
+//        if (divider != null) {
+//            MultiSplitLayout.NodeImpl prevNode = divider.previousSibling();
+//            MultiSplitLayout.NodeImpl nextNode = divider.nextSibling();
+//            if ((prevNode == null) || (nextNode == null)) {
+//                dragUnderway = false;
+//            }
+//            else {
+//                initialDividerBounds = divider.getBounds();
+//                dragOffsetX = mx - initialDividerBounds.x;
+//                dragOffsetY = my - initialDividerBounds.y;
+//                dragDivider  = divider;
+//
+//                Rectangle prevNodeBounds = prevNode.getBounds();
+//                Rectangle nextNodeBounds = nextNode.getBounds();
+//                if (dragDivider.isVertical()) {
+//                    dragMin = prevNodeBounds.x;
+//                    dragMax = nextNodeBounds.x + nextNodeBounds.width;
+//                    dragMax -= dragDivider.getBounds().width;
+//                    if ( msl.getLayoutMode() == MultiSplitLayout.LayoutMode.USER_MIN_SIZE_LAYOUT )
+//                        dragMax -= msl.getUserMinSize();
+//                }
+//                else {
+//                    dragMin = prevNodeBounds.y;
+//                    dragMax = nextNodeBounds.y + nextNodeBounds.height;
+//                    dragMax -= dragDivider.getBounds().height;
+//                    if ( msl.getLayoutMode() == MultiSplitLayout.LayoutMode.USER_MIN_SIZE_LAYOUT )
+//                        dragMax -= msl.getUserMinSize();
+//                }
+//
+//                if ( msl.getLayoutMode() == MultiSplitLayout.LayoutMode.USER_MIN_SIZE_LAYOUT ) {
+//                    dragMin = dragMin + msl.getUserMinSize();
+//                }
+//                else {
+//                    if (dragDivider.isVertical()) {
+//                        dragMin = Math.max( dragMin, dragMin + getMinNodeSize(msl,prevNode).width );
+//                        dragMax = Math.min( dragMax, dragMax - getMinNodeSize(msl,nextNode).width );
+//
+//                        Dimension maxDim = getMaxNodeSize(msl,prevNode);
+//                        if ( maxDim != null )
+//                            dragMax = Math.min( dragMax, prevNodeBounds.x + maxDim.width );
+//                    }
+//                    else {
+//                        dragMin = Math.max( dragMin, dragMin + getMinNodeSize(msl,prevNode).height );
+//                        dragMax = Math.min( dragMax, dragMax - getMinNodeSize(msl,nextNode).height );
+//
+//                        Dimension maxDim  = getMaxNodeSize(msl,prevNode);
+//                        if ( maxDim != null )
+//                            dragMax = Math.min( dragMax, prevNodeBounds.y + maxDim.height );
+//                    }
+//                }
+//
+//                dragUnderway = true;
+//            }
+//        }
+//        else {
+//            dragUnderway = false;
+//        }
+    }
+
+    private void updateDrag( Point p ) {
+        if (!dragUnderway) {
+            return;
+        }
+
+        _dragPoint = dragDivider.move( _dragPoint, p );
+
+        revalidate();
+        repaint();
+//        Rectangle oldBounds = dragDivider.getBounds();
+//        Rectangle bounds = new Rectangle(oldBounds);
+//        if (dragDivider.isVertical()) {
+//            bounds.x = mx - dragOffsetX;
+//            bounds.x = Math.max(bounds.x, dragMin );
+//            bounds.x = Math.min(bounds.x, dragMax);
+//        }
+//        else {
+//            bounds.y = my - dragOffsetY;
+//            bounds.y = Math.max(bounds.y, dragMin );
+//            bounds.y = Math.min(bounds.y, dragMax);
+//        }
+//        dragDivider.setBounds(bounds);
+//        if (isContinuousLayout()) {
+//            revalidate();
+//            repaintDragLimits();
+//        }
+//        else {
+//            repaint(oldBounds.union(bounds));
+//        }
     }
 
     /**
@@ -349,32 +400,6 @@ public final class JXMultiSplitPane extends JPanel
         repaint(damageR);
     }
 
-    private void updateDrag(int mx, int my) {
-        if (!dragUnderway) {
-            return;
-        }
-        Rectangle oldBounds = dragDivider.getBounds();
-        Rectangle bounds = new Rectangle(oldBounds);
-        if (dragDivider.isVertical()) {
-            bounds.x = mx - dragOffsetX;
-            bounds.x = Math.max(bounds.x, dragMin );
-            bounds.x = Math.min(bounds.x, dragMax);
-        }
-        else {
-            bounds.y = my - dragOffsetY;
-            bounds.y = Math.max(bounds.y, dragMin );
-            bounds.y = Math.min(bounds.y, dragMax);
-        }
-        dragDivider.setBounds(bounds);
-        if (isContinuousLayout()) {
-            revalidate();
-            repaintDragLimits();
-        }
-        else {
-            repaint(oldBounds.union(bounds));
-        }
-    }
-
     private void clearDragState() {
         dragDivider = null;
         initialDividerBounds = null;
@@ -406,9 +431,11 @@ public final class JXMultiSplitPane extends JPanel
     }
 
     private void updateCursor(int x, int y, boolean show) {
+        LOG.info( "enter" );
         if (dragUnderway) {
             return;
         }
+        LOG.info( "not underway" );
         int cursorID = Cursor.DEFAULT_CURSOR;
         if (show) {
             MultiSplitLayout.DividerImpl divider = getMultiSplitLayout().dividerAt(x, y);
@@ -420,7 +447,6 @@ public final class JXMultiSplitPane extends JPanel
         }
         setCursor(Cursor.getPredefinedCursor(cursorID));
     }
-
 
     private class InputHandler extends MouseInputAdapter implements KeyListener {
 
@@ -441,7 +467,7 @@ public final class JXMultiSplitPane extends JPanel
 
         @Override
         public void mousePressed(MouseEvent e) {
-            startDrag(e.getX(), e.getY());
+            startDrag( e.getPoint() );
         }
         @Override
         public void mouseReleased(MouseEvent e) {
@@ -449,7 +475,7 @@ public final class JXMultiSplitPane extends JPanel
         }
         @Override
         public void mouseDragged(MouseEvent e) {
-            updateDrag(e.getX(), e.getY());
+            updateDrag( e.getPoint() );
         }
         @Override
         public void keyPressed(KeyEvent e) {

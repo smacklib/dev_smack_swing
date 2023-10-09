@@ -11,6 +11,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -1536,12 +1537,28 @@ public class MultiSplitLayout
      * Base class for the nodes that model a MultiSplitLayout.
      */
     public static abstract class NodeImpl implements Serializable {
+
+        private int _parentIdx;
+
         private SplitImpl parent = null;
+
         private final Rectangle _bounds = new Rectangle();
+
         private double weight = 0.0;
+
         private boolean isVisible = true;
+
         public void setVisible( boolean b ) {
             isVisible = b;
+        }
+
+        public void setParentIdx( int idx )
+        {
+            _parentIdx = idx;
+        }
+        public int getParentIdx()
+        {
+            return _parentIdx;
         }
 
         /**
@@ -1561,7 +1578,10 @@ public class MultiSplitLayout
          * @return the value of the parent property.
          * @see #setParent
          */
-        public SplitImpl getParent() { return parent; }
+        public SplitImpl getParent()
+        {
+            return parent;
+        }
 
         /**
          * Set the value of this Node's parent property.  The default
@@ -1570,6 +1590,7 @@ public class MultiSplitLayout
          * @param parent a Split or null
          * @see #getParent
          */
+        // TODO: fluent api
         public void setParent(SplitImpl parent) {
             this.parent = parent;
         }
@@ -1581,6 +1602,42 @@ public class MultiSplitLayout
         public Rectangle getBounds() {
             return new Rectangle(this._bounds);
         }
+        public NodeImpl _width( int width )
+        {
+            _bounds.width = width;
+            return this;
+        }
+        public int _width()
+        {
+            return _bounds.width;
+        }
+        public NodeImpl _height( int height )
+        {
+            _bounds.height = height;
+            return this;
+        }
+        public int _height()
+        {
+            return _bounds.height;
+        }
+        public NodeImpl _x( int x )
+        {
+            _bounds.x = x;
+            return this;
+        }
+        public int _x()
+        {
+            return _bounds.x;
+        }
+        public NodeImpl _y( int y )
+        {
+            _bounds.y = y;
+            return this;
+        }
+        public int _y()
+        {
+            return _bounds.y;
+        }
 
         /**
          * @return The bounds property.
@@ -1588,7 +1645,6 @@ public class MultiSplitLayout
         protected Rectangle bounds()
         {
             return _bounds;
-
         }
 
         /**
@@ -1654,6 +1710,24 @@ public class MultiSplitLayout
             index += offset;
             return ((index > -1) && (index < siblings.size())) ? siblings.get(index) : null;
         }
+        private NodeImpl _siblingAtOffset(int offset)
+        {
+            SplitImpl p = getParent();
+
+            if (p == null)
+                return null;
+
+            var siblings = p.getChildren();
+
+            JavaUtil.Assert( siblings != null );
+
+            int siblingIdx = _parentIdx + offset;
+
+            JavaUtil.Assert( siblingIdx >= 0 );
+            JavaUtil.Assert( siblingIdx < siblings.size() );
+
+            return siblings.get( siblingIdx );
+        }
 
         /**
          * Return the Node that comes after this one in the parent's
@@ -1667,6 +1741,9 @@ public class MultiSplitLayout
         public NodeImpl nextSibling() {
             return siblingAtOffset(+1);
         }
+        public NodeImpl next() {
+            return _siblingAtOffset(1);
+        }
 
         /**
          * Return the Node that comes before this one in the parent's
@@ -1679,6 +1756,9 @@ public class MultiSplitLayout
          */
         public NodeImpl previousSibling() {
             return siblingAtOffset(-1);
+        }
+        public NodeImpl previous() {
+            return _siblingAtOffset(-1);
         }
 
         abstract void validate( Set<String> nameCollector );
@@ -1803,6 +1883,21 @@ public class MultiSplitLayout
 
             return bounds.x + bounds.width;
         }
+
+        /**
+         * Row.
+         */
+        @Override
+        public void adjustWeights()
+        {
+            double toDistribute = 0.0;
+
+            for ( var c : getChildren2() )
+                toDistribute += c._width();
+
+            for ( var c : getChildren2() )
+                c.setWeight( c._width() / toDistribute );
+        }
     }
 
     public static class ColumnImpl extends SplitImpl {
@@ -1903,23 +1998,6 @@ public class MultiSplitLayout
                 LOG.warning( String.format(
                         "Corrected width %d not %d.", extent(), bounds.height ) );
             }
-//            var children =  _completeWeights( getChildren2() );
-//
-//            double currentPosition = 0.0;
-//            for ( var c : children )
-//            {
-//                double h = c.getWeight() * bounds.height;
-//
-//                Rectangle subBounds = new Rectangle(
-//                        bounds.x,
-//                        MathUtil.round( currentPosition ),
-//                        bounds.width,
-//                        MathUtil.round( h ));
-//
-//                c.layout( subBounds, host );
-//
-//                currentPosition += h;
-//            }
         }
 
         @Override
@@ -1936,6 +2014,20 @@ public class MultiSplitLayout
             return bounds.y + bounds.height;
         }
 
+        /**
+         * Column.
+         */
+        @Override
+        public void adjustWeights()
+        {
+            double toDistribute = 0.0;
+
+            for ( var c : getChildren2() )
+                toDistribute += c._height();
+
+            for ( var c : getChildren2() )
+                c.setWeight( c._height() / toDistribute );
+        }
     }
 
     /**
@@ -2010,12 +2102,14 @@ public class MultiSplitLayout
         }
 
         /**
+         * Adjust the weights to the nodes sizes.
+         */
+        public abstract void adjustWeights();
+
+        /**
          * @return The splits extent after layouting.
          */
-        public int extent()
-        {
-            return -1;
-        }
+        public abstract int extent();
 
         /**
          * Determines whether this node should be visible when its
@@ -2141,27 +2235,25 @@ public class MultiSplitLayout
         }
 
         /**
-         * Set's the children property of this Split node.  The parent
-         * of each new child is set to this Split node, and the parent
-         * of each old child (if any) is set to null.  This method
-         * defensively copies the incoming List.  Default value is
-         * an empty List.
+         * Set's the children property of this Split node.
          *
          * @param children List of children
          * @see #getChildren
          * @throws IllegalArgumentException if children is null
          */
-        public void setChildren(List<NodeImpl> children) {
-            if (children == null) {
-                throw new IllegalArgumentException("children must be a non-null List");
-            }
-            for(NodeImpl child : this._children) {
-                child.setParent(null);
-            }
+        public void setChildren(List<NodeImpl> children)
+        {
+            JavaUtil.Assert( _children.size() == 0 );
 
-            this._children = new ArrayList<NodeImpl>(children);
-            for(NodeImpl child : this._children) {
-                child.setParent(this);
+            _children = new ArrayList<NodeImpl>(
+                    Objects.requireNonNull( children ) );
+
+            int idx = 0;
+
+            for(NodeImpl c : _children)
+            {
+                c.setParent(this);
+                c.setParentIdx( idx++ );
             }
         }
 
@@ -2408,6 +2500,35 @@ public class MultiSplitLayout
         void layout( Rectangle bounds, MultiSplitLayout host )
         {
             throw new AssertionError("Unexpected");
+        }
+
+        public Point move( Point from, Point to )
+        {
+            var prev = previous();
+            var next = next();
+
+            if ( isVertical() )
+            {
+                var delta = to.x - from.x;
+
+                prev._width( prev._width() + delta );
+                _x( _x() + delta );
+                next._x( next._x() + delta );
+                next._width( next._width() - delta );
+            }
+            else
+            {
+                var delta = to.y - from.y;
+
+                prev._height( prev._height() + delta );
+                _y( _y() + delta );
+                next._y( next._y() + delta );
+                next._height( next._height() - delta );
+            }
+
+            getParent().adjustWeights();
+
+            return to;
         }
     }
 
