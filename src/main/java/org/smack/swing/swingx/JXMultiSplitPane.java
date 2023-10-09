@@ -387,19 +387,6 @@ public final class JXMultiSplitPane extends JPanel
         return msl.minimumNodeSize(n);
     }
 
-    private void repaintDragLimits() {
-        Rectangle damageR = dragDivider.getBounds();
-        if (dragDivider.isVertical()) {
-            damageR.x = dragMin;
-            damageR.width = dragMax - dragMin;
-        }
-        else {
-            damageR.y = dragMin;
-            damageR.height = dragMax - dragMin;
-        }
-        repaint(damageR);
-    }
-
     private void clearDragState() {
         dragDivider = null;
         initialDividerBounds = null;
@@ -430,12 +417,11 @@ public final class JXMultiSplitPane extends JPanel
         }
     }
 
-    private void updateCursor(int x, int y, boolean show) {
-        LOG.info( "enter" );
-        if (dragUnderway) {
+    private void updateCursor(int x, int y, boolean show)
+    {
+        if (dragUnderway)
             return;
-        }
-        LOG.info( "not underway" );
+
         int cursorID = Cursor.DEFAULT_CURSOR;
         if (show) {
             MultiSplitLayout.DividerImpl divider = getMultiSplitLayout().dividerAt(x, y);

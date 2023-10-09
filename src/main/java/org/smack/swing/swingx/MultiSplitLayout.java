@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -982,136 +981,136 @@ public class MultiSplitLayout
     }
 
 
-    /* First pass of the layout algorithm.
-     *
-     * If the Dividers are "floating" then set the bounds of each
-     * node to accomodate the preferred size of all of the
-     * Leaf's java.awt.Components.  Otherwise, just set the bounds
-     * of each Leaf/Split node so that it's to the left of (for
-     * Split.isRowLayout() Split children) or directly above
-     * the Divider that follows.
-     *
-     * This pass sets the bounds of each Node in the layout model.  It
-     * does not resize any of the parent Container's
-     * (java.awt.Component) children.  That's done in the second pass,
-     * see layoutGrow() and layoutShrink().
-     */
-    private void layout1(NodeImpl root, Rectangle bounds) {
-        if (root instanceof LeafImpl) {
-            root.setBounds(bounds);
-        }
-        else if (root instanceof SplitImpl) {
-            SplitImpl split = (SplitImpl)root;
-            Iterator<NodeImpl> splitChildren = split.getChildren().iterator();
-            Rectangle childBounds = null;
-            int divSize = getDividerSize();
-            boolean initSplit = false;
-
-
-            /* Layout the Split's child Nodes' along the X axis.  The bounds
-             * of each child will have the same y coordinate and height as the
-             * layout1() bounds argument.
-             *
-             * Note: the column layout code - that's the "else" clause below
-             * this if, is identical to the X axis (rowLayout) code below.
-             */
-            if (split.isRowLayout()) {
-                double x = bounds.getX();
-                while(splitChildren.hasNext()) {
-                    NodeImpl splitChild = splitChildren.next();
-                    if ( !splitChild.isVisible()) {
-                        if ( splitChildren.hasNext())
-                            splitChildren.next();
-                        continue;
-                    }
-                    DividerImpl dividerChild =
-                            (splitChildren.hasNext()) ? (DividerImpl)(splitChildren.next()) : null;
-
-                    double childWidth = 0.0;
-
-                    if ((dividerChild != null) && dividerChild.isVisible()) {
-                        double cw = dividerChild.getBounds().getX() - x;
-                        if ( cw > 0.0 )
-                            childWidth = cw;
-                        else {
-                            childWidth = preferredNodeSize(splitChild).getWidth();
-                            initSplit = true;
-                        }
-                    }
-                    else {
-                        childWidth = split.getBounds().getMaxX() - x;
-                    }
-                    childBounds = boundsWithXandWidth(bounds, x, childWidth);
-                    layout1(splitChild, childBounds);
-
-                    if (( initSplit || false) && (dividerChild != null) && dividerChild.isVisible()) {
-                        double dividerX = childBounds.getMaxX();
-                        Rectangle dividerBounds;
-                        dividerBounds = boundsWithXandWidth(bounds, dividerX, divSize);
-                        dividerChild.setBounds(dividerBounds);
-                    }
-                    if ((dividerChild != null) && dividerChild.isVisible()) {
-                        x = dividerChild.getBounds().getMaxX();
-                    }
-                }
-            }
-
-            /* Layout the Split's child Nodes' along the Y axis.  The bounds
-             * of each child will have the same x coordinate and width as the
-             * layout1() bounds argument.  The algorithm is identical to what's
-             * explained above, for the X axis case.
-             */
-            else {
-                double y = bounds.getY();
-                while(splitChildren.hasNext())
-                {
-                    NodeImpl splitChild = splitChildren.next();
-
-                    if ( !splitChild.isVisible()) {
-                        continue;
-                    }
-
-                    DividerImpl dividerChild = (splitChildren.hasNext()) ?
-                            (DividerImpl)(splitChildren.next()) :
-                                null;
-
-                    double childHeight = 0.0;
-                    if ((dividerChild != null) && dividerChild.isVisible()) {
-                        double cy = dividerChild.getBounds().getY() - y;
-                        if ( cy > 0.0 )
-                            childHeight = cy;
-                        else {
-                            childHeight = preferredNodeSize(splitChild).getHeight();
-                            initSplit = true;
-                        }
-                    }
-                    else {
-                        childHeight = split.getBounds().getMaxY() - y;
-                    }
-
-                    childBounds = boundsWithYandHeight(bounds, y, childHeight);
-                    layout1(splitChild, childBounds);
-
-                    if (( initSplit || false) && (dividerChild != null) && dividerChild.isVisible()) {
-                        double dividerY = childBounds.getMaxY();
-                        Rectangle dividerBounds = boundsWithYandHeight(bounds, dividerY, divSize);
-                        dividerChild.setBounds(dividerBounds);
-                    }
-                    if ((dividerChild != null) && dividerChild.isVisible()) {
-                        y = dividerChild.getBounds().getMaxY();
-                    }
-                }
-            }
-            /* The bounds of the Split node root are set to be just
-             * big enough to contain all of its children, but only
-             * along the axis it's allocating space on.  That's
-             * X for rows, Y for columns.  The second pass of the
-             * layout algorithm - see layoutShrink()/layoutGrow()
-             * allocates extra space.
-             */
-            minimizeSplitBounds(split, bounds);
-        }
-    }
+//    /* First pass of the layout algorithm.
+//     *
+//     * If the Dividers are "floating" then set the bounds of each
+//     * node to accomodate the preferred size of all of the
+//     * Leaf's java.awt.Components.  Otherwise, just set the bounds
+//     * of each Leaf/Split node so that it's to the left of (for
+//     * Split.isRowLayout() Split children) or directly above
+//     * the Divider that follows.
+//     *
+//     * This pass sets the bounds of each Node in the layout model.  It
+//     * does not resize any of the parent Container's
+//     * (java.awt.Component) children.  That's done in the second pass,
+//     * see layoutGrow() and layoutShrink().
+//     */
+//    private void layout1(NodeImpl root, Rectangle bounds) {
+//        if (root instanceof LeafImpl) {
+//            root.setBounds(bounds);
+//        }
+//        else if (root instanceof SplitImpl) {
+//            SplitImpl split = (SplitImpl)root;
+//            Iterator<NodeImpl> splitChildren = split.getChildren().iterator();
+//            Rectangle childBounds = null;
+//            int divSize = getDividerSize();
+//            boolean initSplit = false;
+//
+//
+//            /* Layout the Split's child Nodes' along the X axis.  The bounds
+//             * of each child will have the same y coordinate and height as the
+//             * layout1() bounds argument.
+//             *
+//             * Note: the column layout code - that's the "else" clause below
+//             * this if, is identical to the X axis (rowLayout) code below.
+//             */
+//            if (split.isRowLayout()) {
+//                double x = bounds.getX();
+//                while(splitChildren.hasNext()) {
+//                    NodeImpl splitChild = splitChildren.next();
+//                    if ( !splitChild.isVisible()) {
+//                        if ( splitChildren.hasNext())
+//                            splitChildren.next();
+//                        continue;
+//                    }
+//                    DividerImpl dividerChild =
+//                            (splitChildren.hasNext()) ? (DividerImpl)(splitChildren.next()) : null;
+//
+//                    double childWidth = 0.0;
+//
+//                    if ((dividerChild != null) && dividerChild.isVisible()) {
+//                        double cw = dividerChild.getBounds().getX() - x;
+//                        if ( cw > 0.0 )
+//                            childWidth = cw;
+//                        else {
+//                            childWidth = preferredNodeSize(splitChild).getWidth();
+//                            initSplit = true;
+//                        }
+//                    }
+//                    else {
+//                        childWidth = split.getBounds().getMaxX() - x;
+//                    }
+//                    childBounds = boundsWithXandWidth(bounds, x, childWidth);
+//                    layout1(splitChild, childBounds);
+//
+//                    if (( initSplit || false) && (dividerChild != null) && dividerChild.isVisible()) {
+//                        double dividerX = childBounds.getMaxX();
+//                        Rectangle dividerBounds;
+//                        dividerBounds = boundsWithXandWidth(bounds, dividerX, divSize);
+//                        dividerChild.setBounds(dividerBounds);
+//                    }
+//                    if ((dividerChild != null) && dividerChild.isVisible()) {
+//                        x = dividerChild.getBounds().getMaxX();
+//                    }
+//                }
+//            }
+//
+//            /* Layout the Split's child Nodes' along the Y axis.  The bounds
+//             * of each child will have the same x coordinate and width as the
+//             * layout1() bounds argument.  The algorithm is identical to what's
+//             * explained above, for the X axis case.
+//             */
+//            else {
+//                double y = bounds.getY();
+//                while(splitChildren.hasNext())
+//                {
+//                    NodeImpl splitChild = splitChildren.next();
+//
+//                    if ( !splitChild.isVisible()) {
+//                        continue;
+//                    }
+//
+//                    DividerImpl dividerChild = (splitChildren.hasNext()) ?
+//                            (DividerImpl)(splitChildren.next()) :
+//                                null;
+//
+//                    double childHeight = 0.0;
+//                    if ((dividerChild != null) && dividerChild.isVisible()) {
+//                        double cy = dividerChild.getBounds().getY() - y;
+//                        if ( cy > 0.0 )
+//                            childHeight = cy;
+//                        else {
+//                            childHeight = preferredNodeSize(splitChild).getHeight();
+//                            initSplit = true;
+//                        }
+//                    }
+//                    else {
+//                        childHeight = split.getBounds().getMaxY() - y;
+//                    }
+//
+//                    childBounds = boundsWithYandHeight(bounds, y, childHeight);
+//                    layout1(splitChild, childBounds);
+//
+//                    if (( initSplit || false) && (dividerChild != null) && dividerChild.isVisible()) {
+//                        double dividerY = childBounds.getMaxY();
+//                        Rectangle dividerBounds = boundsWithYandHeight(bounds, dividerY, divSize);
+//                        dividerChild.setBounds(dividerBounds);
+//                    }
+//                    if ((dividerChild != null) && dividerChild.isVisible()) {
+//                        y = dividerChild.getBounds().getMaxY();
+//                    }
+//                }
+//            }
+//            /* The bounds of the Split node root are set to be just
+//             * big enough to contain all of its children, but only
+//             * along the axis it's allocating space on.  That's
+//             * X for rows, Y for columns.  The second pass of the
+//             * layout algorithm - see layoutShrink()/layoutGrow()
+//             * allocates extra space.
+//             */
+//            minimizeSplitBounds(split, bounds);
+//        }
+//    }
 
     /**
      * Get the layout mode
@@ -1196,64 +1195,64 @@ public class MultiSplitLayout
         throw new InvalidLayoutException(msg, node);
     }
 
-    @Deprecated
-    private void checkLayout(NodeImpl root) {
-        if (root instanceof SplitImpl) {
-            SplitImpl split = (SplitImpl)root;
-            if (split.getChildren().size() <= 2) {
-                throwInvalidLayout("Split must have > 2 children", root);
-            }
-            Iterator<NodeImpl> splitChildren = split.getChildren().iterator();
-            double weight = 0.0;
-            while(splitChildren.hasNext())       {
-                NodeImpl splitChild = splitChildren.next();
-                if ( !splitChild.isVisible()) {
-                    if ( splitChildren.hasNext())
-                        splitChildren.next();
-                    continue;
-                }
-                if (splitChild instanceof DividerImpl) {
-                    continue;
-                    //throwInvalidLayout("expected a Split or Leaf Node", splitChild);
-                }
-                if (splitChildren.hasNext()) {
-                    NodeImpl dividerChild = splitChildren.next();
-                    if (!(dividerChild instanceof DividerImpl)) {
-                        throwInvalidLayout("expected a Divider Node", dividerChild);
-                    }
-                }
-                weight += splitChild.getWeight();
-                checkLayout(splitChild);
-            }
-            if (weight > 1.0) {
-                throwInvalidLayout("Split children's total weight > 1.0", root);
-            }
-        }
-    }
+//    @Deprecated
+//    private void checkLayout(NodeImpl root) {
+//        if (root instanceof SplitImpl) {
+//            SplitImpl split = (SplitImpl)root;
+//            if (split.getChildren().size() <= 2) {
+//                throwInvalidLayout("Split must have > 2 children", root);
+//            }
+//            Iterator<NodeImpl> splitChildren = split.getChildren().iterator();
+//            double weight = 0.0;
+//            while(splitChildren.hasNext())       {
+//                NodeImpl splitChild = splitChildren.next();
+//                if ( !splitChild.isVisible()) {
+//                    if ( splitChildren.hasNext())
+//                        splitChildren.next();
+//                    continue;
+//                }
+//                if (splitChild instanceof DividerImpl) {
+//                    continue;
+//                    //throwInvalidLayout("expected a Split or Leaf Node", splitChild);
+//                }
+//                if (splitChildren.hasNext()) {
+//                    NodeImpl dividerChild = splitChildren.next();
+//                    if (!(dividerChild instanceof DividerImpl)) {
+//                        throwInvalidLayout("expected a Divider Node", dividerChild);
+//                    }
+//                }
+//                weight += splitChild.getWeight();
+//                checkLayout(splitChild);
+//            }
+//            if (weight > 1.0) {
+//                throwInvalidLayout("Split children's total weight > 1.0", root);
+//            }
+//        }
+//    }
     private void validateLayout( NodeImpl root )
     {
         root.validate( new HashSet<>() );
     }
 
-    /**
-     * Compute the bounds of all of the Split/Divider/Leaf Nodes in
-     * the layout model, and then set the bounds of each child component
-     * with a matching Leaf Node.
-     */
-    public void layoutContainerOld(Container parent)
-    {
-        if ( layoutByWeight )
-            doLayoutByWeight( parent );
-
-        checkLayout(getModel());
-        Insets insets = parent.getInsets();
-        Dimension size = parent.getSize();
-        int width = size.width - (insets.left + insets.right);
-        int height = size.height - (insets.top + insets.bottom);
-        Rectangle bounds = new Rectangle( insets.left, insets.top, width, height);
-        layout1(getModel(), bounds);
-        layout2(getModel(), bounds);
-    }
+//    /**
+//     * Compute the bounds of all of the Split/Divider/Leaf Nodes in
+//     * the layout model, and then set the bounds of each child component
+//     * with a matching Leaf Node.
+//     */
+//    public void layoutContainerOld(Container parent)
+//    {
+//        if ( layoutByWeight )
+//            doLayoutByWeight( parent );
+//
+//        checkLayout(getModel());
+//        Insets insets = parent.getInsets();
+//        Dimension size = parent.getSize();
+//        int width = size.width - (insets.left + insets.right);
+//        int height = size.height - (insets.top + insets.bottom);
+//        Rectangle bounds = new Rectangle( insets.left, insets.top, width, height);
+//        layout1(getModel(), bounds);
+//        layout2(getModel(), bounds);
+//    }
 
     /**
      *
@@ -1540,7 +1539,7 @@ public class MultiSplitLayout
 
         private int _parentIdx;
 
-        private SplitImpl parent = null;
+        private SplitImpl _parent = null;
 
         private final Rectangle _bounds = new Rectangle();
 
@@ -1580,7 +1579,7 @@ public class MultiSplitLayout
          */
         public SplitImpl getParent()
         {
-            return parent;
+            return _parent;
         }
 
         /**
@@ -1592,7 +1591,8 @@ public class MultiSplitLayout
          */
         // TODO: fluent api
         public void setParent(SplitImpl parent) {
-            this.parent = parent;
+            JavaUtil.Assert( _parent == null );
+            _parent = parent;
         }
 
         /**
@@ -1901,8 +1901,8 @@ public class MultiSplitLayout
     }
 
     public static class ColumnImpl extends SplitImpl {
-        public ColumnImpl() {
-        }
+//        public ColumnImpl() {
+//        }
 
         public ColumnImpl( Column column, MultiSplitLayout host )
         {
