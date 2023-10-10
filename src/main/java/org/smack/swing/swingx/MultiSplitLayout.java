@@ -3,7 +3,6 @@
  *
  * Copyright © 2003-2023 Michael Binz
  */
-
 package org.smack.swing.swingx;
 
 import java.awt.Component;
@@ -93,9 +92,15 @@ public class MultiSplitLayout
                     new JSplitPane().getDividerSize(),
                     "dividerSize" );
 
+    private JavaBeanProperty<Integer, MultiSplitLayout> _minimumExtent =
+            new JavaBeanProperty<>(
+                    this,
+                    20,
+                    "minimumExtent" );
+
     private LayoutMode layoutMode;
 
-    private int _userMinSize = 20;
+//    private int _userMinSize = 20;
 
     /**
      * Create a MultiSplitLayout with a default model with a single
@@ -252,8 +257,7 @@ public class MultiSplitLayout
 
     /**
      * Sets the width of Dividers in Split rows, and the height of
-     * Dividers in Split columns.  The default value of this property
-     * is the same as for JSplitPane Dividers.
+     * Dividers in Split columns.
      *
      * @param dividerSize the size of dividers (pixels)
      * @throws IllegalArgumentException if dividerSize < 0
@@ -266,6 +270,8 @@ public class MultiSplitLayout
 
         _dividerSize.set( dividerSize );
     }
+
+
 
     /**
      * Add a component to this MultiSplitLayout.  The
@@ -297,7 +303,8 @@ public class MultiSplitLayout
      */
     @Override
     public void removeLayoutComponent(Component child) {
-        String name = getNameForComponent( child );
+        String name = getNameForComponent(
+                Objects.requireNonNull( child ) );
 
         if ( name != null ) {
             _childMap.remove( name );
@@ -454,9 +461,9 @@ public class MultiSplitLayout
      * Get the minimum node size
      * @return the minimum size
      */
-    public int getUserMinSize()
+    public int getMinimumExtent()
     {
-        return _userMinSize;
+        return _minimumExtent.get();
     }
 
     /**
@@ -464,9 +471,9 @@ public class MultiSplitLayout
      * layout mode.
      * @param minSize the new minimum size
      */
-    public void setUserMinSize( int minSize )
+    public void setMinimumExtent( int minSize )
     {
-        _userMinSize = minSize;
+        _minimumExtent.set( minSize );
     }
 
     /**
@@ -607,49 +614,6 @@ public class MultiSplitLayout
     public DividerImpl dividerAt(int x, int y) {
         return dividerAt(getModel(), x, y);
     }
-
-    private boolean nodeOverlapsRectangle(NodeImpl node, Rectangle r2) {
-        Rectangle r1 = node.getBounds();
-        return
-                (r1.x <= (r2.x + r2.width)) && ((r1.x + r1.width) >= r2.x) &&
-                (r1.y <= (r2.y + r2.height)) && ((r1.y + r1.height) >= r2.y);
-    }
-
-    private List<DividerImpl> dividersThatOverlap(NodeImpl root, Rectangle r) {
-        if (nodeOverlapsRectangle(root, r) && (root instanceof SplitImpl)) {
-            List<DividerImpl> dividers = new ArrayList<DividerImpl>();
-            for(NodeImpl child : ((SplitImpl)root).getChildren()) {
-                if (child instanceof DividerImpl) {
-                    if (nodeOverlapsRectangle(child, r)) {
-                        dividers.add((DividerImpl)child);
-                    }
-                }
-                else if (child instanceof SplitImpl) {
-                    dividers.addAll(dividersThatOverlap(child, r));
-                }
-            }
-            return dividers;
-        }
-        else {
-            return Collections.emptyList();
-        }
-    }
-
-    /**
-     * Return the Dividers whose bounds overlap the specified
-     * Rectangle.
-     *
-     * @param r target Rectangle
-     * @return the Dividers that overlap r
-     * @throws IllegalArgumentException if the Rectangle is null
-     */
-    public List<DividerImpl> dividersThatOverlap(Rectangle r) {
-        if (r == null) {
-            throw new IllegalArgumentException("null Rectangle");
-        }
-        return dividersThatOverlap(getModel(), r);
-    }
-
 
     public static abstract class Node
     {
@@ -1714,7 +1678,7 @@ public class MultiSplitLayout
             throw new AssertionError("Unexpected");
         }
 
-        public Point move( Point from, Point to )
+        public Point move( Point from, Point to, int minimumExtent )
         {
             var prev = previous();
             var next = next();

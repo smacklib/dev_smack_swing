@@ -17,8 +17,6 @@ import java.awt.event.MouseEvent;
 import java.io.Serializable;
 import java.util.logging.Logger;
 
-import javax.accessibility.AccessibleContext;
-import javax.accessibility.AccessibleRole;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputAdapter;
 
@@ -33,17 +31,11 @@ import org.smack.swing.swingx.painter.AbstractPainter;
  * is changed, all PropertyChangeListeners are fired.
  *
  * @author Michael Binz
- * @author Hans Muller
- * @author Luan O'Carroll
  */
 @SuppressWarnings("serial")
 public final class JXMultiSplitPane extends JPanel
 {
     private static final Logger LOG = Logger.getLogger( JXMultiSplitPane.class.getName() );
-
-    private AccessibleContext accessibleContext = null;
-    private final boolean continuousLayout = true;
-    private DividerPainter dividerPainter = new DefaultDividerPainter();
 
     /**
      * Creates a MultiSplitPane with it's LayoutManager set to
@@ -144,8 +136,7 @@ public final class JXMultiSplitPane extends JPanel
     private boolean dragUnderway = false;
     private MultiSplitLayout.DividerImpl dragDivider = null;
     private Rectangle initialDividerBounds = null;
-    //private boolean oldFloatingDividers = true;
-    private int dragOffsetX = 0;
+//    private int dragOffsetX = 0;
     private int dragOffsetY = 0;
     private int dragMin = -1;
     private int dragMax = -1;
@@ -176,7 +167,7 @@ public final class JXMultiSplitPane extends JPanel
             return;
         }
 
-        _dragPoint = dragDivider.move( _dragPoint, p );
+        _dragPoint = dragDivider.move( _dragPoint, p, 20 );
 
         revalidate();
         repaint();
@@ -299,20 +290,5 @@ public final class JXMultiSplitPane extends JPanel
 
         @Override
         public void keyTyped(KeyEvent e) { }
-    }
-
-    @Override
-    public AccessibleContext getAccessibleContext() {
-        if( accessibleContext == null ) {
-            accessibleContext = new AccessibleMultiSplitPane();
-        }
-        return accessibleContext;
-    }
-
-    protected class AccessibleMultiSplitPane extends AccessibleJPanel {
-        @Override
-        public AccessibleRole getAccessibleRole() {
-            return AccessibleRole.SPLIT_PANE;
-        }
     }
 }
