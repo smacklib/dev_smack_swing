@@ -45,7 +45,6 @@ public class JXMultiSplitPaneTest
                     row,
                     new DividerImpl(),
                     bottom );
-            result.setRowLayout( false );
 
             return result;
         });

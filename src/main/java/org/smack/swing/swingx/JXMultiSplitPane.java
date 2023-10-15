@@ -8,13 +8,11 @@ package org.smack.swing.swingx;
 
 import java.awt.Cursor;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.io.Serializable;
 import java.util.logging.Logger;
 
 import javax.swing.JPanel;
@@ -22,7 +20,7 @@ import javax.swing.event.MouseInputAdapter;
 
 import org.smack.swing.swingx.MultiSplitLayout.DividerImpl;
 import org.smack.swing.swingx.MultiSplitLayout.NodeImpl;
-import org.smack.swing.swingx.painter.AbstractPainter;
+import org.smack.swing.swingx.MultiSplitLayout.SplitImpl;
 
 /**
  *
@@ -78,7 +76,8 @@ public final class JXMultiSplitPane extends JPanel
      * @see #getMultiSplitLayout
      * @see MultiSplitLayout#setModel
      */
-    public final void setModel(NodeImpl model) {
+    public final void setModel( SplitImpl model )
+    {
         getMultiSplitLayout().setModel(model);
     }
 
@@ -117,36 +116,16 @@ public final class JXMultiSplitPane extends JPanel
         return dragDivider;
     }
 
-    /**
-     * Draws a single Divider.  Typically used to specialize the
-     * way the active Divider is painted.
-     *
-     * @see #getDividerPainter
-     * @see #setDividerPainter
-     */
-    public static abstract class DividerPainter extends AbstractPainter<DividerImpl> {
-    }
-
-    private class DefaultDividerPainter extends DividerPainter implements Serializable {
-        @Override
-        protected void doPaint(Graphics2D g, DividerImpl divider, int width, int height) {
-        }
-    }
-
     private boolean dragUnderway = false;
     private MultiSplitLayout.DividerImpl dragDivider = null;
     private Rectangle initialDividerBounds = null;
-//    private int dragOffsetX = 0;
-    private int dragOffsetY = 0;
-    private int dragMin = -1;
-    private int dragMax = -1;
 
     private Point _dragPoint = null;
 
     private void startDrag( Point p ) {
         requestFocusInWindow();
         MultiSplitLayout msl = getMultiSplitLayout();
-        dragDivider = msl.dividerAt( p.x, p.y );
+        dragDivider = msl.dividerAt( p );
 
         if ( dragDivider == null ) {
             LOG.warning( "No divider." );
@@ -233,14 +212,14 @@ public final class JXMultiSplitPane extends JPanel
         }
     }
 
-    private void updateCursor(int x, int y, boolean show)
+    private void updateCursor( Point p, boolean show )
     {
         if (dragUnderway)
             return;
 
         int cursorID = Cursor.DEFAULT_CURSOR;
         if (show) {
-            MultiSplitLayout.DividerImpl divider = getMultiSplitLayout().dividerAt(x, y);
+            MultiSplitLayout.DividerImpl divider = getMultiSplitLayout().dividerAt( p );
             if (divider != null) {
                 cursorID  = (divider.isVertical()) ?
                         Cursor.E_RESIZE_CURSOR :
@@ -254,17 +233,17 @@ public final class JXMultiSplitPane extends JPanel
 
         @Override
         public void mouseEntered(MouseEvent e) {
-            updateCursor(e.getX(), e.getY(), true);
+            updateCursor(e.getPoint(), true);
         }
 
         @Override
         public void mouseMoved(MouseEvent e) {
-            updateCursor(e.getX(), e.getY(), true);
+            updateCursor(e.getPoint(), true);
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
-            updateCursor(e.getX(), e.getY(), false);
+            updateCursor(e.getPoint(), false);
         }
 
         @Override

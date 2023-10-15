@@ -44,12 +44,11 @@ public class DefaultSplitPaneModel extends RowImpl {
 
     /** Creates a new instance of DefaultSplitPaneLayout */
     public DefaultSplitPaneModel() {
-        setRowLayout( true );
+        //setRowLayout( true );
         //SplitImpl row = new RowImpl();
         SplitImpl col = new ColumnImpl();
-        col.setRowLayout(false);
+        //col.setRowLayout(false);
         setChildren(new LeafImpl(LEFT), new DividerImpl(), col);
         col.setChildren(new LeafImpl(TOP), new DividerImpl(), new LeafImpl(BOTTOM));
     }
-
 }

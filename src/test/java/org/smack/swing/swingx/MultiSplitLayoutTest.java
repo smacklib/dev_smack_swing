@@ -62,7 +62,6 @@ public class MultiSplitLayoutTest
                     row,
                     new DividerImpl(),
                     bottom );
-            result.setRowLayout( false );
 
             return result;
         });
@@ -124,7 +123,6 @@ public class MultiSplitLayoutTest
                     row,
                     new DividerImpl(),
                     bottom );
-            result.setRowLayout( false );
 
             return result;
         });
@@ -238,33 +236,33 @@ public class MultiSplitLayoutTest
         assertEquals( mspl, pceh.get().getSource() );
     }
 
-    @Test
-    public void propModelTest() throws Exception
-    {
-        Holder<PropertyChangeEvent> pceh = new Holder<>();
-
-        final var mspl = new MultiSplitLayout();
-
-        mspl.addPropertyChangeListener( ce -> pceh.set( ce ) );
-        assertNull( pceh.get() );
-
-        mspl.setModel( new LeafImpl( "test" ) );
-
-        assertNotNull( pceh.get() );
-
-        assertEquals(
-                "model",
-                pceh.get().getPropertyName() );
-        assertEquals(
-                "test",
-                LeafImpl.class.cast(pceh.get().getNewValue() ).getName() );
-        assertEquals(
-                "default",
-                LeafImpl.class.cast(pceh.get().getOldValue() ).getName() );
-        assertEquals(
-                mspl,
-                pceh.get().getSource() );
-    }
+//    @Test
+//    public void propModelTest() throws Exception
+//    {
+//        Holder<PropertyChangeEvent> pceh = new Holder<>();
+//
+//        final var mspl = new MultiSplitLayout();
+//
+//        mspl.addPropertyChangeListener( ce -> pceh.set( ce ) );
+//        assertNull( pceh.get() );
+//
+//        mspl.setModel( new LeafImpl( "test" ) );
+//
+//        assertNotNull( pceh.get() );
+//
+//        assertEquals(
+//                "model",
+//                pceh.get().getPropertyName() );
+//        assertEquals(
+//                "test",
+//                LeafImpl.class.cast(pceh.get().getNewValue() ).getName() );
+//        assertEquals(
+//                "default",
+//                LeafImpl.class.cast(pceh.get().getOldValue() ).getName() );
+//        assertEquals(
+//                mspl,
+//                pceh.get().getSource() );
+//    }
 
 
     @Test

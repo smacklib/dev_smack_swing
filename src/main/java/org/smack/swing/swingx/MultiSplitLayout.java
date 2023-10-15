@@ -79,10 +79,10 @@ public class MultiSplitLayout
     private final Map<String, LeafImpl> _leafMap =
             new HashMap<>();
 
-    private JavaBeanProperty<NodeImpl, MultiSplitLayout> _model =
+    private JavaBeanProperty<SplitImpl, MultiSplitLayout> _model =
             new JavaBeanProperty<>(
                     this,
-                    new LeafImpl( "default" ),
+                    null, //ew LeafImpl( "default" ),
                     "model" );
 
     private JavaBeanProperty<Integer, MultiSplitLayout> _dividerSize =
@@ -99,8 +99,6 @@ public class MultiSplitLayout
 
     private LayoutMode layoutMode;
 
-//    private int _userMinSize = 20;
-
     /**
      * Create a MultiSplitLayout with a default model with a single
      * Leaf node named "default".
@@ -116,9 +114,9 @@ public class MultiSplitLayout
      *
      * #see setModel
      */
-    public MultiSplitLayout(NodeImpl model)
+    public MultiSplitLayout(SplitImpl model)
     {
-        _model.set( model );
+        setModel( model );
     }
 
     /**
@@ -137,22 +135,9 @@ public class MultiSplitLayout
      * @param name the name used to associate a component with the layout
      * @return the node associated with the component
      */
-    public NodeImpl getNodeForName( String name )
+    LeafImpl getNodeForName( String name )
     {
-        final var model = getModel();
-
-        if ( model instanceof SplitImpl ) {
-            SplitImpl split = ((SplitImpl)model);
-            return getNodeForName( split, name );
-        } else if (model instanceof LeafImpl) {
-            if (((LeafImpl) model).getName().equals(name)) {
-                return model;
-            } else {
-                return null;
-            }
-        } else {
-            return null;
-        }
+        return _leafMap.get( name );
     }
 
     /**
@@ -173,38 +158,38 @@ public class MultiSplitLayout
         return name;
     }
 
-    /**
-     * Get the MultiSplitLayout.Node associated with a component
-     * @param split the layout split that owns the requested node
-     * @param comp the component being positioned by the layout
-     * @return the node associated with the component
-     */
-    public NodeImpl getNodeForComponent( SplitImpl split, Component comp )
-    {
-        return getNodeForName( split, getNameForComponent( comp ));
-    }
+//    /**
+//     * Get the MultiSplitLayout.Node associated with a component
+//     * @param split the layout split that owns the requested node
+//     * @param comp the component being positioned by the layout
+//     * @return the node associated with the component
+//     */
+//    private NodeImpl getNodeForComponent( SplitImpl split, Component comp )
+//    {
+//        return getNodeForName( split, getNameForComponent( comp ));
+//    }
 
-    /**
-     * Get the MultiSplitLayout.Node associated with a component
-     * @param split the layout split that owns the requested node
-     * @param name the name used to associate a component with the layout
-     * @return the node associated with the component
-     */
-    public NodeImpl getNodeForName( SplitImpl split, String name )
-    {
-        for(NodeImpl n : split.getChildren()) {
-            if ( n instanceof LeafImpl ) {
-                if ( ((LeafImpl)n).getName().equals( name ))
-                    return n;
-            }
-            else if ( n instanceof SplitImpl ) {
-                NodeImpl n1 = getNodeForName( (SplitImpl)n, name );
-                if ( n1 != null )
-                    return n1;
-            }
-        }
-        return null;
-    }
+//    /**
+//     * Get the MultiSplitLayout.Node associated with a component
+//     * @param split the layout split that owns the requested node
+//     * @param name the name used to associate a component with the layout
+//     * @return the node associated with the component
+//     */
+//    private NodeImpl getNodeForName( SplitImpl split, String name )
+//    {
+//        for(NodeImpl n : split.getChildren()) {
+//            if ( n instanceof LeafImpl ) {
+//                if ( ((LeafImpl)n).getName().equals( name ))
+//                    return n;
+//            }
+//            else if ( n instanceof SplitImpl ) {
+//                NodeImpl n1 = getNodeForName( (SplitImpl)n, name );
+//                if ( n1 != null )
+//                    return n1;
+//            }
+//        }
+//        return null;
+//    }
 
     /**
      * Return the root of the tree of Split, Leaf, and Divider nodes
@@ -213,33 +198,31 @@ public class MultiSplitLayout
      * @return the value of the model property
      * @see #setModel
      */
-    public NodeImpl getModel()
+    public SplitImpl getModel()
     {
         return _model.get();
     }
 
     /**
-     * Set the root of the tree of Split, Leaf, and Divider nodes
-     * that define this layout.  The model can be a Split node
-     * (the typical case) or a Leaf.  The default value of this
-     * property is a Leaf named "default".
+     * Set the model root.
      *
-     * @param model the root of the tree of Split, Leaf, and Divider node
-     * @throws IllegalArgumentException if model is a Divider or null
+     * @param model The model root.
      * @see #getModel
      */
-    public void setModel(NodeImpl model) {
-        if ((model == null) || (model instanceof DividerImpl)) {
-            throw new IllegalArgumentException("invalid model");
-        }
+    public void setModel(SplitImpl model)
+    {
+        Objects.requireNonNull( model );
+
+        model.attach( this );
+
         _model.set( model );
     }
 
-    public void setModel(Node model)
+    public void setModel(Split model)
     {
         NodeImpl internalModel = model.convert( this );
 
-        _model.set( internalModel );
+        _model.set( (SplitImpl)internalModel );
     }
 
     /**
@@ -610,6 +593,10 @@ public class MultiSplitLayout
      * @param y y coordinate
      * @return the Divider at x,y
      */
+    public DividerImpl dividerAt( Point p ) {
+        return dividerAt(getModel(), p.x, p.y );
+    }
+    @Deprecated
     public DividerImpl dividerAt(int x, int y) {
         return dividerAt(getModel(), x, y);
     }
@@ -748,6 +735,8 @@ public class MultiSplitLayout
 
         private boolean isVisible = true;
 
+        private MultiSplitLayout _host;
+
         public void setVisible( boolean b ) {
             isVisible = b;
         }
@@ -840,6 +829,11 @@ public class MultiSplitLayout
             return _bounds.y;
         }
 
+        public void attach( MultiSplitLayout host )
+        {
+            _host = host;
+        }
+
         /**
          * @return The bounds property.
          */
@@ -902,71 +896,16 @@ public class MultiSplitLayout
             this.weight = weight;
         }
 
-        private NodeImpl siblingAtOffset(int offset) {
-            SplitImpl p = getParent();
-            if (p == null) { return null; }
-            List<NodeImpl> siblings = p.getChildren();
-            int index = siblings.indexOf(this);
-            if (index == -1) { return null; }
-            index += offset;
-            return ((index > -1) && (index < siblings.size())) ? siblings.get(index) : null;
-        }
-        private NodeImpl _siblingAtOffset(int offset)
-        {
-            SplitImpl p = getParent();
-
-            if (p == null)
-                return null;
-
-            var siblings = p.getChildren();
-
-            JavaUtil.Assert( siblings != null );
-
-            int siblingIdx = _parentIdx + offset;
-
-            JavaUtil.Assert( siblingIdx >= 0 );
-            JavaUtil.Assert( siblingIdx < siblings.size() );
-
-            return siblings.get( siblingIdx );
-        }
-
-        /**
-         * Return the Node that comes after this one in the parent's
-         * list of children, or null.  If this node's parent is null,
-         * or if it's the last child, then return null.
-         *
-         * @return the Node that comes after this one in the parent's list of children.
-         * @see #previousSibling
-         * @see #getParent
-         */
-        public NodeImpl nextSibling() {
-            return siblingAtOffset(+1);
-        }
-        public NodeImpl next() {
-            return _siblingAtOffset(1);
-        }
-
-        /**
-         * Return the Node that comes before this one in the parent's
-         * list of children, or null.  If this node's parent is null,
-         * or if it's the last child, then return null.
-         *
-         * @return the Node that comes before this one in the parent's list of children.
-         * @see #nextSibling
-         * @see #getParent
-         */
-        public NodeImpl previousSibling() {
-            return siblingAtOffset(-1);
-        }
-        public NodeImpl previous() {
-            return _siblingAtOffset(-1);
-        }
-
         abstract void validate( Set<String> nameCollector );
 
         abstract void layout(
                 Rectangle bounds,
                 MultiSplitLayout host );
+
+        protected MultiSplitLayout host()
+        {
+            return _host;
+        }
     }
 
     /**
@@ -983,7 +922,6 @@ public class MultiSplitLayout
 
         public RowImpl(NodeImpl... children) {
             super( children );
-            setRowLayout( true );
         }
 
         @Override
@@ -993,10 +931,8 @@ public class MultiSplitLayout
 
             var children =  _completeWeights( getChildren2() );
 
-            final int dividerCount =
-                    children.size() -1;
             final int netRowWidth =
-                    bounds.width - dividerCount * host.getDividerSize();
+                    distributableExtent();
 
             double currentPosition = 0.0;
 
@@ -1089,14 +1025,6 @@ public class MultiSplitLayout
         }
 
         @Override
-        public int extent( int idx )
-        {
-            var child = getChildAt( idx );
-
-            return child.getBounds().width;
-        }
-
-        @Override
         protected int _extent( int idx  )
         {
             return getChildAt( idx )._width();
@@ -1133,6 +1061,19 @@ public class MultiSplitLayout
         {
             return to.x - from.x;
         }
+
+        @Override
+        protected int distributableExtent()
+        {
+            var children = getChildren2();
+
+            if ( children.size() == 1 )
+                return _width();
+
+            var dividerCount = children.size() -1;
+
+            return _width() - ( dividerCount * host().getDividerSize() );
+        }
     }
 
     public static class ColumnImpl extends SplitImpl
@@ -1144,7 +1085,6 @@ public class MultiSplitLayout
 
         public ColumnImpl(NodeImpl... children) {
             super(children);
-            setRowLayout( false );
         }
 
         @Override
@@ -1251,14 +1191,6 @@ public class MultiSplitLayout
         }
 
         @Override
-        public int extent( int idx )
-        {
-            var child = getChildAt( idx );
-
-            return child.getBounds().height;
-        }
-
-        @Override
         protected int _extent( int idx )
         {
             return getChildAt( idx )._height();
@@ -1295,6 +1227,17 @@ public class MultiSplitLayout
         {
             return to.y - from.y;
         }
+
+        @Override
+        protected int distributableExtent()
+        {
+            var result = 0;
+
+            for ( var c : getChildren2() )
+                result += c._height();
+
+            return result;
+        }
     }
 
     /**
@@ -1305,15 +1248,13 @@ public class MultiSplitLayout
                 Collections.emptyList();
         private List<NodeImpl> _childrenWoDividers =
                 Collections.emptyList();
-        private boolean rowLayout = true;
+
         private String name;
 
         /**
-         * @deprecated Use Vertical Horizontal ctor.
          * @param children
          */
-        @Deprecated
-        public SplitImpl(NodeImpl... children)
+        private SplitImpl( NodeImpl... children )
         {
             setChildren(children);
 
@@ -1377,10 +1318,6 @@ public class MultiSplitLayout
          * @return The splits dynamic extent.
          */
         public abstract int extent();
-        /**
-         * @return The split node's dynamic extent.
-         */
-        public abstract int extent( int idx );
 
         /**
          * Determines whether this node should be visible when its
@@ -1408,6 +1345,12 @@ public class MultiSplitLayout
          */
         protected abstract int _staticExtent();
         /**
+         * Get the distributable extent.  This is the total
+         * of the children extents without the dividers.
+         */
+        protected abstract int distributableExtent();
+
+        /**
          * @param idx The child index.
          * @return The dynamic position of the child.
          * TODO typo
@@ -1418,7 +1361,6 @@ public class MultiSplitLayout
          * @param idx The child index.
          * @param p The new position.
          * @return Fluent API.
-         * TODO typo
          */
         protected abstract SplitImpl _extentPosition( int idx, int p );
         /**
@@ -1426,7 +1368,6 @@ public class MultiSplitLayout
          * @param idx The child index.
          * @param p The new extent
          * @return Fluent API.
-         * TODO typo
          */
         protected abstract SplitImpl _extent( int idx, int p );
 
@@ -1442,20 +1383,6 @@ public class MultiSplitLayout
          * @see #setRowLayout
          */
         public final boolean isRowLayout() { return this instanceof RowImpl; }
-
-        /**
-         * Set the rowLayout property.  If true, all of this Split's
-         * children are to be laid out in a row: all the same height,
-         * each node's left edge equal to the previous Node's right
-         * edge.  If false, children are laid on in a column.  Default
-         * value is true.
-         *
-         * @param rowLayout true for horizontal row layout, false for column
-         * @see #isRowLayout
-         */
-        public void setRowLayout(boolean rowLayout) {
-            this.rowLayout = rowLayout;
-        }
 
         /**
          * Returns this Split node's children.  The returned value
@@ -1595,6 +1522,15 @@ public class MultiSplitLayout
             setBounds( bounds );
 
             subLayout( bounds, host );
+        }
+
+        @Override
+        public void attach( MultiSplitLayout host )
+        {
+            super.attach( host );
+
+            for ( var c : getChildren() )
+                c.attach( host );
         }
     }
 
