@@ -741,11 +741,11 @@ public class MultiSplitLayout
             isVisible = b;
         }
 
-        public void setParentIdx( int idx )
+        protected void setParentIdx( int idx )
         {
             _parentIdx = idx;
         }
-        public int getParentIdx()
+        protected int getParentIdx()
         {
             return _parentIdx;
         }
@@ -757,7 +757,7 @@ public class MultiSplitLayout
          * @return <code>true</code> if the node is visible,
          * <code>false</code> otherwise
          */
-        public boolean isVisible() {
+        protected boolean isVisible() {
             return isVisible;
         }
 
@@ -767,7 +767,7 @@ public class MultiSplitLayout
          * @return the value of the parent property.
          * @see #setParent
          */
-        public SplitImpl getParent()
+        protected SplitImpl getParent()
         {
             return _parent;
         }
@@ -780,7 +780,7 @@ public class MultiSplitLayout
          * @see #getParent
          */
         // TODO: fluent api
-        public void setParent(SplitImpl parent) {
+        protected void setParent(SplitImpl parent) {
             JavaUtil.Assert( _parent == null );
             _parent = parent;
         }
@@ -790,8 +790,9 @@ public class MultiSplitLayout
          * @see #setBounds
          */
         public Rectangle getBounds() {
-            return new Rectangle(this._bounds);
+            return new Rectangle( _bounds );
         }
+
         public NodeImpl _width( int width )
         {
             _bounds.width = width;
@@ -1409,7 +1410,7 @@ public class MultiSplitLayout
          * @see #getChildren
          * @throws IllegalArgumentException if children is null
          */
-        public void setChildren(List<NodeImpl> children)
+        private void setChildren(List<NodeImpl> children)
         {
             JavaUtil.Assert( _children.size() == 0 );
 
