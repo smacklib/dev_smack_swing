@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -987,18 +986,6 @@ public class MultiSplitLayout
             setRowLayout( true );
         }
 
-        /**
-         * Returns true if this Split's children are to be
-         * laid out in a row: all the same height, left edge
-         * equal to the previous Node's right edge.  If false,
-         * children are laid on in a column.
-         *
-         * @return the value of the rowLayout property.
-         * @see #setRowLayout
-         */
-        @Override
-        public final boolean isRowLayout() { return true; }
-
         @Override
         public void subLayout( Rectangle bounds, MultiSplitLayout host )
         {
@@ -1100,6 +1087,52 @@ public class MultiSplitLayout
             for ( var c : getChildren2() )
                 c.setWeight( c._width() / toDistribute );
         }
+
+        @Override
+        public int extent( int idx )
+        {
+            var child = getChildAt( idx );
+
+            return child.getBounds().width;
+        }
+
+        @Override
+        protected int _extent( int idx  )
+        {
+            return getChildAt( idx )._width();
+        }
+
+        @Override
+        protected int _staticExtent()
+        {
+            return _height();
+        }
+
+        @Override
+        protected int _extendPosition( int idx )
+        {
+            return getChildAt( idx )._x();
+        }
+
+        @Override
+        protected SplitImpl _extentPosition( int idx, int p )
+        {
+            getChildAt( idx )._x( p );
+            return this;
+        }
+
+        @Override
+        protected SplitImpl _extent( int idx, int p )
+        {
+            getChildAt( idx )._width( p );
+            return this;
+        }
+
+        @Override
+        protected int _pointDelta( Point from, Point to )
+        {
+            return to.x - from.x;
+        }
     }
 
     public static class ColumnImpl extends SplitImpl
@@ -1113,18 +1146,6 @@ public class MultiSplitLayout
             super(children);
             setRowLayout( false );
         }
-
-        /**
-         * Returns true if the this Split's children are to be
-         * laid out in a row: all the same height, left edge
-         * equal to the previous Node's right edge.  If false,
-         * children are laid on in a column.
-         *
-         * @return the value of the rowLayout property.
-         * @see #setRowLayout
-         */
-        @Override
-        public final boolean isRowLayout() { return false; }
 
         @Override
         public void subLayout( Rectangle bounds, MultiSplitLayout host )
@@ -1228,6 +1249,52 @@ public class MultiSplitLayout
             for ( var c : getChildren2() )
                 c.setWeight( c._height() / toDistribute );
         }
+
+        @Override
+        public int extent( int idx )
+        {
+            var child = getChildAt( idx );
+
+            return child.getBounds().height;
+        }
+
+        @Override
+        protected int _extent( int idx )
+        {
+            return getChildAt( idx )._height();
+        }
+
+        @Override
+        protected int _staticExtent()
+        {
+            return _width();
+        }
+
+        @Override
+        protected int _extendPosition( int idx )
+        {
+            return getChildAt( idx )._y();
+        }
+
+        @Override
+        protected SplitImpl _extentPosition( int idx, int p )
+        {
+            getChildAt( idx )._height( p );
+            return this;
+        }
+
+        @Override
+        protected SplitImpl _extent( int idx, int p )
+        {
+            getChildAt( idx )._height( p );
+            return this;
+        }
+
+        @Override
+        protected int _pointDelta( Point from, Point to )
+        {
+            return to.y - from.y;
+        }
     }
 
     /**
@@ -1307,9 +1374,13 @@ public class MultiSplitLayout
         public abstract void adjustWeights();
 
         /**
-         * @return The splits extent after layouting.
+         * @return The splits dynamic extent.
          */
         public abstract int extent();
+        /**
+         * @return The split node's dynamic extent.
+         */
+        public abstract int extent( int idx );
 
         /**
          * Determines whether this node should be visible when its
@@ -1328,6 +1399,40 @@ public class MultiSplitLayout
         }
 
         /**
+         * @param idx child index.
+         * @return The dynamic extend of the child.
+         */
+        protected abstract int _extent( int idx );
+        /**
+         * @return The static (common) extent of this split.
+         */
+        protected abstract int _staticExtent();
+        /**
+         * @param idx The child index.
+         * @return The dynamic position of the child.
+         * TODO typo
+         */
+        protected abstract int _extendPosition( int idx );
+        /**
+         * Set the position of the dynamic extent.
+         * @param idx The child index.
+         * @param p The new position.
+         * @return Fluent API.
+         * TODO typo
+         */
+        protected abstract SplitImpl _extentPosition( int idx, int p );
+        /**
+         * Set the extend of the child.
+         * @param idx The child index.
+         * @param p The new extent
+         * @return Fluent API.
+         * TODO typo
+         */
+        protected abstract SplitImpl _extent( int idx, int p );
+
+        protected abstract int _pointDelta( Point from, Point to );
+
+        /**
          * Returns true if the this Split's children are to be
          * laid out in a row: all the same height, left edge
          * equal to the previous Node's right edge.  If false,
@@ -1336,7 +1441,7 @@ public class MultiSplitLayout
          * @return the value of the rowLayout property.
          * @see #setRowLayout
          */
-        public boolean isRowLayout() { return rowLayout; }
+        public final boolean isRowLayout() { return this instanceof RowImpl; }
 
         /**
          * Set the rowLayout property.  If true, all of this Split's
@@ -1365,73 +1470,9 @@ public class MultiSplitLayout
         public List<NodeImpl> getChildren2() {
             return new ArrayList<NodeImpl>(_childrenWoDividers);
         }
-
-        /**
-         * Check the dividers to ensure that redundant dividers are hidden and do
-         * not interfere in the layout, for example when all the children of a split
-         * are hidden (the split is then invisible), so two dividers may otherwise
-         * appear next to one another.
-         * @param split the split to check
-         */
-        public void checkDividers( SplitImpl split ) {
-            ListIterator<NodeImpl> splitChildren = split.getChildren().listIterator();
-            while( splitChildren.hasNext()) {
-                NodeImpl splitChild = splitChildren.next();
-                if ( !splitChild.isVisible()) {
-                    continue;
-                }
-                else if ( splitChildren.hasNext()) {
-                    NodeImpl dividerChild = splitChildren.next();
-                    if ( dividerChild instanceof DividerImpl ) {
-                        if ( splitChildren.hasNext()) {
-                            NodeImpl rightChild = splitChildren.next();
-                            while ( !rightChild.isVisible()) {
-                                rightChild = rightChild.nextSibling();
-                                if ( rightChild == null ) {
-                                    // No visible right sibling found, so hide the divider
-                                    dividerChild.setVisible( false );
-                                    break;
-                                }
-                            }
-
-                            // A visible child is found but it's a divider and therefore
-                            // we have two visible and adjacent dividers - so we hide one
-                            if (( rightChild != null ) && ( rightChild instanceof DividerImpl ))
-                                dividerChild.setVisible( false );
-                        }
-                    }
-                    else if (( splitChild instanceof DividerImpl ) && ( dividerChild instanceof DividerImpl )) {
-                        splitChild.setVisible( false );
-                    }
-                }
-            }
-        }
-
-        /**
-         * Restore any of the hidden dividers that are required to separate visible nodes
-         * @param split the node to check
-         */
-        public void restoreDividers( SplitImpl split ) {
-
-            ListIterator<NodeImpl> splitChildren = split.getChildren().listIterator();
-            while( splitChildren.hasNext()) {
-                NodeImpl splitChild = splitChildren.next();
-                if ( splitChild instanceof DividerImpl ) {
-                    NodeImpl prev = splitChild.previousSibling();
-                    if ( prev.isVisible()) {
-                        NodeImpl next = splitChild.nextSibling();
-                        while ( next != null ) {
-                            if ( next.isVisible()) {
-                                splitChild.setVisible( true );
-                                break;
-                            }
-                            next = next.nextSibling();
-                        }
-                    }
-                }
-            }
-            if ( split.getParent() != null )
-                restoreDividers( split.getParent());
+        public NodeImpl getChildAt( int idx )
+        {
+            return _children.get( idx );
         }
 
         /**
@@ -1678,29 +1719,50 @@ public class MultiSplitLayout
             throw new AssertionError("Unexpected");
         }
 
+        /**
+         * Moves this Divider.
+         *
+         * @param from
+         * @param to
+         * @param minimumExtent
+         * @return The point position the divider was moved to.
+         */
         public Point move( Point from, Point to, int minimumExtent )
         {
-            var prev = previous();
-            var next = next();
+            final var parent = getParent();
+            final var ownIdx = getParentIdx();
+            final var prevIdx = ownIdx-1;
+            final var nextIdx = ownIdx+1;
 
-            if ( isVertical() )
-            {
-                var delta = to.x - from.x;
+            var delta = parent._pointDelta(
+                    from,
+                    to );
 
-                prev._width( prev._width() + delta );
-                _x( _x() + delta );
-                next._x( next._x() + delta );
-                next._width( next._width() - delta );
-            }
-            else
-            {
-                var delta = to.y - from.y;
+            var prevWidth =
+                    parent._extent( prevIdx ) +
+                    delta;
+            if ( prevWidth <= minimumExtent )
+                return from;
 
-                prev._height( prev._height() + delta );
-                _y( _y() + delta );
-                next._y( next._y() + delta );
-                next._height( next._height() - delta );
-            }
+            var nextWidth =
+                    parent._extent( nextIdx ) -
+                    delta;
+            if ( nextWidth <= minimumExtent )
+                return from;
+
+            parent._extent( prevIdx, prevWidth );
+
+//            parent._extentPosition(
+//                    ownIdx,
+//                    parent._extendPosition( ownIdx ) );
+
+//            parent._extent(
+//                    nextIdx,
+//                    getParent()._extent( nextIdx ) );
+
+            parent._extent(
+                    nextIdx,
+                    nextWidth );
 
             getParent().adjustWeights();
 
