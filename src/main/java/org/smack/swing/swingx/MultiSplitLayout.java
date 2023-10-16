@@ -1244,13 +1244,10 @@ public class MultiSplitLayout
     /**
      * Defines a vertical or horizontal subdivision into two or more tiles.
      */
-    public static abstract class SplitImpl extends NodeImpl {
+    public static abstract class SplitImpl extends NodeImpl
+    {
         private List<NodeImpl> _children =
                 Collections.emptyList();
-        private List<NodeImpl> _childrenWoDividers =
-                Collections.emptyList();
-
-        private String name;
 
         /**
          * @param children
@@ -1258,11 +1255,8 @@ public class MultiSplitLayout
         private SplitImpl( NodeImpl... children )
         {
             setChildren(children);
-
-            _childrenWoDividers = _children.stream().filter(
-                    c -> ! DividerImpl.class.isInstance( c ) ).collect(
-                             Collectors.toList() );
         }
+
         public SplitImpl( Split split, MultiSplitLayout host )
         {
             var splitChildCount =
@@ -1292,22 +1286,11 @@ public class MultiSplitLayout
             }
 
             setChildren(children);
-
-            _childrenWoDividers = _children.stream().filter(
-                    c -> ! DividerImpl.class.isInstance( c ) ).collect(
-                             Collectors.toList() );
-        }
-
-        /**
-         * Default constructor to support xml (de)serialization and other bean spec dependent ops.
-         * Resulting instance of Split is invalid until setChildren() is called.
-         */
-        public SplitImpl() {
         }
 
         public int size()
         {
-            return _childrenWoDividers.size();
+            return (_children.size() / 2) +1;
         }
 
         /**
@@ -1341,10 +1324,12 @@ public class MultiSplitLayout
          * @return The dynamic extend of the child.
          */
         protected abstract int _extent( int idx );
+
         /**
          * @return The static (common) extent of this split.
          */
         protected abstract int _staticExtent();
+
         /**
          * Get the distributable extent.  This is the total
          * of the children extents without the dividers.
@@ -1357,6 +1342,7 @@ public class MultiSplitLayout
          * TODO typo
          */
         protected abstract int _extendPosition( int idx );
+
         /**
          * Set the position of the dynamic extent.
          * @param idx The child index.
@@ -1364,6 +1350,7 @@ public class MultiSplitLayout
          * @return Fluent API.
          */
         protected abstract SplitImpl _extentPosition( int idx, int p );
+
         /**
          * Set the extend of the child.
          * @param idx The child index.
@@ -1375,29 +1362,26 @@ public class MultiSplitLayout
         protected abstract int _pointDelta( Point from, Point to );
 
         /**
-         * Returns true if the this Split's children are to be
-         * laid out in a row: all the same height, left edge
-         * equal to the previous Node's right edge.  If false,
+         * @return true if the this Split's children are to be
+         * laid out in a row.  If false,
          * children are laid out in a column.
-         *
-         * @return the value of the rowLayout property.
-         * @see #setRowLayout
          */
-        public final boolean isRowLayout() { return this instanceof RowImpl; }
+        private final boolean isRowLayout() { return this instanceof RowImpl; }
 
         /**
-         * Returns this Split node's children.  The returned value
-         * is not a reference to the Split's internal list of children
-         *
-         * @return the value of the children property.
-         * @see #setChildren
+         * @return This node's children.
          */
-        public List<NodeImpl> getChildren() {
-            return new ArrayList<NodeImpl>(_children);
+        public List<NodeImpl> getChildren()
+        {
+            return _children;
         }
+
         public List<NodeImpl> getChildren2() {
-            return new ArrayList<NodeImpl>(_childrenWoDividers);
+            return _children.stream().filter(
+                  c -> ! DividerImpl.class.isInstance( c ) ).collect(
+                           Collectors.toList() );
         }
+
         public NodeImpl getChildAt( int idx )
         {
             return _children.get( idx );
@@ -1414,8 +1398,7 @@ public class MultiSplitLayout
         {
             JavaUtil.Assert( _children.size() == 0 );
 
-            _children = new ArrayList<NodeImpl>(
-                    Objects.requireNonNull( children ) );
+            _children = Collections.unmodifiableList( children );
 
             int idx = 0;
 
@@ -1436,59 +1419,16 @@ public class MultiSplitLayout
          * @see #getChildren
          * @throws IllegalArgumentException if children is null
          */
-        public void setChildren(NodeImpl... children) {
-            setChildren(children == null ? null : Arrays.asList(children));
-        }
-
-        /**
-         * Convenience method that returns the last child whose weight
-         * is > 0.0.
-         *
-         * @return the last child whose weight is > 0.0.
-         * @see #getChildren
-         * @see NodeImpl#getWeight
-         */
-        public final NodeImpl lastWeightedChild() {
-            List<NodeImpl> kids = getChildren();
-            NodeImpl weightedChild = null;
-            for(NodeImpl child : kids) {
-                if ( !child.isVisible())
-                    continue;
-                if (child.getWeight() > 0.0) {
-                    weightedChild = child;
-                }
-            }
-            return weightedChild;
-        }
-
-        /**
-         * Return the Leaf's name.
-         *
-         * @return the value of the name property.
-         * @see #setName
-         */
-        public String getName() { return name; }
-
-        /**
-         * Set the value of the name property.  Name may not be null.
-         *
-         * @param name value of the name property
-         * @throws IllegalArgumentException if name is null
-         */
-        public void setName(String name) {
-            if (name == null) {
-                throw new IllegalArgumentException("name is null");
-            }
-            this.name = name;
+        public void setChildren( NodeImpl... children )
+        {
+            setChildren( Arrays.asList(
+                    Objects.requireNonNull( children ) ) );
         }
 
         @Override
         public String toString() {
             int nChildren = getChildren().size();
             StringBuffer sb = new StringBuffer("MultiSplitLayout.Split");
-            sb.append(" \"");
-            sb.append(getName());
-            sb.append("\"");
             sb.append(isRowLayout() ? " ROW [" : " COLUMN [");
             sb.append(nChildren + ((nChildren == 1) ? " child" : " children"));
             sb.append("] ");
@@ -1505,7 +1445,7 @@ public class MultiSplitLayout
 
             {
                 double totalWeight = 0.0;
-                for ( var c : _childrenWoDividers )
+                for ( var c : getChildren2() )
                 {
                     c.validate( nameCollector );
                     totalWeight += c.weight;
