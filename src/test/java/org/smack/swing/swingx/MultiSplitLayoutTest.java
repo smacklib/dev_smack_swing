@@ -341,7 +341,6 @@ public class MultiSplitLayoutTest
         SplitImpl split = new RowImpl( nodes );
 
         assertEquals( nodes.length, split.getChildren().size() );
-        assertEquals( nodes.length-count, split.size() );
     }
 
     @Test
@@ -359,7 +358,6 @@ public class MultiSplitLayoutTest
         SplitImpl split = new ColumnImpl( nodes );
 
         assertEquals( nodes.length, split.getChildren().size() );
-        assertEquals( nodes.length-count, split.size() );
     }
 
     @Test
@@ -379,7 +377,6 @@ public class MultiSplitLayoutTest
         SplitImpl split = new RowImpl( nodes );
 
         assertEquals( nodes.length, split.getChildren().size() );
-        assertEquals( nodes.length-count, split.size() );
     }
 
     @Test

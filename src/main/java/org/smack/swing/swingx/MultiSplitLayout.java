@@ -596,10 +596,6 @@ public class MultiSplitLayout
     public DividerImpl dividerAt( Point p ) {
         return dividerAt(getModel(), p.x, p.y );
     }
-    @Deprecated
-    public DividerImpl dividerAt(int x, int y) {
-        return dividerAt(getModel(), x, y);
-    }
 
     public static abstract class Node
     {
@@ -926,7 +922,7 @@ public class MultiSplitLayout
         }
 
         @Override
-        public void subLayout( Rectangle bounds, MultiSplitLayout host )
+        public void layout( Rectangle bounds, MultiSplitLayout host )
         {
             setBounds( bounds );
 
@@ -1089,7 +1085,7 @@ public class MultiSplitLayout
         }
 
         @Override
-        public void subLayout( Rectangle bounds, MultiSplitLayout host )
+        public void layout( Rectangle bounds, MultiSplitLayout host )
         {
             setBounds( bounds );
 
@@ -1288,11 +1284,6 @@ public class MultiSplitLayout
             setChildren(children);
         }
 
-        public int size()
-        {
-            return (_children.size() / 2) +1;
-        }
-
         /**
          * Adjust the weights to the nodes sizes.
          */
@@ -1455,15 +1446,8 @@ public class MultiSplitLayout
             }
         }
 
-        abstract void subLayout( Rectangle bounds, MultiSplitLayout host );
-
         @Override
-        final void layout( Rectangle bounds, MultiSplitLayout host )
-        {
-            setBounds( bounds );
-
-            subLayout( bounds, host );
-        }
+        abstract void layout( Rectangle bounds, MultiSplitLayout host );
 
         @Override
         public void attach( MultiSplitLayout host )
