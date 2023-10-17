@@ -42,10 +42,8 @@ public class MultiSplitLayoutTest
         ///////////////////
 
         SplitImpl row = JavaUtil.make( () -> {
-            var left = new LeafImpl("left");
-            left.setWeight( .5 );
-            var right = new LeafImpl( "right" );
-            right.setWeight( .5 );
+            var left = new LeafImpl("left").weight( .5 );
+            var right = new LeafImpl( "right" ).weight( .5 );
 
             return new RowImpl(
                     left,
@@ -54,9 +52,8 @@ public class MultiSplitLayoutTest
         });
 
         SplitImpl column = JavaUtil.make( () -> {
-            var bottom = new LeafImpl( "bottom" );
-            bottom.setWeight( .5 );
-            row.setWeight( .5 );
+            var bottom = new LeafImpl( "bottom" ).weight( .5 );
+            row.weight( .5 );
 
             var result = new ColumnImpl(
                     row,
@@ -74,19 +71,19 @@ public class MultiSplitLayoutTest
         mspl.layoutContainer( container );
 
         {
-            var d = mspl.getNodeForName( "left" ).getBounds();
+            var d = mspl.getNodeForName( "left" ).bounds();
             assertEquals(
                 new Rectangle( 0, 0, 95, 50 ),
                 d );
         }
         {
-            var d = mspl.getNodeForName( "right" ).getBounds();
+            var d = mspl.getNodeForName( "right" ).bounds();
             assertEquals(
                 new Rectangle( 105, 0, 95, 50 ),
                 d );
         }
         {
-            var d = mspl.getNodeForName( "bottom" ).getBounds();
+            var d = mspl.getNodeForName( "bottom" ).bounds();
             assertEquals(
                 new Rectangle( 0, 50, 200, 50 ),
                 d );
@@ -103,10 +100,8 @@ public class MultiSplitLayoutTest
         ///////////////////
 
         SplitImpl row = JavaUtil.make( () -> {
-            var left = new LeafImpl("left");
-            left.setWeight( .5 );
-            var right = new LeafImpl( "right" );
-            right.setWeight( .5 );
+            var left = new LeafImpl("left").weight( .5 );
+            var right = new LeafImpl( "right" ).weight( .5 );
 
             return new RowImpl(
                     left,
@@ -115,9 +110,8 @@ public class MultiSplitLayoutTest
         });
 
         SplitImpl column = JavaUtil.make( () -> {
-            var bottom = new LeafImpl( "bottom" );
-            bottom.setWeight( .5 );
-            row.setWeight( .5 );
+            var bottom = new LeafImpl( "bottom" ).weight( .5 );
+            row.weight( .5 );
 
             var result = new ColumnImpl(
                     row,
@@ -137,19 +131,19 @@ public class MultiSplitLayoutTest
         mspl.layoutContainer( container );
 
         {
-            var d = mspl.getNodeForName( "left" ).getBounds();
+            var d = mspl.getNodeForName( "left" ).bounds();
             assertEquals(
                 new Rectangle( 0, 0, 96, 51 ),
                 d );
         }
         {
-            var d = mspl.getNodeForName( "right" ).getBounds();
+            var d = mspl.getNodeForName( "right" ).bounds();
             assertEquals(
                 new Rectangle( 105, 0, 96, 51 ),
                 d );
         }
         {
-            var d = mspl.getNodeForName( "bottom" ).getBounds();
+            var d = mspl.getNodeForName( "bottom" ).bounds();
             assertEquals(
                 new Rectangle( 0, 51, 201, 51 ),
                 d );
@@ -157,7 +151,7 @@ public class MultiSplitLayoutTest
         {
             assertEquals(
                     WIDTH,
-                    mspl.getNodeForName( "left" ).getParent().extent() );
+                    mspl.getNodeForName( "left" ).getParent().realExtent() );
         }
     }
 
@@ -165,13 +159,11 @@ public class MultiSplitLayoutTest
     public void basicTest_rounding2() throws Exception
     {
         RowImpl row = JavaUtil.make( () -> {
-            var one = new LeafImpl("1");
-            one.setWeight( .3 );
-            var two = new LeafImpl( "2" );
-            two.setWeight( .3 );
+            var one = new LeafImpl("1").weight( .3 );
+            var two = new LeafImpl( "2" ).weight( .3 );
             // TODO validate names.
             var three = new LeafImpl( "3" );
-            three.setWeight( .0 );
+            three.weight( .0 );
 
             return new RowImpl(
                     one,
@@ -192,19 +184,19 @@ public class MultiSplitLayoutTest
         mspl.layoutContainer( container );
 
         {
-            var d = mspl.getNodeForName( "1" ).getBounds();
+            var d = mspl.getNodeForName( "1" ).bounds();
             assertEquals(
                 new Rectangle( 0, 0, 54, 101 ),
                 d );
         }
         {
-            var d = mspl.getNodeForName( "2" ).getBounds();
+            var d = mspl.getNodeForName( "2" ).bounds();
             assertEquals(
                 new Rectangle( 64, 0, 54, 101 ),
                 d );
         }
         {
-            var d = mspl.getNodeForName( "3" ).getBounds();
+            var d = mspl.getNodeForName( "3" ).bounds();
             assertEquals(
                 new Rectangle( 129, 0, 72, 101 ),
                 d );
@@ -212,7 +204,7 @@ public class MultiSplitLayoutTest
         {
             assertEquals(
                     WIDTH,
-                    row.extent() );
+                    row.realExtent() );
         }
     }
 

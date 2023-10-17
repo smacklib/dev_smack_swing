@@ -158,39 +158,6 @@ public class MultiSplitLayout
         return name;
     }
 
-//    /**
-//     * Get the MultiSplitLayout.Node associated with a component
-//     * @param split the layout split that owns the requested node
-//     * @param comp the component being positioned by the layout
-//     * @return the node associated with the component
-//     */
-//    private NodeImpl getNodeForComponent( SplitImpl split, Component comp )
-//    {
-//        return getNodeForName( split, getNameForComponent( comp ));
-//    }
-
-//    /**
-//     * Get the MultiSplitLayout.Node associated with a component
-//     * @param split the layout split that owns the requested node
-//     * @param name the name used to associate a component with the layout
-//     * @return the node associated with the component
-//     */
-//    private NodeImpl getNodeForName( SplitImpl split, String name )
-//    {
-//        for(NodeImpl n : split.getChildren()) {
-//            if ( n instanceof LeafImpl ) {
-//                if ( ((LeafImpl)n).getName().equals( name ))
-//                    return n;
-//            }
-//            else if ( n instanceof SplitImpl ) {
-//                NodeImpl n1 = getNodeForName( (SplitImpl)n, name );
-//                if ( n1 != null )
-//                    return n1;
-//            }
-//        }
-//        return null;
-//    }
-
     /**
      * Return the root of the tree of Split, Leaf, and Divider nodes
      * that define this layout.
@@ -525,15 +492,15 @@ public class MultiSplitLayout
 
         for ( var c : children )
         {
-            if ( c.weight == 0.0 )
-                c.weight = unsetPercentage;
+            if ( c._weight == 0.0 )
+                c._weight = unsetPercentage;
         }
 
         double totalWeight = 0.0;
         for ( var c : children )
         {
-            if ( c.weight > 0.0 )
-                totalWeight += c.weight;
+            if ( c._weight > 0.0 )
+                totalWeight += c._weight;
         }
 
         LOG.info( "totalWeight=" + totalWeight );
@@ -572,12 +539,12 @@ public class MultiSplitLayout
     private DividerImpl dividerAt(NodeImpl root, int x, int y) {
         if (root instanceof DividerImpl) {
             DividerImpl divider = (DividerImpl)root;
-            return (divider.getBounds().contains(x, y)) ? divider : null;
+            return (divider.bounds().contains(x, y)) ? divider : null;
         }
         else if (root instanceof SplitImpl) {
             SplitImpl split = (SplitImpl)root;
             for(NodeImpl child : split.getChildren()) {
-                if (child.getBounds().contains(x, y)) {
+                if (child.bounds().contains(x, y)) {
                     return dividerAt(child, x, y);
                 }
             }
@@ -723,11 +690,16 @@ public class MultiSplitLayout
 
         private int _parentIdx;
 
+        /**
+         * This node's extent position in its parent.
+         */
+        private int _position;
+
         private SplitImpl _parent = null;
 
         private final Rectangle _bounds = new Rectangle();
 
-        private double weight = 0.0;
+        private double _weight = 0.0;
 
         private boolean isVisible = true;
 
@@ -781,23 +753,17 @@ public class MultiSplitLayout
             _parent = parent;
         }
 
-        /**
-         * @return A copy of the value of the bounds property.
-         * @see #setBounds
-         */
-        public Rectangle getBounds() {
-            return new Rectangle( _bounds );
-        }
-
         public NodeImpl _width( int width )
         {
             _bounds.width = width;
             return this;
         }
+
         public int _width()
         {
             return _bounds.width;
         }
+
         public NodeImpl _height( int height )
         {
             _bounds.height = height;
@@ -846,10 +812,13 @@ public class MultiSplitLayout
          *
          * @param bounds the new value of the bounds property
          * @throws NullPointerException if bounds is null
-         * @see #getBounds
+         * @see #bounds()
          */
-        public void setBounds(Rectangle bounds) {
-            _bounds.setBounds( Objects.requireNonNull( bounds ) );
+        public void setBounds(Rectangle bounds)
+        {
+            _bounds.setBounds(
+                    Objects.requireNonNull(
+                            bounds ) );
         }
 
         /**
@@ -858,9 +827,12 @@ public class MultiSplitLayout
          * much to reduce when the layout shrinks.
          *
          * @return the value of the weight property
-         * @see #setWeight
          */
-        public double getWeight() { return weight; }
+        public double getWeight()
+        {
+            return _weight;
+        }
+
         /**
          * Fluent API.
          * @param weight
@@ -868,29 +840,13 @@ public class MultiSplitLayout
          */
         public NodeImpl weight( double weight )
         {
-            setWeight( weight );
-            return this;
-        }
-
-        /**
-         * The weight property is a between 0.0 and 1.0 used to
-         * compute how much space to add to this sibling when the
-         * layout grows or how much to reduce when the layout shrinks.
-         * If rowLayout is true then this node's width grows
-         * or shrinks by (extraSpace * weight).  If rowLayout is false,
-         * then the node's height is changed.  The default value
-         * of weight is 0.0.
-         *
-         * @param weight a double between 0.0 and 1.0
-         * @see #getWeight
-         * @see MultiSplitLayout#layoutContainer
-         * @throws IllegalArgumentException if weight is not between 0.0 and 1.0
-         */
-        public void setWeight(double weight) {
             if ((weight < 0.0)|| (weight > 1.0)) {
                 throw new IllegalArgumentException("invalid weight");
             }
-            this.weight = weight;
+
+            _weight = weight;
+
+            return this;
         }
 
         abstract void validate( Set<String> nameCollector );
@@ -902,6 +858,15 @@ public class MultiSplitLayout
         protected MultiSplitLayout host()
         {
             return _host;
+        }
+
+        protected void position( int p )
+        {
+            _position = p;
+        }
+        protected int position()
+        {
+            return _position;
         }
     }
 
@@ -967,13 +932,13 @@ public class MultiSplitLayout
                 }
             }
 
-            if ( extent() != bounds.width )
+            if ( realExtent() != bounds.width )
             {
                 // Correct the node positions.
-                int error = extent() - bounds.width;
+                int error = realExtent() - bounds.width;
 
                 LOG.warning( String.format(
-                        "Expected width %d not %d.  Error=%d", extent(), bounds.width, error ) );
+                        "Expected width %d not %d.  Error=%d", realExtent(), bounds.width, error ) );
 
                 var children = getChildren2();
 
@@ -985,15 +950,15 @@ public class MultiSplitLayout
                 }
             }
 
-            if ( extent() != bounds.width )
+            if ( realExtent() != bounds.width )
             {
                 LOG.warning( String.format(
-                        "Corrected width %d not %d.", extent(), bounds.width ) );
+                        "Corrected width %d not %d.", realExtent(), bounds.width ) );
             }
         }
 
         @Override
-        public int extent()
+        public int realExtent()
         {
             var children =
                     getChildren2();
@@ -1018,7 +983,7 @@ public class MultiSplitLayout
                 toDistribute += c._width();
 
             for ( var c : getChildren2() )
-                c.setWeight( c._width() / toDistribute );
+                c.weight( c._width() / toDistribute );
         }
 
         @Override
@@ -1070,6 +1035,12 @@ public class MultiSplitLayout
             var dividerCount = children.size() -1;
 
             return _width() - ( dividerCount * host().getDividerSize() );
+        }
+
+        @Override
+        public int expectedExtent()
+        {
+            return bounds().width;
         }
     }
 
@@ -1135,13 +1106,13 @@ public class MultiSplitLayout
                 }
             }
 
-            if ( extent() != bounds.width )
+            if ( realExtent() != bounds.width )
             {
                 // Correct the node positions.
-                int error = extent() - bounds.height;
+                int error = realExtent() - bounds.height;
 
                 LOG.warning( String.format(
-                        "Expected width %d not %d.  Error=%d", extent(), bounds.height, error ) );
+                        "Expected width %d not %d.  Error=%d", realExtent(), bounds.height, error ) );
 
                 for ( int i = children.size()-1 ; error > 0 ; i-- )
                 {
@@ -1151,15 +1122,15 @@ public class MultiSplitLayout
                 }
             }
 
-            if ( extent() != bounds.height )
+            if ( realExtent() != bounds.height )
             {
                 LOG.warning( String.format(
-                        "Corrected width %d not %d.", extent(), bounds.height ) );
+                        "Corrected width %d not %d.", realExtent(), bounds.height ) );
             }
         }
 
         @Override
-        public int extent()
+        public int realExtent()
         {
             var children =
                     getChildren2();
@@ -1184,7 +1155,7 @@ public class MultiSplitLayout
                 toDistribute += c._height();
 
             for ( var c : getChildren2() )
-                c.setWeight( c._height() / toDistribute );
+                c.weight( c._height() / toDistribute );
         }
 
         @Override
@@ -1234,6 +1205,12 @@ public class MultiSplitLayout
                 result += c._height();
 
             return result;
+        }
+
+        @Override
+        public int expectedExtent()
+        {
+            return bounds().height;
         }
     }
 
@@ -1290,9 +1267,10 @@ public class MultiSplitLayout
         public abstract void adjustWeights();
 
         /**
-         * @return The splits dynamic extent.
+         * @return The split's real extent after formatting.
          */
-        public abstract int extent();
+        public abstract int realExtent();
+        public abstract int expectedExtent();
 
         /**
          * Determines whether this node should be visible when its
@@ -1425,7 +1403,7 @@ public class MultiSplitLayout
             sb.append(isRowLayout() ? " ROW [" : " COLUMN [");
             sb.append(nChildren + ((nChildren == 1) ? " child" : " children"));
             sb.append("] ");
-            sb.append(getBounds());
+            sb.append(bounds());
             return sb.toString();
         }
 
@@ -1441,7 +1419,7 @@ public class MultiSplitLayout
                 for ( var c : getChildren2() )
                 {
                     c.validate( nameCollector );
-                    totalWeight += c.weight;
+                    totalWeight += c._weight;
                 }
                 if ( totalWeight > 1.0 )
                     throwInvalidLayout("Split children's total weight > 1.0", this);
@@ -1450,6 +1428,82 @@ public class MultiSplitLayout
 
         @Override
         abstract void layout( Rectangle bounds, MultiSplitLayout host );
+
+        public void layout2( Rectangle bounds, MultiSplitLayout host )
+        {
+            setBounds( bounds );
+
+            final int distributableExtent =
+                    distributableExtent();
+
+            double currentPosition = 0.0;
+
+            for ( int i = 0 ; i < getChildren().size() ; i++ )
+            {
+                // Toggle between splits and dividers.
+                if ( MathUtil.isEven( i ) )
+                {
+                    var c = getChildren().get( i );
+
+                    c.position( MathUtil.round( currentPosition ) );
+
+                    double w = c.getWeight() * distributableExtent;
+
+                    Rectangle subBounds = new Rectangle(
+                            MathUtil.round( currentPosition ),
+                            bounds.y,
+                            MathUtil.round( w ),
+                            bounds.height );
+
+                    c.layout(
+                            subBounds,
+                            host );
+
+                    currentPosition += w;
+                }
+                else
+                {
+                    DividerImpl divider = (DividerImpl)getChildren().get( i );
+
+                    divider.position( MathUtil.round( currentPosition ) );
+
+                    Rectangle subBounds = new Rectangle(
+                            MathUtil.round( currentPosition ),
+                            bounds.y,
+                            host.getDividerSize(),
+                            bounds.height );
+
+                    divider.setBounds( subBounds );
+
+                    currentPosition += host.getDividerSize();
+
+                }
+            }
+
+            if ( realExtent() != bounds.width )
+            {
+                // Correct the node positions.
+                int error = realExtent() - bounds.width;
+
+                LOG.warning( String.format(
+                        "Expected width %d not %d.  Error=%d", realExtent(), bounds.width, error ) );
+
+                var children = getChildren2();
+
+                for ( int i = children.size()-1 ; error > 0 ; i-- )
+                {
+                    NodeImpl c = children.get( i );
+                    c.bounds().x -= error;
+                    error--;
+                }
+            }
+
+            if ( realExtent() != bounds.width )
+            {
+                LOG.warning( String.format(
+                        "Corrected width %d not %d.", realExtent(), bounds.width ) );
+            }
+        }
 
         @Override
         public void attach( MultiSplitLayout host )
@@ -1504,7 +1558,7 @@ public class MultiSplitLayout
             sb.append(" weight=");
             sb.append(getWeight());
             sb.append(" ");
-            sb.append(getBounds());
+            sb.append(bounds());
             return sb.toString();
         }
 
@@ -1556,7 +1610,8 @@ public class MultiSplitLayout
          * @throws UnsupportedOperationException
          */
         @Override
-        public void setWeight(double weight) {
+        public NodeImpl weight( double weight )
+        {
             throw new UnsupportedOperationException();
         }
 
@@ -1568,7 +1623,7 @@ public class MultiSplitLayout
 
         @Override
         public String toString() {
-            return "MultiSplitLayout.Divider " + getBounds().toString();
+            return "MultiSplitLayout.Divider " + bounds().toString();
         }
 
         @Override

@@ -26,9 +26,9 @@ public class JXMultiSplitPaneTest
 
         SplitImpl row = JavaUtil.make( () -> {
             var left = new LeafImpl("left");
-            left.setWeight( .5 );
+            left.weight( .5 );
             var right = new LeafImpl( "right" );
-            right.setWeight( .5 );
+            right.weight( .5 );
 
             return new RowImpl(
                     left,
@@ -37,9 +37,8 @@ public class JXMultiSplitPaneTest
         });
 
         SplitImpl column = JavaUtil.make( () -> {
-            var bottom = new LeafImpl( "bottom" );
-            bottom.setWeight( .5 );
-            row.setWeight( .5 );
+            var bottom = new LeafImpl( "bottom" ).weight( .5 );
+            row.weight( .5 );
 
             var result = new ColumnImpl(
                     row,
