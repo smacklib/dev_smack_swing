@@ -926,8 +926,6 @@ public class MultiSplitLayout
         {
             setBounds( bounds );
 
-            var children =  _completeWeights( getChildren2() );
-
             final int netRowWidth =
                     distributableExtent();
 
@@ -976,6 +974,8 @@ public class MultiSplitLayout
 
                 LOG.warning( String.format(
                         "Expected width %d not %d.  Error=%d", extent(), bounds.width, error ) );
+
+                var children = getChildren2();
 
                 for ( int i = children.size()-1 ; error > 0 ; i-- )
                 {
@@ -1398,6 +1398,8 @@ public class MultiSplitLayout
                 c.setParent(this);
                 c.setParentIdx( idx++ );
             }
+
+            _completeWeights( _children );
         }
 
         /**
