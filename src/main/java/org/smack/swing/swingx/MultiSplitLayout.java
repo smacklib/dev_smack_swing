@@ -457,6 +457,8 @@ public class MultiSplitLayout
      */
     private void _performLayout( NodeImpl node, Rectangle bounds )
     {
+        node.setBounds( bounds );
+
         node.layout( bounds );
     }
 
@@ -1307,8 +1309,6 @@ public class MultiSplitLayout
         @Override
         public final void layout( Rectangle bounds )
         {
-            setBounds( bounds );
-
             final int distributableExtent =
                     distributableExtent();
 
@@ -1447,8 +1447,6 @@ public class MultiSplitLayout
         @Override
         void layout( Rectangle bounds )
         {
-            setBounds( bounds );
-
             host().getComponentForNode( this ).setBounds( bounds );
         }
     }
