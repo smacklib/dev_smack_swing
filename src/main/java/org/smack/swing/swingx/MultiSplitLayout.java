@@ -1263,8 +1263,7 @@ public class MultiSplitLayout
         /**
          * Convenience method for setting the children of this Split node.  The parent
          * of each new child is set to this Split node, and the parent
-         * of each old child (if any) is set to null.  This method
-         * defensively copies the incoming array.
+         * of each old child (if any) is set to null.
          *
          * @param children array of children
          * @see #getChildren
@@ -1312,62 +1311,47 @@ public class MultiSplitLayout
             final int distributableExtent =
                     distributableExtent();
 
-            double currentPosition = 0.0;
+            double currentPosition = .0;
+            double _error = .0;
 
             for ( int i = 0 ; i < getChildren().size() ; i++ )
             {
                 var c = getChildren().get( i );
 
+                _position( i, MathUtil.round( currentPosition ) );
+                _staticPosition( i, _staticPosition() );
+
+                _staticExtent( i, _staticExtent() );
+
                 // Toggle between splits and dividers.
                 if ( MathUtil.isEven( i ) )
                 {
-                    double w = c.getWeight() * distributableExtent;
-
-                    _staticExtent( i, _staticExtent() );
-                    _extent( i, MathUtil.round( w ) );
-                    _position( i, MathUtil.round( currentPosition ) );
-                    _staticPosition( i, _staticPosition() );
-
-                    Rectangle subBounds = c.bounds();
+                    double w =
+                            (c.getWeight() * distributableExtent) -
+                            _error;
+                    _extent(
+                            i,
+                            MathUtil.round( w ) );
+                    _error =
+                            _extent( i ) -
+                            w;
 
                     c.layout(
-                            subBounds );
-
-                    currentPosition += w;
+                            c.bounds() );
                 }
                 else
                 {
-                    _staticExtent( i, _staticExtent() );
                     _extent( i, host().getDividerSize() );
-                    _position( i, MathUtil.round( currentPosition ) );
-                    _staticPosition( i, _staticPosition() );
-
-                    currentPosition += host().getDividerSize();
                 }
-            }
 
-            //
-            if ( realExtent() != _extent() )
-            {
-                // The last element's extent is reduced by the error.
-                // Better is to distribute that on all leaves.
-                int error = realExtent() - _extent();
-
-                LOG.warning( String.format(
-                        "Expected extent %d not %d.  Error=%d", realExtent(), _extent(), error ) );
-
-                var lastIdx =
-                        getChildren().size()-1;
-
-                _extent(
-                        lastIdx,
-                        _extent( lastIdx ) - error );
+                currentPosition += _extent( i );
             }
 
             if ( realExtent() != _extent() )
             {
-                LOG.warning( String.format(
+                LOG.severe( String.format(
                         "Corrected extent %d not %d.", realExtent(), _extent() ) );
+                throw new AssertionError();
             }
         }
 
