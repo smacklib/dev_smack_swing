@@ -3,11 +3,9 @@
  *
  * Copyright © 2003-2023 Michael Binz
  */
-
 package org.smack.swing.swingx;
 
 import java.awt.Cursor;
-import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
@@ -19,52 +17,59 @@ import javax.swing.JPanel;
 import javax.swing.event.MouseInputAdapter;
 
 import org.smack.swing.swingx.MultiSplitLayout.DividerImpl;
-import org.smack.swing.swingx.MultiSplitLayout.NodeImpl;
 import org.smack.swing.swingx.MultiSplitLayout.SplitImpl;
 
 /**
- *
- * <p>
- * All properties in this class are bound: when a properties value
- * is changed, all PropertyChangeListeners are fired.
+ * Properties in this class are bound.
  *
  * @author Michael Binz
  */
 @SuppressWarnings("serial")
-public final class JXMultiSplitPane extends JPanel
+public final class JXMultiSplitPane
+    extends JPanel
 {
-    private static final Logger LOG = Logger.getLogger( JXMultiSplitPane.class.getName() );
+    private static final Logger LOG =
+            Logger.getLogger( JXMultiSplitPane.class.getName() );
 
     /**
      * Creates a MultiSplitPane with it's LayoutManager set to
      * to an empty MultiSplitLayout.
      */
-    public JXMultiSplitPane() {
-        this(new MultiSplitLayout());
+    public JXMultiSplitPane()
+    {
+        this( new MultiSplitLayout() );
     }
 
     /**
      * Creates a MultiSplitPane.
      * @param layout the new split pane's layout
      */
-    public JXMultiSplitPane( MultiSplitLayout layout ) {
-        super(layout);
-        InputHandler inputHandler = new InputHandler();
-        addMouseListener(inputHandler);
-        addMouseMotionListener(inputHandler);
-        addKeyListener(inputHandler);
+    public JXMultiSplitPane( MultiSplitLayout layout )
+    {
+        super( layout );
+
+        InputHandler inputHandler =
+                new InputHandler();
+        addMouseListener(
+                inputHandler);
+        addMouseMotionListener(
+                inputHandler);
+        addKeyListener(
+                inputHandler);
+
         setFocusable(true);
     }
 
     /**
      * A convenience method that returns the layout manager cast
-     * to MutliSplitLayout.
+     * to MultiSplitLayout.
      *
      * @return this MultiSplitPane's layout manager
      * @see java.awt.Container#getLayout
      * @see #setModel
      */
-    public final MultiSplitLayout getMultiSplitLayout() {
+    private final MultiSplitLayout getMultiSplitLayout()
+    {
         return (MultiSplitLayout)getLayout();
     }
 
@@ -90,7 +95,8 @@ public final class JXMultiSplitPane extends JPanel
      * @see #getMultiSplitLayout
      * @see MultiSplitLayout#setDividerSize
      */
-    public final void setDividerSize(int dividerSize) {
+    public final void setDividerSize(int dividerSize)
+    {
         getMultiSplitLayout().setDividerSize(dividerSize);
     }
 
@@ -102,7 +108,8 @@ public final class JXMultiSplitPane extends JPanel
      * @see #getMultiSplitLayout
      * @see MultiSplitLayout#getDividerSize
      */
-    public final int getDividerSize() {
+    public final int getDividerSize()
+    {
         return getMultiSplitLayout().getDividerSize();
     }
 
@@ -112,7 +119,8 @@ public final class JXMultiSplitPane extends JPanel
      *
      * @return the Divider that's being moved or null.
      */
-    public DividerImpl activeDivider() {
+    public DividerImpl activeDivider()
+    {
         return dragDivider;
     }
 
@@ -122,7 +130,8 @@ public final class JXMultiSplitPane extends JPanel
 
     private Point _dragPoint = null;
 
-    private void startDrag( Point p ) {
+    private void startDrag( Point p )
+    {
         requestFocusInWindow();
         MultiSplitLayout msl = getMultiSplitLayout();
         dragDivider = msl.dividerAt( p );
@@ -141,7 +150,8 @@ public final class JXMultiSplitPane extends JPanel
 
     }
 
-    private void updateDrag( Point p ) {
+    private void updateDrag( Point p )
+    {
         if (!dragUnderway) {
             return;
         }
@@ -150,30 +160,6 @@ public final class JXMultiSplitPane extends JPanel
 
         revalidate();
         repaint();
-    }
-
-    /**
-     * Set the maximum node size. This method can be overridden to limit the
-     * size of a node during a drag operation on a divider. When implementing
-     * this method in a subclass the node instance should be checked, for
-     * example:
-     * <code>
-     * class MyMultiSplitPane extends JXMultiSplitPane
-     * {
-     *   protected Dimension getMaxNodeSize( MultiSplitLayout msl, Node n )
-     *   {
-     *     if (( n instanceof Leaf ) && ((Leaf)n).getName().equals( "top" ))
-     *       return msl.maximumNodeSize( n );
-     *     return null;
-     *   }
-     * }
-     * </code>
-     * @param msl the MultiSplitLayout used by this pane
-     * @param n the node being resized
-     * @return the maximum size or null (by default) to ignore the maximum size.
-     */
-    protected Dimension getMaxNodeSize( MultiSplitLayout msl, NodeImpl n ) {
-        return null;
     }
 
     private void clearDragState()

@@ -98,18 +98,12 @@ public class MultiSplitLayout
                     20,
                     "minimumExtent" );
 
-    private LayoutMode layoutMode;
-
     /**
      * Create a MultiSplitLayout with a default model with a single
      * Leaf node named "default".
      *
      * #see setModel
      */
-    public MultiSplitLayout( Split model  )
-    {
-        setModel( model.convert( this ) );
-    }
     public MultiSplitLayout()
     {
         setModel2( new Row( .0, new Leaf( 0.0, "default" )) );
@@ -120,6 +114,10 @@ public class MultiSplitLayout
      *
      * #see setModel
      */
+    public MultiSplitLayout( Split model  )
+    {
+        setModel( model.convert( this ) );
+    }
     public MultiSplitLayout( SplitImpl model )
     {
         setModel( model );
@@ -228,8 +226,6 @@ public class MultiSplitLayout
         _dividerSize.set( dividerSize );
     }
 
-
-
     /**
      * Add a component to this MultiSplitLayout.  The
      * <code>name</code> should match the name property of the Leaf
@@ -245,10 +241,11 @@ public class MultiSplitLayout
      * @see #removeLayoutComponent
      */
     @Override
-    public void addLayoutComponent(String name, Component child) {
-        if (name == null) {
-            throw new IllegalArgumentException("name not specified");
-        }
+    public void addLayoutComponent(String name, Component child)
+    {
+        if ( StringUtil.isEmpty( name ) )
+            throw new IllegalArgumentException("Name not specified.");
+
         _childMap.put(name, child);
     }
 
@@ -268,23 +265,6 @@ public class MultiSplitLayout
         }
     }
 
-    private Component childForNode(NodeImpl node) {
-        if (node instanceof LeafImpl) {
-            LeafImpl leaf = (LeafImpl)node;
-            String name = leaf.getName();
-            return (name != null) ? _childMap.get(name) : null;
-        }
-        return null;
-    }
-
-    private Dimension preferredComponentSize(NodeImpl node) {
-        if ( layoutMode == LayoutMode.NO_MIN_SIZE_LAYOUT )
-            return new Dimension(0, 0);
-
-        Component child = childForNode(node);
-        return ((child != null) && child.isVisible() ) ? child.getPreferredSize() : new Dimension(0, 0);
-    }
-
     /**
      * Not supported.
      */
@@ -299,32 +279,6 @@ public class MultiSplitLayout
     @Override
     public Dimension minimumLayoutSize(Container parent) {
         return preferredLayoutSize(parent);
-    }
-
-    /**
-     * Get the layout mode
-     * @return current layout mode
-     */
-    @Deprecated
-    public LayoutMode getLayoutMode()
-    {
-        return layoutMode;
-    }
-
-    /**
-     * Set the layout mode. By default this layout uses the preferred and minimum
-     * sizes of the child components. To ignore the minimum size set the layout
-     * mode to MultiSplitLayout.LAYOUT_NO_MIN_SIZE.
-     * @param layoutMode the layout mode
-     * <ul>
-     * <li>DEFAULT_LAYOUT - use the preferred and minimum sizes when sizing the children</li>
-     * <li>LAYOUT_NO_MIN_SIZE - ignore the minimum size when sizing the children</li>
-     * </li>
-     */
-    @Deprecated
-    public void setLayoutMode( LayoutMode layoutMode )
-    {
-        this.layoutMode = layoutMode;
     }
 
     /**
@@ -386,6 +340,7 @@ public class MultiSplitLayout
     private static List<NodeImpl> _completeWeights( List<NodeImpl> children )
     {
         double[] weights = new double[children.size()];
+
         for ( int i = 0 ; i < weights.length ; i++ )
         {
             var c = children.get( i );
@@ -394,6 +349,7 @@ public class MultiSplitLayout
 
         double unsetCount = 0.0;
         double setPercentage = 0.0;
+
         for ( var c : weights )
         {
             if ( c == 0.0 )
@@ -512,12 +468,6 @@ public class MultiSplitLayout
     {
         private final List<Node> _nodes;
 
-        protected Split( Node... nodes )
-        {
-            super( 0.0 );
-            _nodes = Arrays.asList( nodes );
-        }
-
         protected Split( double weight, Node... nodes )
         {
             super( weight );
@@ -531,6 +481,11 @@ public class MultiSplitLayout
                         "Total weights > 0: " + totalWeights );
 
             _nodes = Arrays.asList( nodes );
+        }
+
+        protected Split( Node... nodes )
+        {
+            this( .0, nodes );
         }
 
         private double totalWeights( Node... nodes )
@@ -1051,33 +1006,34 @@ public class MultiSplitLayout
 
         public SplitImpl( Split split, MultiSplitLayout host )
         {
+            weight( split.weight() );
+
             var splitChildCount =
                     split._nodes.size();
 
             JavaUtil.Assert( splitChildCount > 0 );
 
-            List<NodeImpl> children =
-                    new ArrayList<>(
+            NodeImpl[] children =
+                    new NodeImpl[
                             splitChildCount +
-                            splitChildCount -1 );
+                            splitChildCount -1 ];
 
             int nodesIdx = 0;
-            for ( int i = 0 ; i < children.size() ; i++ )
+            for ( int i = 0 ; i < children.length ; i++ )
             {
                 if ( MathUtil.isEven(i) )
                 {
-                    children.set(
-                            i,
-                            split._nodes.get( nodesIdx++ ).convert( host ) );
+                    children[i] =
+                            split._nodes.get( nodesIdx++ ).convert( host );
                 }
                 else
                 {
-                    children.set( i, new DividerImpl() );
+                    children[i] =
+                            new DividerImpl();
                 }
-
             }
 
-            setChildren(children);
+            setChildren( Arrays.asList( children ) );
         }
 
         /**
@@ -1345,10 +1301,12 @@ public class MultiSplitLayout
         private final String _name;
 
         /**
-         * Create a Leaf node.  The default value of name is "".
+         * Create a Leaf node.
          */
         public LeafImpl( Leaf leaf )
         {
+            weight( leaf.weight() );
+
             _name = Objects.requireNonNull( leaf.name() );
         }
 
