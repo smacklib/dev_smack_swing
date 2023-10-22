@@ -31,6 +31,7 @@ import org.smack.swing.beans.AbstractBean;
 import org.smack.swing.beans.JavaBeanProperty;
 import org.smack.util.JavaUtil;
 import org.smack.util.MathUtil;
+import org.smack.util.StringUtil;
 
 
 /**
@@ -185,11 +186,13 @@ public class MultiSplitLayout
         _model.set( model );
     }
 
-    public void setModel(Split model)
+    public void setModel2(Split model)
     {
-        NodeImpl internalModel = model.convert( this );
-
-        _model.set( (SplitImpl)internalModel );
+        _model.set( model.convert( this ) );
+    }
+    public Split getModel2()
+    {
+        return (Split)_model.get().convert();
     }
 
     /**
@@ -297,6 +300,7 @@ public class MultiSplitLayout
      * Get the layout mode
      * @return current layout mode
      */
+    @Deprecated
     public LayoutMode getLayoutMode()
     {
         return layoutMode;
@@ -312,6 +316,7 @@ public class MultiSplitLayout
      * <li>LAYOUT_NO_MIN_SIZE - ignore the minimum size when sizing the children</li>
      * </li>
      */
+    @Deprecated
     public void setLayoutMode( LayoutMode layoutMode )
     {
         this.layoutMode = layoutMode;
@@ -532,6 +537,20 @@ public class MultiSplitLayout
 
             return result;
         }
+
+        @Override
+        abstract SplitImpl convert( MultiSplitLayout host );
+
+        @Override
+        public String toString()
+        {
+            var nodeStrings = new ArrayList<String>();
+
+            for ( var c : _nodes )
+                nodeStrings.toString();
+
+            return StringUtil.concatenate( ", ", _nodes );
+        }
     }
 
     public static class Column extends Split
@@ -550,6 +569,15 @@ public class MultiSplitLayout
         {
             return new ColumnImpl( this, host );
         }
+
+        @Override
+        public String toString()
+        {
+            return String.format(
+                    "Row( weight=%f, %s )",
+                    weight(),
+                    super.toString() );
+        }
     }
 
     public static class Row extends Split
@@ -567,6 +595,15 @@ public class MultiSplitLayout
         RowImpl convert( MultiSplitLayout host )
         {
             return new RowImpl( this, host );
+        }
+
+        @Override
+        public String toString()
+        {
+            return String.format(
+                    "Row( weight=%f, %s )",
+                    weight(),
+                    super.toString() );
         }
     }
 
@@ -593,6 +630,15 @@ public class MultiSplitLayout
             host._leafMap.put( _name, result );
 
             return result;
+        }
+
+        @Override
+        public String toString()
+        {
+            return String.format(
+                    "Leaf( weight=%s, name=%s )",
+                    weight(),
+                    _name );
         }
     }
 
@@ -771,6 +817,8 @@ public class MultiSplitLayout
         {
             return _host;
         }
+
+        protected abstract Node convert();
     }
 
     /**
@@ -873,6 +921,17 @@ public class MultiSplitLayout
         {
             return bounds().width;
         }
+
+        @Override
+        protected Row convert()
+        {
+            ArrayList<Node> nodes = new ArrayList<>();
+
+            for ( var c : getChildren2() )
+                nodes.add( c.convert() );
+
+            return new Row( nodes.toArray( new Node[0] ) );
+        }
     }
 
     public static class ColumnImpl extends SplitImpl
@@ -969,6 +1028,17 @@ public class MultiSplitLayout
         protected int _extent()
         {
             return bounds().height;
+        }
+
+        @Override
+        protected Column convert()
+        {
+            ArrayList<Node> nodes = new ArrayList<>();
+
+            for ( var c : getChildren2() )
+                nodes.add( c.convert() );
+
+            return new Column( nodes.toArray( new Node[0] ) );
         }
     }
 
@@ -1344,6 +1414,12 @@ public class MultiSplitLayout
         {
             host().getComponentForNode( this ).setBounds( bounds );
         }
+
+        @Override
+        protected Node convert()
+        {
+            return new Leaf( getWeight(), _name );
+        }
     }
 
     /**
@@ -1435,6 +1511,12 @@ public class MultiSplitLayout
             getParent().adjustWeights();
 
             return to;
+        }
+
+        @Override
+        protected Node convert()
+        {
+            throw new AssertionError();
         }
     }
 

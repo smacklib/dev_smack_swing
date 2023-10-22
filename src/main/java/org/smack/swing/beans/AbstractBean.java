@@ -1,5 +1,5 @@
 /*
- * $Id: 4edfdfc949c4094b82f8b9b5a2499384f5132aa6 $
+ * $Id$
  *
  * Copyright 2004 Sun Microsystems, Inc., 4150 Network Circle,
  * Santa Clara, California 95054, U.S.A. All rights reserved.
