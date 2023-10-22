@@ -277,109 +277,20 @@ public class MultiSplitLayout
         return ((child != null) && child.isVisible() ) ? child.getPreferredSize() : new Dimension(0, 0);
     }
 
-    private Dimension preferredNodeSize(NodeImpl root) {
-        if (root instanceof LeafImpl) {
-            return preferredComponentSize(root);
-        }
-        else if (root instanceof DividerImpl) {
-            if ( !((DividerImpl)root).isVisible())
-                return new Dimension(0,0);
-            int divSize = getDividerSize();
-            return new Dimension(divSize, divSize);
-        }
-        else {
-            SplitImpl split = (SplitImpl)root;
-            List<NodeImpl> splitChildren = split.getChildren();
-            int width = 0;
-            int height = 0;
-            if (split.isRowLayout()) {
-                for(NodeImpl splitChild : splitChildren) {
-                    if ( !splitChild.isVisible())
-                        continue;
-                    Dimension size = preferredNodeSize(splitChild);
-                    width += size.width;
-                    height = Math.max(height, size.height);
-                }
-            }
-            else {
-                for(NodeImpl splitChild : splitChildren) {
-                    if ( !splitChild.isVisible())
-                        continue;
-                    Dimension size = preferredNodeSize(splitChild);
-                    width = Math.max(width, size.width);
-                    height += size.height;
-                }
-            }
-            return new Dimension(width, height);
-        }
+    /**
+     * Not supported.
+     */
+    @Override
+    public Dimension preferredLayoutSize(Container parent) {
+        return new Dimension( Integer.MAX_VALUE, Integer.MAX_VALUE );
     }
 
     /**
-     * Get the minimum size of this node. Sums the minumum sizes of rows or
-     * columns to get the overall minimum size for the layout node, including the
-     * dividers.
-     * @param root the node whose size is required.
-     * @return the minimum size.
+     * Not supported.
      */
-    public Dimension minimumNodeSize(NodeImpl root) {
-        assert( root.isVisible );
-        if (root instanceof LeafImpl) {
-            if ( layoutMode == LayoutMode.NO_MIN_SIZE_LAYOUT )
-                return new Dimension(0, 0);
-
-            Component child = childForNode(root);
-            return ((child != null) && child.isVisible() ) ? child.getMinimumSize() : new Dimension(0, 0);
-        }
-        else if (root instanceof DividerImpl) {
-            if ( !((DividerImpl)root).isVisible()  )
-                return new Dimension(0,0);
-            int divSize = getDividerSize();
-            return new Dimension(divSize, divSize);
-        }
-        else {
-            SplitImpl split = (SplitImpl)root;
-            List<NodeImpl> splitChildren = split.getChildren();
-            int width = 0;
-            int height = 0;
-            if (split.isRowLayout()) {
-                for(NodeImpl splitChild : splitChildren) {
-                    if ( !splitChild.isVisible())
-                        continue;
-                    Dimension size = minimumNodeSize(splitChild);
-                    width += size.width;
-                    height = Math.max(height, size.height);
-                }
-            }
-            else {
-                for(NodeImpl splitChild : splitChildren) {
-                    if ( !splitChild.isVisible())
-                        continue;
-                    Dimension size = minimumNodeSize(splitChild);
-                    width = Math.max(width, size.width);
-                    height += size.height;
-                }
-            }
-            return new Dimension(width, height);
-        }
-    }
-
-    private Dimension sizeWithInsets(Container parent, Dimension size) {
-        Insets insets = parent.getInsets();
-        int width = size.width + insets.left + insets.right;
-        int height = size.height + insets.top + insets.bottom;
-        return new Dimension(width, height);
-    }
-
-    @Override
-    public Dimension preferredLayoutSize(Container parent) {
-        Dimension size = preferredNodeSize(getModel());
-        return sizeWithInsets(parent, size);
-    }
-
     @Override
     public Dimension minimumLayoutSize(Container parent) {
-        Dimension size = minimumNodeSize(getModel());
-        return sizeWithInsets(parent, size);
+        return preferredLayoutSize(parent);
     }
 
     /**
@@ -913,7 +824,7 @@ public class MultiSplitLayout
         }
 
         @Override
-        protected int _extendPosition( int idx )
+        protected int _extentPosition( int idx )
         {
             return getChildAt( idx )._x();
         }
@@ -1003,7 +914,7 @@ public class MultiSplitLayout
         }
 
         @Override
-        protected int _extendPosition( int idx )
+        protected int _extentPosition( int idx )
         {
             return getChildAt( idx )._y();
         }
@@ -1121,7 +1032,7 @@ public class MultiSplitLayout
             var lastIdx = getChildren().size() -1;
 
             var lastPosition =
-                    _extendPosition( lastIdx);
+                    _extentPosition( lastIdx);
             var lastExtent =
                     _extent( lastIdx );
             return
@@ -1192,9 +1103,8 @@ public class MultiSplitLayout
         /**
          * @param idx The child index.
          * @return The dynamic position of the child.
-         * TODO typo
          */
-        protected abstract int _extendPosition( int idx );
+        protected abstract int _extentPosition( int idx );
 
         protected abstract SplitImpl _staticPosition( int idx, int p );
 
@@ -1323,7 +1233,8 @@ public class MultiSplitLayout
 
                 _staticExtent( i, _staticExtent() );
 
-                // Toggle between splits and dividers.
+                // For the computation of the extent we have
+                // to toggle between splits and dividers.
                 if ( MathUtil.isEven( i ) )
                 {
                     double w =
@@ -1516,14 +1427,6 @@ public class MultiSplitLayout
                 return from;
 
             parent._extent( prevIdx, prevWidth );
-
-//            parent._extentPosition(
-//                    ownIdx,
-//                    parent._extendPosition( ownIdx ) );
-
-//            parent._extent(
-//                    nextIdx,
-//                    getParent()._extent( nextIdx ) );
 
             parent._extent(
                     nextIdx,

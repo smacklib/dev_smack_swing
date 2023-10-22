@@ -176,17 +176,6 @@ public final class JXMultiSplitPane extends JPanel
         return null;
     }
 
-    /**
-     * Set the minimum node size. This method can be overridden to limit the
-     * size of a node during a drag operation on a divider.
-     * @param msl the MultiSplitLayout used by this pane
-     * @param n the node being resized
-     * @return the maximum size or null (by default) to ignore the maximum size.
-     */
-    protected Dimension getMinNodeSize( MultiSplitLayout msl, NodeImpl n ) {
-        return msl.minimumNodeSize(n);
-    }
-
     private void clearDragState()
     {
         dragDivider = null;
