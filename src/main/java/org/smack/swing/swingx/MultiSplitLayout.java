@@ -83,7 +83,7 @@ public class MultiSplitLayout
     private JavaBeanProperty<SplitImpl, MultiSplitLayout> _model =
             new JavaBeanProperty<>(
                     this,
-                    null, //ew LeafImpl( "default" ),
+                    null,
                     "model" );
 
     private JavaBeanProperty<Integer, MultiSplitLayout> _dividerSize =
@@ -601,13 +601,7 @@ public class MultiSplitLayout
 
         private double _weight = 0.0;
 
-        private boolean isVisible = true;
-
         private MultiSplitLayout _host;
-
-        public void setVisible( boolean b ) {
-            isVisible = b;
-        }
 
         protected void setParentIdx( int idx )
         {
@@ -616,17 +610,6 @@ public class MultiSplitLayout
         protected int getParentIdx()
         {
             return _parentIdx;
-        }
-
-        /**
-         * Determines whether this node should be visible when its
-         * parent is visible. Nodes are
-         * initially visible
-         * @return <code>true</code> if the node is visible,
-         * <code>false</code> otherwise
-         */
-        protected boolean isVisible() {
-            return isVisible;
         }
 
         /**
@@ -1058,22 +1041,6 @@ public class MultiSplitLayout
         }
 
         public abstract int expectedExtent();
-
-        /**
-         * Determines whether this node should be visible when its
-         * parent is visible. Nodes are
-         * initially visible
-         * @return <code>true</code> if the node is visible,
-         * <code>false</code> otherwise
-         */
-        @Override
-        public boolean isVisible() {
-            for(NodeImpl child : _children) {
-                if ( child.isVisible() && !( child instanceof DividerImpl ))
-                    return true;
-            }
-            return false;
-        }
 
         /**
          * @return The split's dynamic extent.
