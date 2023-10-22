@@ -1515,7 +1515,7 @@ public class MultiSplitLayout
                 int error = realExtent() - _extent();
 
                 LOG.warning( String.format(
-                        "Expected width %d not %d.  Error=%d", realExtent(), _extent(), error ) );
+                        "Expected extent %d not %d.  Error=%d", realExtent(), _extent(), error ) );
 
                 var lastIdx =
                         getChildren().size()-1;
@@ -1525,10 +1525,10 @@ public class MultiSplitLayout
                         _extent( lastIdx ) - error );
             }
 
-            if ( realExtent() != bounds.width )
+            if ( realExtent() != _extent() )
             {
                 LOG.warning( String.format(
-                        "Corrected width %d not %d.", realExtent(), bounds.width ) );
+                        "Corrected extent %d not %d.", realExtent(), _extent() ) );
             }
         }
 
