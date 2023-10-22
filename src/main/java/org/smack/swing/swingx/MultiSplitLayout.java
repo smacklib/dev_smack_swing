@@ -690,11 +690,6 @@ public class MultiSplitLayout
 
         private int _parentIdx;
 
-        /**
-         * This node's extent position in its parent.
-         */
-        private int _position;
-
         private SplitImpl _parent = null;
 
         private final Rectangle _bounds = new Rectangle();
@@ -806,9 +801,7 @@ public class MultiSplitLayout
         }
 
         /**
-         * Set the bounding Rectangle for this node.  The value of
-         * bounds may not be null.  The default value of bounds
-         * is equal to <code>new Rectangle(0,0,0,0)</code>.
+         * Update the bounds of this node.
          *
          * @param bounds the new value of the bounds property
          * @throws NullPointerException if bounds is null
@@ -816,9 +809,16 @@ public class MultiSplitLayout
          */
         public void setBounds(Rectangle bounds)
         {
-            _bounds.setBounds(
-                    Objects.requireNonNull(
-                            bounds ) );
+            Objects.requireNonNull( bounds );
+
+            _bounds.x =
+                    bounds.x;
+            _bounds.y =
+                    bounds.y;
+            _bounds.width =
+                    bounds.width;
+            _bounds.height =
+                    bounds.height;
         }
 
         /**
@@ -859,15 +859,6 @@ public class MultiSplitLayout
         {
             return _host;
         }
-
-        protected void position( int p )
-        {
-            _position = p;
-        }
-        protected int position()
-        {
-            return _position;
-        }
     }
 
     /**
@@ -889,6 +880,12 @@ public class MultiSplitLayout
         @Override
         public void layout( Rectangle bounds, MultiSplitLayout host )
         {
+            if ( true )
+            {
+                super.layout( bounds );
+                return;
+            }
+
             setBounds( bounds );
 
             final int netRowWidth =
@@ -957,20 +954,6 @@ public class MultiSplitLayout
             }
         }
 
-        @Override
-        public int realExtent()
-        {
-            var children =
-                    getChildren2();
-            var lastNode =
-                    children.get(
-                            children.size()-1 );
-            var bounds =
-                    lastNode._bounds;
-
-            return bounds.x + bounds.width;
-        }
-
         /**
          * Row.
          */
@@ -999,13 +982,20 @@ public class MultiSplitLayout
         }
 
         @Override
+        protected SplitImpl _staticExtent( int idx, int extent )
+        {
+            getChildAt( idx )._height( extent );
+            return this;
+        }
+
+        @Override
         protected int _extendPosition( int idx )
         {
             return getChildAt( idx )._x();
         }
 
         @Override
-        protected SplitImpl _extentPosition( int idx, int p )
+        protected SplitImpl _position( int idx, int p )
         {
             getChildAt( idx )._x( p );
             return this;
@@ -1025,20 +1015,26 @@ public class MultiSplitLayout
         }
 
         @Override
-        protected int distributableExtent()
+        public int expectedExtent()
         {
-            var children = getChildren2();
-
-            if ( children.size() == 1 )
-                return _width();
-
-            var dividerCount = children.size() -1;
-
-            return _width() - ( dividerCount * host().getDividerSize() );
+            return bounds().width;
         }
 
         @Override
-        public int expectedExtent()
+        protected SplitImpl _staticPosition( int idx, int p )
+        {
+            getChildAt( idx )._y( p );
+            return this;
+        }
+
+        @Override
+        protected int _staticPosition()
+        {
+            return bounds().y;
+        }
+
+        @Override
+        protected int _extent()
         {
             return bounds().width;
         }
@@ -1058,6 +1054,12 @@ public class MultiSplitLayout
         @Override
         public void layout( Rectangle bounds, MultiSplitLayout host )
         {
+            if ( true )
+            {
+                super.layout( bounds );
+                return;
+            }
+
             setBounds( bounds );
 
             var children =  _completeWeights( getChildren2() );
@@ -1129,20 +1131,6 @@ public class MultiSplitLayout
             }
         }
 
-        @Override
-        public int realExtent()
-        {
-            var children =
-                    getChildren2();
-            var lastNode =
-                    children.get(
-                            children.size()-1 );
-            var bounds =
-                    lastNode._bounds;
-
-            return bounds.y + bounds.height;
-        }
-
         /**
          * Column.
          */
@@ -1177,9 +1165,9 @@ public class MultiSplitLayout
         }
 
         @Override
-        protected SplitImpl _extentPosition( int idx, int p )
+        protected SplitImpl _position( int idx, int p )
         {
-            getChildAt( idx )._height( p );
+            getChildAt( idx )._y( p );
             return this;
         }
 
@@ -1197,18 +1185,33 @@ public class MultiSplitLayout
         }
 
         @Override
-        protected int distributableExtent()
+        public int expectedExtent()
         {
-            var result = 0;
-
-            for ( var c : getChildren2() )
-                result += c._height();
-
-            return result;
+            return bounds().height;
         }
 
         @Override
-        public int expectedExtent()
+        protected SplitImpl _staticExtent( int idx, int extent )
+        {
+            getChildAt( idx )._width( extent );
+            return this;
+        }
+
+        @Override
+        protected SplitImpl _staticPosition( int idx, int p )
+        {
+            getChildAt( idx )._x( p );
+            return this;
+        }
+
+        @Override
+        protected int _staticPosition()
+        {
+            return bounds().x;
+        }
+
+        @Override
+        protected int _extent()
         {
             return bounds().height;
         }
@@ -1269,7 +1272,19 @@ public class MultiSplitLayout
         /**
          * @return The split's real extent after formatting.
          */
-        public abstract int realExtent();
+        public final int realExtent()
+        {
+            var lastIdx = getChildren().size() -1;
+
+            var lastPosition =
+                    _extendPosition( lastIdx);
+            var lastExtent =
+                    _extent( lastIdx );
+            return
+                    lastPosition +
+                    lastExtent;
+        }
+
         public abstract int expectedExtent();
 
         /**
@@ -1289,21 +1304,46 @@ public class MultiSplitLayout
         }
 
         /**
+         * @return The split's dynamic extent.
+         */
+        protected abstract int _extent();
+
+        /**
          * @param idx child index.
          * @return The dynamic extend of the child.
          */
         protected abstract int _extent( int idx );
 
         /**
+         * Set the extent of the child.
+         * @param idx The child index.
+         * @param p The new extent
+         * @return Fluent API.
+         */
+        protected abstract SplitImpl _extent( int idx, int p );
+
+        /**
          * @return The static (common) extent of this split.
          */
         protected abstract int _staticExtent();
+
+        protected abstract int _staticPosition();
 
         /**
          * Get the distributable extent.  This is the total
          * of the children extents without the dividers.
          */
-        protected abstract int distributableExtent();
+        protected final int distributableExtent()
+        {
+            var result = _extent();
+
+            int dividerCount =
+                    getChildren().size() / 2;
+
+            return
+                    result -
+                    (dividerCount * host().getDividerSize());
+        }
 
         /**
          * @param idx The child index.
@@ -1312,23 +1352,19 @@ public class MultiSplitLayout
          */
         protected abstract int _extendPosition( int idx );
 
+        protected abstract SplitImpl _staticPosition( int idx, int p );
+
         /**
          * Set the position of the dynamic extent.
          * @param idx The child index.
          * @param p The new position.
          * @return Fluent API.
          */
-        protected abstract SplitImpl _extentPosition( int idx, int p );
-
-        /**
-         * Set the extend of the child.
-         * @param idx The child index.
-         * @param p The new extent
-         * @return Fluent API.
-         */
-        protected abstract SplitImpl _extent( int idx, int p );
+        protected abstract SplitImpl _position( int idx, int p );
 
         protected abstract int _pointDelta( Point from, Point to );
+
+        protected abstract SplitImpl _staticExtent( int idx, int extent );
 
         /**
          * @return true if the this Split's children are to be
@@ -1429,7 +1465,7 @@ public class MultiSplitLayout
         @Override
         abstract void layout( Rectangle bounds, MultiSplitLayout host );
 
-        public void layout2( Rectangle bounds, MultiSplitLayout host )
+        public void layout( Rectangle bounds )
         {
             setBounds( bounds );
 
@@ -1440,62 +1476,53 @@ public class MultiSplitLayout
 
             for ( int i = 0 ; i < getChildren().size() ; i++ )
             {
+                var c = getChildren().get( i );
+
                 // Toggle between splits and dividers.
                 if ( MathUtil.isEven( i ) )
                 {
-                    var c = getChildren().get( i );
-
-                    c.position( MathUtil.round( currentPosition ) );
-
                     double w = c.getWeight() * distributableExtent;
 
-                    Rectangle subBounds = new Rectangle(
-                            MathUtil.round( currentPosition ),
-                            bounds.y,
-                            MathUtil.round( w ),
-                            bounds.height );
+                    _staticExtent( i, _staticExtent() );
+                    _extent( i, MathUtil.round( w ) );
+                    _position( i, MathUtil.round( currentPosition ) );
+                    _staticPosition( i, _staticPosition() );
+
+                    Rectangle subBounds = c.bounds();
 
                     c.layout(
                             subBounds,
-                            host );
+                            host() );
 
                     currentPosition += w;
                 }
                 else
                 {
-                    DividerImpl divider = (DividerImpl)getChildren().get( i );
+                    _staticExtent( i, _staticExtent() );
+                    _extent( i, host().getDividerSize() );
+                    _position( i, MathUtil.round( currentPosition ) );
+                    _staticPosition( i, _staticPosition() );
 
-                    divider.position( MathUtil.round( currentPosition ) );
-
-                    Rectangle subBounds = new Rectangle(
-                            MathUtil.round( currentPosition ),
-                            bounds.y,
-                            host.getDividerSize(),
-                            bounds.height );
-
-                    divider.setBounds( subBounds );
-
-                    currentPosition += host.getDividerSize();
-
+                    currentPosition += host().getDividerSize();
                 }
             }
 
-            if ( realExtent() != bounds.width )
+            //
+            if ( realExtent() != _extent() )
             {
-                // Correct the node positions.
-                int error = realExtent() - bounds.width;
+                // The last element's extent is reduced by the error.
+                // Better is to distribute that on all leaves.
+                int error = realExtent() - _extent();
 
                 LOG.warning( String.format(
-                        "Expected width %d not %d.  Error=%d", realExtent(), bounds.width, error ) );
+                        "Expected width %d not %d.  Error=%d", realExtent(), _extent(), error ) );
 
-                var children = getChildren2();
+                var lastIdx =
+                        getChildren().size()-1;
 
-                for ( int i = children.size()-1 ; error > 0 ; i-- )
-                {
-                    NodeImpl c = children.get( i );
-                    c.bounds().x -= error;
-                    error--;
-                }
+                _extent(
+                        lastIdx,
+                        _extent( lastIdx ) - error );
             }
 
             if ( realExtent() != bounds.width )
@@ -1569,7 +1596,6 @@ public class MultiSplitLayout
 
             LOG.info( toString() );
         }
-
 
         @Override
         void validate( Set<String> nameCollector )
