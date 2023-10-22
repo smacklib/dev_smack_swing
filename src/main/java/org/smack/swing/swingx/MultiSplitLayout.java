@@ -457,7 +457,7 @@ public class MultiSplitLayout
      */
     private void _performLayout( NodeImpl node, Rectangle bounds )
     {
-        node.layout( bounds, this );
+        node.layout( bounds );
     }
 
     private static List<NodeImpl> _completeWeights( List<NodeImpl> children )
@@ -852,8 +852,7 @@ public class MultiSplitLayout
         abstract void validate( Set<String> nameCollector );
 
         abstract void layout(
-                Rectangle bounds,
-                MultiSplitLayout host );
+                Rectangle bounds );
 
         protected MultiSplitLayout host()
         {
@@ -875,83 +874,6 @@ public class MultiSplitLayout
 
         public RowImpl(NodeImpl... children) {
             super( children );
-        }
-
-        @Override
-        public void layout( Rectangle bounds, MultiSplitLayout host )
-        {
-            if ( true )
-            {
-                super.layout( bounds );
-                return;
-            }
-
-            setBounds( bounds );
-
-            final int netRowWidth =
-                    distributableExtent();
-
-            double currentPosition = 0.0;
-
-            for ( int i = 0 ; i < getChildren().size() ; i++ )
-            {
-                // Toggle between splits and dividers.
-                if ( MathUtil.isEven( i ) )
-                {
-                    var c = getChildren().get( i );
-                    double w = c.getWeight() * netRowWidth;
-
-                    Rectangle subBounds = new Rectangle(
-                            MathUtil.round( currentPosition ),
-                            bounds.y,
-                            MathUtil.round( w ),
-                            bounds.height );
-
-                    c.layout(
-                            subBounds,
-                            host );
-
-                    currentPosition += w;
-                }
-                else
-                {
-                    DividerImpl divider = (DividerImpl)getChildren().get( i );
-
-                    Rectangle subBounds = new Rectangle(
-                            MathUtil.round( currentPosition ),
-                            bounds.y,
-                            host.getDividerSize(),
-                            bounds.height );
-
-                    divider.setBounds( subBounds );
-                    currentPosition += host.getDividerSize();
-
-                }
-            }
-
-            if ( realExtent() != bounds.width )
-            {
-                // Correct the node positions.
-                int error = realExtent() - bounds.width;
-
-                LOG.warning( String.format(
-                        "Expected width %d not %d.  Error=%d", realExtent(), bounds.width, error ) );
-
-                var children = getChildren2();
-
-                for ( int i = children.size()-1 ; error > 0 ; i-- )
-                {
-                    NodeImpl c = children.get( i );
-                    c.bounds().x -= error;
-                    error--;
-                }
-            }
-
-            if ( realExtent() != bounds.width )
-            {
-                LOG.warning( String.format(
-                        "Corrected width %d not %d.", realExtent(), bounds.width ) );
-            }
         }
 
         /**
@@ -1049,86 +971,6 @@ public class MultiSplitLayout
 
         public ColumnImpl(NodeImpl... children) {
             super(children);
-        }
-
-        @Override
-        public void layout( Rectangle bounds, MultiSplitLayout host )
-        {
-            if ( true )
-            {
-                super.layout( bounds );
-                return;
-            }
-
-            setBounds( bounds );
-
-            var children =  _completeWeights( getChildren2() );
-
-            final int dividerCount =
-                    children.size() -1;
-            final int netRowHeigth =
-                    bounds.height - dividerCount * host.getDividerSize();
-
-            double currentPosition = 0.0;
-
-            for ( int i = 0 ; i < getChildren().size() ; i++ )
-            {
-                // Toggle between splits and dividers.
-                if ( MathUtil.isEven( i ) )
-                {
-                    var c = getChildren().get( i );
-                    double h = c.getWeight() * netRowHeigth;
-
-                    Rectangle subBounds = new Rectangle(
-                            bounds.x, // MathUtil.round( currentPosition ),
-                            MathUtil.round( currentPosition ), // bounds.y,
-                            bounds.width, // MathUtil.round( w ),
-                            MathUtil.round( h ) ); // bounds.height );
-
-                    c.layout(
-                            subBounds,
-                            host );
-
-                    currentPosition += h;
-                }
-                else
-                {
-                    DividerImpl divider = (DividerImpl)getChildren().get( i );
-
-                    Rectangle subBounds = new Rectangle(
-                            bounds.x, // MathUtil.round( currentPosition ),
-                            MathUtil.round( currentPosition ),
-                            bounds.width,
-                            host.getDividerSize()
-                            );
-
-                    divider.setBounds( subBounds );
-                    currentPosition += host.getDividerSize();
-
-                }
-            }
-
-            if ( realExtent() != bounds.width )
-            {
-                // Correct the node positions.
-                int error = realExtent() - bounds.height;
-
-                LOG.warning( String.format(
-                        "Expected width %d not %d.  Error=%d", realExtent(), bounds.height, error ) );
-
-                for ( int i = children.size()-1 ; error > 0 ; i-- )
-                {
-                    NodeImpl c = children.get( i );
-                    c.bounds().y -= error;
-                    error--;
-                }
-            }
-
-            if ( realExtent() != bounds.height )
-            {
-                LOG.warning( String.format(
-                        "Corrected width %d not %d.", realExtent(), bounds.height ) );
-            }
         }
 
         /**
@@ -1463,9 +1305,7 @@ public class MultiSplitLayout
         }
 
         @Override
-        abstract void layout( Rectangle bounds, MultiSplitLayout host );
-
-        public void layout( Rectangle bounds )
+        public final void layout( Rectangle bounds )
         {
             setBounds( bounds );
 
@@ -1491,8 +1331,7 @@ public class MultiSplitLayout
                     Rectangle subBounds = c.bounds();
 
                     c.layout(
-                            subBounds,
-                            host() );
+                            subBounds );
 
                     currentPosition += w;
                 }
@@ -1606,11 +1445,11 @@ public class MultiSplitLayout
         }
 
         @Override
-        void layout( Rectangle bounds, MultiSplitLayout host )
+        void layout( Rectangle bounds )
         {
             setBounds( bounds );
 
-            host.getComponentForNode( this ).setBounds( bounds );
+            host().getComponentForNode( this ).setBounds( bounds );
         }
     }
 
@@ -1658,7 +1497,7 @@ public class MultiSplitLayout
         }
 
         @Override
-        void layout( Rectangle bounds, MultiSplitLayout host )
+        void layout( Rectangle bounds )
         {
             throw new AssertionError("Unexpected");
         }
