@@ -106,8 +106,13 @@ public class MultiSplitLayout
      *
      * #see setModel
      */
+    public MultiSplitLayout( Split model  )
+    {
+        setModel( model.convert( this ) );
+    }
     public MultiSplitLayout()
     {
+        setModel2( new Row( .0, new Leaf( 0.0, "default" )) );
     }
 
     /**
@@ -115,7 +120,7 @@ public class MultiSplitLayout
      *
      * #see setModel
      */
-    public MultiSplitLayout(SplitImpl model)
+    public MultiSplitLayout( SplitImpl model )
     {
         setModel( model );
     }
@@ -503,7 +508,7 @@ public class MultiSplitLayout
         abstract NodeImpl convert( MultiSplitLayout host );
     }
 
-    private static abstract class Split extends Node
+    public static abstract class Split extends Node
     {
         private final List<Node> _nodes;
 
@@ -542,18 +547,22 @@ public class MultiSplitLayout
         abstract SplitImpl convert( MultiSplitLayout host );
 
         @Override
-        public String toString()
+        public final String toString()
         {
             var nodeStrings = new ArrayList<String>();
 
             for ( var c : _nodes )
-                nodeStrings.toString();
+                nodeStrings.add( c.toString() );
 
-            return StringUtil.concatenate( ", ", _nodes );
+            return String.format(
+                    "%s( weight=%s, %s )",
+                    getClass().getSimpleName(),
+                    weight(),
+                    StringUtil.concatenate( ", ", nodeStrings ) );
         }
     }
 
-    public static class Column extends Split
+    public final static class Column extends Split
     {
         public Column( double weight, Node... nodes )
         {
@@ -569,18 +578,9 @@ public class MultiSplitLayout
         {
             return new ColumnImpl( this, host );
         }
-
-        @Override
-        public String toString()
-        {
-            return String.format(
-                    "Row( weight=%f, %s )",
-                    weight(),
-                    super.toString() );
-        }
     }
 
-    public static class Row extends Split
+    public final static class Row extends Split
     {
         public Row( double weight, Node... nodes )
         {
@@ -596,18 +596,9 @@ public class MultiSplitLayout
         {
             return new RowImpl( this, host );
         }
-
-        @Override
-        public String toString()
-        {
-            return String.format(
-                    "Row( weight=%f, %s )",
-                    weight(),
-                    super.toString() );
-        }
     }
 
-    public static class Leaf extends Node
+    public final static class Leaf extends Node
     {
         private final String _name;
 

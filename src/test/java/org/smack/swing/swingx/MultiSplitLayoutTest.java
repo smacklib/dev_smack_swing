@@ -33,10 +33,31 @@ import org.smack.util.JavaUtil;
 public class MultiSplitLayoutTest
 {
     @Test
-    public void Model_toString() throws Exception
+    public void Model_toString_Row() throws Exception
     {
-        Leaf c = new Leaf( .5, "name" );
-        assertEquals( "Leaf( weight=0.5, name=name )", c.toString() );
+        Leaf left = new Leaf( .5, "left" );
+        assertEquals( "Leaf( weight=0.5, name=left )", left.toString() );
+        Leaf right = new Leaf( .5, "right" );
+        assertEquals( "Leaf( weight=0.5, name=right )", right.toString() );
+
+        Row row = new Row( .5, left, right );
+        assertEquals(
+                "Row( weight=0.5, Leaf( weight=0.5, name=left ), Leaf( weight=0.5, name=right ) )",
+                row.toString() );
+    }
+
+    @Test
+    public void Model_toString_Column() throws Exception
+    {
+        Leaf left = new Leaf( .5, "left" );
+        assertEquals( "Leaf( weight=0.5, name=left )", left.toString() );
+        Leaf right = new Leaf( .5, "right" );
+        assertEquals( "Leaf( weight=0.5, name=right )", right.toString() );
+
+        Column col = new Column( .5, left, right );
+        assertEquals(
+                "Column( weight=0.5, Leaf( weight=0.5, name=left ), Leaf( weight=0.5, name=right ) )",
+                col.toString() );
     }
 
     @Test
