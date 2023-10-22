@@ -33,7 +33,6 @@ import org.smack.util.JavaUtil;
 import org.smack.util.MathUtil;
 import org.smack.util.StringUtil;
 
-
 /**
  * The MultiSplitLayout layout manager recursively arranges its
  * components in row and column groups called "Splits".  Elements of
@@ -68,15 +67,15 @@ public class MultiSplitLayout
     implements
         LayoutManager, Serializable
 {
-    private static Logger LOG = Logger.getLogger( MultiSplitLayout.class.getName() );
-
-    public enum LayoutMode { DEFAULT_LAYOUT, NO_MIN_SIZE_LAYOUT, USER_MIN_SIZE_LAYOUT };
+    private static Logger LOG =
+            Logger.getLogger( MultiSplitLayout.class.getName() );
 
     /**
      * A map holding the component-to-name mappings.
      */
     private final Map<String, Component> _childMap =
             new HashMap<String, Component>();
+
     private final Map<String, LeafImpl> _leafMap =
             new HashMap<>();
 
@@ -184,7 +183,7 @@ public class MultiSplitLayout
     {
         Objects.requireNonNull( model );
 
-        model.attach( this );
+        validateLayout( model );
 
         _model.set( model );
     }
@@ -193,6 +192,7 @@ public class MultiSplitLayout
     {
         _model.set( model.convert( this ) );
     }
+
     public Split getModel2()
     {
         return (Split)_model.get().convert();
@@ -282,8 +282,8 @@ public class MultiSplitLayout
     }
 
     /**
-     * Get the minimum node size
-     * @return the minimum size
+     * Get the minimum node size.
+     * @return the minimum size.
      */
     public int getMinimumExtent()
     {
@@ -291,8 +291,8 @@ public class MultiSplitLayout
     }
 
     /**
-     * Set the user defined minimum size support in the USER_MIN_SIZE_LAYOUT
-     * layout mode.
+     * Set the minimum node size.
+     *
      * @param minSize the new minimum size
      */
     public void setMinimumExtent( int minSize )
@@ -408,8 +408,6 @@ public class MultiSplitLayout
     @Override
     public void layoutContainer(Container parent)
     {
-        validateLayout( _model.get() );
-
         _performLayout(
                 _model.get(),
                 calculateInnerArea( parent ) );
@@ -472,30 +470,12 @@ public class MultiSplitLayout
         {
             super( weight );
 
-            var totalWeights =
-                    totalWeights(
-                            Objects.requireNonNull( nodes ) );
-
-            if ( totalWeights > 1.0 )
-                throw new IllegalArgumentException(
-                        "Total weights > 0: " + totalWeights );
-
-            _nodes = Arrays.asList( nodes );
+            _nodes = Arrays.asList( Objects.requireNonNull( nodes ) );
         }
 
         protected Split( Node... nodes )
         {
             this( .0, nodes );
-        }
-
-        private double totalWeights( Node... nodes )
-        {
-            var result = 0.0;
-
-            for ( var c : nodes )
-                result += c.weight();
-
-            return result;
         }
 
         @Override
@@ -531,7 +511,7 @@ public class MultiSplitLayout
         @Override
         ColumnImpl convert( MultiSplitLayout host )
         {
-            return new ColumnImpl( this, host );
+            return host.new ColumnImpl( this, host );
         }
     }
 
@@ -549,7 +529,7 @@ public class MultiSplitLayout
         @Override
         RowImpl convert( MultiSplitLayout host )
         {
-            return new RowImpl( this, host );
+            return host.new RowImpl( this );
         }
     }
 
@@ -571,7 +551,7 @@ public class MultiSplitLayout
         @Override
         LeafImpl convert( MultiSplitLayout host )
         {
-            var result = new LeafImpl( this );
+            var result = host.new LeafImpl( this );
 
             host._leafMap.put( _name, result );
 
@@ -591,8 +571,11 @@ public class MultiSplitLayout
     /**
      * Base class for the nodes that model a MultiSplitLayout.
      */
-    public static abstract class NodeImpl implements Serializable {
+    public abstract class NodeImpl implements Serializable {
 
+        /**
+         * This node's index in its parent.
+         */
         private int _parentIdx;
 
         private SplitImpl _parent = null;
@@ -600,8 +583,6 @@ public class MultiSplitLayout
         private final Rectangle _bounds = new Rectangle();
 
         private double _weight = 0.0;
-
-        private MultiSplitLayout _host;
 
         protected void setParentIdx( int idx )
         {
@@ -652,32 +633,32 @@ public class MultiSplitLayout
             _bounds.height = height;
             return this;
         }
+
         public int _height()
         {
             return _bounds.height;
         }
+
         public NodeImpl _x( int x )
         {
             _bounds.x = x;
             return this;
         }
+
         public int _x()
         {
             return _bounds.x;
         }
+
         public NodeImpl _y( int y )
         {
             _bounds.y = y;
             return this;
         }
+
         public int _y()
         {
             return _bounds.y;
-        }
-
-        public void attach( MultiSplitLayout host )
-        {
-            _host = host;
         }
 
         /**
@@ -742,24 +723,19 @@ public class MultiSplitLayout
         abstract void layout(
                 Rectangle bounds );
 
-        protected MultiSplitLayout host()
-        {
-            return _host;
-        }
-
         protected abstract Node convert();
     }
 
     /**
      *
      */
-    public static class RowImpl extends SplitImpl {
+    public class RowImpl extends SplitImpl {
         public RowImpl() {
         }
 
-        public RowImpl( Row column, MultiSplitLayout host )
+        public RowImpl( Row column )
         {
-            super( column, host );
+            super( column );
         }
 
         public RowImpl(NodeImpl... children) {
@@ -863,11 +839,11 @@ public class MultiSplitLayout
         }
     }
 
-    public static class ColumnImpl extends SplitImpl
+    public class ColumnImpl extends SplitImpl
     {
         public ColumnImpl( Column column, MultiSplitLayout host )
         {
-            super( column, host );
+            super( column );
         }
 
         public ColumnImpl(NodeImpl... children) {
@@ -974,7 +950,7 @@ public class MultiSplitLayout
     /**
      * Defines a vertical or horizontal subdivision into two or more tiles.
      */
-    public static abstract class SplitImpl extends NodeImpl
+    public abstract class SplitImpl extends NodeImpl
     {
         private List<NodeImpl> _children =
                 Collections.emptyList();
@@ -987,7 +963,7 @@ public class MultiSplitLayout
             setChildren(children);
         }
 
-        public SplitImpl( Split split, MultiSplitLayout host )
+        public SplitImpl( Split split )
         {
             weight( split.weight() );
 
@@ -1004,16 +980,9 @@ public class MultiSplitLayout
             int nodesIdx = 0;
             for ( int i = 0 ; i < children.length ; i++ )
             {
-                if ( MathUtil.isEven(i) )
-                {
-                    children[i] =
-                            split._nodes.get( nodesIdx++ ).convert( host );
-                }
-                else
-                {
-                    children[i] =
-                            new DividerImpl();
-                }
+                children[i] = MathUtil.isEven(i) ?
+                        split._nodes.get( nodesIdx++ ).convert( MultiSplitLayout.this ) :
+                        new DividerImpl();
             }
 
             setChildren( Arrays.asList( children ) );
@@ -1081,7 +1050,7 @@ public class MultiSplitLayout
 
             return
                     result -
-                    (dividerCount * host().getDividerSize());
+                    (dividerCount * MultiSplitLayout.this.getDividerSize());
         }
 
         /**
@@ -1090,6 +1059,14 @@ public class MultiSplitLayout
          */
         protected abstract int _extentPosition( int idx );
 
+        /**
+         * Set the static position of a child.  That is, the position that is
+         * the same for all elements of a Split.
+         *
+         * @param idx The child index.
+         * @param p The new position to set.
+         * @return Fluent API.
+         */
         protected abstract SplitImpl _staticPosition( int idx, int p );
 
         /**
@@ -1100,8 +1077,22 @@ public class MultiSplitLayout
          */
         protected abstract SplitImpl _position( int idx, int p );
 
+        /**
+         * Two drag points.
+         * @param from The start point.
+         * @param to The target point.
+         * @return The significant delta depending on the Split type.
+         */
         protected abstract int _pointDelta( Point from, Point to );
 
+        /**
+         * Set the static extent.  That is, the extent that is the same for
+         * all elements in a Split.
+         *
+         * @param idx The element index.
+         * @param extent The new extent to set.
+         * @return Fluent API.
+         */
         protected abstract SplitImpl _staticExtent( int idx, int extent );
 
         /**
@@ -1109,7 +1100,10 @@ public class MultiSplitLayout
          * laid out in a row.  If false,
          * children are laid out in a column.
          */
-        private final boolean isRowLayout() { return this instanceof RowImpl; }
+        private final boolean isRowLayout()
+        {
+            return this instanceof RowImpl;
+        }
 
         /**
          * @return This node's children.
@@ -1119,6 +1113,10 @@ public class MultiSplitLayout
             return _children;
         }
 
+        /**
+         *
+         * @return The children without intermediate dividers.
+         */
         public List<NodeImpl> getChildren2() {
             return _children.stream().filter(
                   c -> ! DividerImpl.class.isInstance( c ) ).collect(
@@ -1236,7 +1234,7 @@ public class MultiSplitLayout
                 }
                 else
                 {
-                    _extent( i, host().getDividerSize() );
+                    _extent( i, MultiSplitLayout.this.getDividerSize() );
                 }
 
                 currentPosition += _extent( i );
@@ -1249,21 +1247,12 @@ public class MultiSplitLayout
                 throw new AssertionError();
             }
         }
-
-        @Override
-        public void attach( MultiSplitLayout host )
-        {
-            super.attach( host );
-
-            for ( var c : getChildren() )
-                c.attach( host );
-        }
     }
 
     /**
      * Models a java.awt Component child.
      */
-    public static class LeafImpl extends NodeImpl
+    public class LeafImpl extends NodeImpl
     {
         private final String _name;
 
@@ -1310,14 +1299,6 @@ public class MultiSplitLayout
         }
 
         @Override
-        public void setBounds( Rectangle bounds )
-        {
-            super.setBounds( bounds );
-
-            LOG.info( toString() );
-        }
-
-        @Override
         void validate( Set<String> nameCollector )
         {
             if ( nameCollector.contains( _name ) )
@@ -1328,7 +1309,8 @@ public class MultiSplitLayout
         @Override
         void layout( Rectangle bounds )
         {
-            host().getComponentForNode( this ).setBounds( bounds );
+            MultiSplitLayout.this.
+                getComponentForNode( this ).setBounds( bounds );
         }
 
         @Override
@@ -1341,7 +1323,8 @@ public class MultiSplitLayout
     /**
      * Models a single vertical/horizontal divider.
      */
-    public static class DividerImpl extends NodeImpl {
+    public class DividerImpl extends NodeImpl
+    {
         /**
          * Convenience method, returns true if the Divider's parent
          * is a Split row (a Split with isRowLayout() true), false
@@ -1350,7 +1333,8 @@ public class MultiSplitLayout
          *
          * @return true if this Divider is part of a Split row.
          */
-        public final boolean isVertical() {
+        public final boolean isVertical()
+        {
             SplitImpl parent = getParent();
             return (parent != null) ? parent.isRowLayout() : false;
         }
@@ -1418,8 +1402,9 @@ public class MultiSplitLayout
             if ( nextWidth <= minimumExtent )
                 return from;
 
-            parent._extent( prevIdx, prevWidth );
-
+            parent._extent(
+                    prevIdx,
+                    prevWidth );
             parent._extent(
                     nextIdx,
                     nextWidth );
@@ -1434,25 +1419,5 @@ public class MultiSplitLayout
         {
             throw new AssertionError();
         }
-    }
-
-    private static void printModel(String indent, NodeImpl root) {
-        if (root instanceof SplitImpl) {
-            SplitImpl split = (SplitImpl)root;
-            System.out.println(indent + split);
-            for(NodeImpl child : split.getChildren()) {
-                printModel(indent + "  ", child);
-            }
-        }
-        else {
-            System.out.println(indent + root);
-        }
-    }
-
-    /**
-     * Print the tree with enough detail for simple debugging.
-     */
-    public static void printModel(NodeImpl root) {
-        printModel("", root);
     }
 }
