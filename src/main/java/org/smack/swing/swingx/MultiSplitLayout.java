@@ -139,15 +139,13 @@ public class MultiSplitLayout
      */
     private String getNameForComponent( Component child )
     {
-        String name = null;
-        for(Map.Entry<String,Component> kv : _childMap.entrySet()) {
-            if (kv.getValue() == child) {
-                name = kv.getKey();
-                break;
-            }
+        for(Map.Entry<String,Component> kv : _childMap.entrySet())
+        {
+            if (kv.getValue() == child)
+                return kv.getKey();
         }
 
-        return name;
+        return null;
     }
 
     /**
@@ -249,9 +247,8 @@ public class MultiSplitLayout
         String name = getNameForComponent(
                 Objects.requireNonNull( child ) );
 
-        if ( name != null ) {
+        if ( name != null )
             _childMap.remove( name );
-        }
     }
 
     /**
