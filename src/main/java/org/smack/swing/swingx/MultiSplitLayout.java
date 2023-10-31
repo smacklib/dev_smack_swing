@@ -12,7 +12,6 @@ import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -65,7 +64,7 @@ public class MultiSplitLayout
     extends
         AbstractBean
     implements
-        LayoutManager, Serializable
+        LayoutManager
 {
     private static Logger LOG =
             Logger.getLogger( MultiSplitLayout.class.getName() );
@@ -116,8 +115,11 @@ public class MultiSplitLayout
     public MultiSplitLayout( Split model  )
     {
         setModel( model.convert( this ) );
+
+        LOG.info( model.toString() );
     }
-    public MultiSplitLayout( SplitImpl model )
+
+    MultiSplitLayout( SplitImpl model )
     {
         setModel( model );
     }
@@ -188,12 +190,12 @@ public class MultiSplitLayout
         _model.set( model );
     }
 
-    public void setModel2(Split model)
+    void setModel2(Split model)
     {
         _model.set( model.convert( this ) );
     }
 
-    public Split getModel2()
+    Split getModel2()
     {
         return (Split)_model.get().convert();
     }
@@ -304,16 +306,12 @@ public class MultiSplitLayout
      * The specified Node is either the wrong type or was configured
      * incorrectly.
      */
-    public static class InvalidLayoutException extends RuntimeException {
+    private static class InvalidLayoutException extends RuntimeException {
         private final NodeImpl node;
         public InvalidLayoutException(String msg, NodeImpl node) {
             super(msg);
             this.node = node;
         }
-        /**
-         * @return the invalid Node.
-         */
-        public NodeImpl getNode() { return node; }
     }
 
     private static void throwInvalidLayout(String msg, NodeImpl node) {
@@ -330,14 +328,14 @@ public class MultiSplitLayout
      * @param node The node to layout.
      * @param bounds
      */
-    private void _performLayout( NodeImpl node, Rectangle bounds )
+    private void performLayout( NodeImpl node, Rectangle bounds )
     {
         node.setBounds( bounds );
 
         node.layout( bounds );
     }
 
-    private static List<NodeImpl> _completeWeights( List<NodeImpl> children )
+    private static List<NodeImpl> completeWeights( List<NodeImpl> children )
     {
         double[] weights = new double[children.size()];
 
@@ -388,7 +386,7 @@ public class MultiSplitLayout
     }
 
     // TODO utility candidate.
-    public static Rectangle calculateInnerArea( Container c )
+    private static Rectangle calculateInnerArea( Container c )
     {
         Objects.requireNonNull( c );
 
@@ -408,7 +406,7 @@ public class MultiSplitLayout
     @Override
     public void layoutContainer(Container parent)
     {
-        _performLayout(
+        performLayout(
                 _model.get(),
                 calculateInnerArea( parent ) );
     }
@@ -468,14 +466,40 @@ public class MultiSplitLayout
 
         protected Split( double weight, Node... nodes )
         {
-            super( weight );
+            super( weightInRange( weight ) );
 
-            _nodes = Arrays.asList( Objects.requireNonNull( nodes ) );
+            _nodes = Arrays.asList(
+                    validate( Objects.requireNonNull( nodes ) ) );
         }
 
         protected Split( Node... nodes )
         {
             this( .0, nodes );
+        }
+
+        private Node[] validate( Node[] nodes )
+        {
+            double totalWeight = .0;
+            boolean hasFreeWeight = false;
+
+            for ( var c : nodes )
+            {
+                var currentWeight = c.weight();
+
+                if ( currentWeight == .0 )
+                   hasFreeWeight = true;
+
+                totalWeight += currentWeight;
+            }
+
+            if ( totalWeight > 1.0 )
+                throw new IllegalArgumentException(
+                        "Weights > 1.0: " + totalWeight );
+            if ( totalWeight < 1. && ! hasFreeWeight )
+                throw new IllegalArgumentException(
+                        "Weights < 1.0 without compensation: " + totalWeight );
+
+            return nodes;
         }
 
         @Override
@@ -571,8 +595,8 @@ public class MultiSplitLayout
     /**
      * Base class for the nodes that model a MultiSplitLayout.
      */
-    public abstract class NodeImpl implements Serializable {
-
+    abstract class NodeImpl
+    {
         /**
          * This node's index in its parent.
          */
@@ -584,11 +608,12 @@ public class MultiSplitLayout
 
         private double _weight = 0.0;
 
-        protected void setParentIdx( int idx )
+        protected final void setParentIdx( int idx )
         {
             _parentIdx = idx;
         }
-        protected int getParentIdx()
+
+        protected final int getParentIdx()
         {
             return _parentIdx;
         }
@@ -617,46 +642,46 @@ public class MultiSplitLayout
             _parent = parent;
         }
 
-        public NodeImpl _width( int width )
+        final NodeImpl _width( int width )
         {
             _bounds.width = width;
             return this;
         }
 
-        public int _width()
+        final int _width()
         {
             return _bounds.width;
         }
 
-        public NodeImpl _height( int height )
+        final NodeImpl _height( int height )
         {
             _bounds.height = height;
             return this;
         }
 
-        public int _height()
+        final int _height()
         {
             return _bounds.height;
         }
 
-        public NodeImpl _x( int x )
+        final NodeImpl _x( int x )
         {
             _bounds.x = x;
             return this;
         }
 
-        public int _x()
+        final int _x()
         {
             return _bounds.x;
         }
 
-        public NodeImpl _y( int y )
+        final NodeImpl _y( int y )
         {
             _bounds.y = y;
             return this;
         }
 
-        public int _y()
+        final int _y()
         {
             return _bounds.y;
         }
@@ -664,7 +689,7 @@ public class MultiSplitLayout
         /**
          * @return The bounds property.
          */
-        protected Rectangle bounds()
+        final Rectangle bounds()
         {
             return _bounds;
         }
@@ -676,7 +701,7 @@ public class MultiSplitLayout
          * @throws NullPointerException if bounds is null
          * @see #bounds()
          */
-        public void setBounds(Rectangle bounds)
+        final void setBounds(Rectangle bounds)
         {
             Objects.requireNonNull( bounds );
 
@@ -697,7 +722,7 @@ public class MultiSplitLayout
          *
          * @return the value of the weight property
          */
-        public double getWeight()
+        final double getWeight()
         {
             return _weight;
         }
@@ -707,12 +732,8 @@ public class MultiSplitLayout
          * @param weight
          * @return
          */
-        public NodeImpl weight( double weight )
+        final NodeImpl weight( double weight )
         {
-            if ((weight < 0.0)|| (weight > 1.0)) {
-                throw new IllegalArgumentException("invalid weight");
-            }
-
             _weight = weight;
 
             return this;
@@ -729,75 +750,59 @@ public class MultiSplitLayout
     /**
      *
      */
-    public class RowImpl extends SplitImpl {
-        public RowImpl() {
-        }
-
+    class RowImpl extends SplitImpl
+    {
         public RowImpl( Row column )
         {
             super( column );
         }
 
-        public RowImpl(NodeImpl... children) {
+        public RowImpl(NodeImpl... children)
+        {
             super( children );
         }
 
-        /**
-         * Row.
-         */
         @Override
-        public void adjustWeights()
-        {
-            double toDistribute = 0.0;
-
-            for ( var c : getChildren2() )
-                toDistribute += c._width();
-
-            for ( var c : getChildren2() )
-                c.weight( c._width() / toDistribute );
-        }
-
-        @Override
-        protected int _extent( int idx  )
+        protected int extent( int idx  )
         {
             return getChildAt( idx )._width();
         }
 
         @Override
-        protected int _staticExtent()
+        protected int staticExtent()
         {
             return _height();
         }
 
         @Override
-        protected SplitImpl _staticExtent( int idx, int extent )
+        protected SplitImpl staticExtent( int idx, int extent )
         {
             getChildAt( idx )._height( extent );
             return this;
         }
 
         @Override
-        protected int _extentPosition( int idx )
+        protected int extentPosition( int idx )
         {
             return getChildAt( idx )._x();
         }
 
         @Override
-        protected SplitImpl _position( int idx, int p )
+        protected SplitImpl position( int idx, int p )
         {
             getChildAt( idx )._x( p );
             return this;
         }
 
         @Override
-        protected SplitImpl _extent( int idx, int p )
+        protected SplitImpl extent( int idx, int p )
         {
             getChildAt( idx )._width( p );
             return this;
         }
 
         @Override
-        protected int _pointDelta( Point from, Point to )
+        protected int pointDelta( Point from, Point to )
         {
             return to.x - from.x;
         }
@@ -809,20 +814,20 @@ public class MultiSplitLayout
         }
 
         @Override
-        protected SplitImpl _staticPosition( int idx, int p )
+        protected SplitImpl staticPosition( int idx, int p )
         {
             getChildAt( idx )._y( p );
             return this;
         }
 
         @Override
-        protected int _staticPosition()
+        protected int staticPosition()
         {
             return bounds().y;
         }
 
         @Override
-        protected int _extent()
+        protected int extent()
         {
             return bounds().width;
         }
@@ -841,64 +846,49 @@ public class MultiSplitLayout
 
     public class ColumnImpl extends SplitImpl
     {
-        public ColumnImpl( Column column, MultiSplitLayout host )
+        ColumnImpl( Column column, MultiSplitLayout host )
         {
             super( column );
         }
 
-        public ColumnImpl(NodeImpl... children) {
+        ColumnImpl(NodeImpl... children) {
             super(children);
         }
 
-        /**
-         * Column.
-         */
         @Override
-        public void adjustWeights()
-        {
-            double toDistribute = 0.0;
-
-            for ( var c : getChildren2() )
-                toDistribute += c._height();
-
-            for ( var c : getChildren2() )
-                c.weight( c._height() / toDistribute );
-        }
-
-        @Override
-        protected int _extent( int idx )
+        protected int extent( int idx )
         {
             return getChildAt( idx )._height();
         }
 
         @Override
-        protected int _staticExtent()
+        protected int staticExtent()
         {
             return _width();
         }
 
         @Override
-        protected int _extentPosition( int idx )
+        protected int extentPosition( int idx )
         {
             return getChildAt( idx )._y();
         }
 
         @Override
-        protected SplitImpl _position( int idx, int p )
+        protected SplitImpl position( int idx, int p )
         {
             getChildAt( idx )._y( p );
             return this;
         }
 
         @Override
-        protected SplitImpl _extent( int idx, int p )
+        protected SplitImpl extent( int idx, int p )
         {
             getChildAt( idx )._height( p );
             return this;
         }
 
         @Override
-        protected int _pointDelta( Point from, Point to )
+        protected int pointDelta( Point from, Point to )
         {
             return to.y - from.y;
         }
@@ -910,27 +900,27 @@ public class MultiSplitLayout
         }
 
         @Override
-        protected SplitImpl _staticExtent( int idx, int extent )
+        protected SplitImpl staticExtent( int idx, int extent )
         {
             getChildAt( idx )._width( extent );
             return this;
         }
 
         @Override
-        protected SplitImpl _staticPosition( int idx, int p )
+        protected SplitImpl staticPosition( int idx, int p )
         {
             getChildAt( idx )._x( p );
             return this;
         }
 
         @Override
-        protected int _staticPosition()
+        protected int staticPosition()
         {
             return bounds().x;
         }
 
         @Override
-        protected int _extent()
+        protected int extent()
         {
             return bounds().height;
         }
@@ -963,7 +953,7 @@ public class MultiSplitLayout
             setChildren(children);
         }
 
-        public SplitImpl( Split split )
+        SplitImpl( Split split )
         {
             weight( split.weight() );
 
@@ -989,9 +979,18 @@ public class MultiSplitLayout
         }
 
         /**
-         * Adjust the weights to the nodes sizes.
+         * Adjust the weights to the node sizes.
          */
-        public abstract void adjustWeights();
+        final void adjustWeights()
+        {
+            double toDistribute = 0.0;
+
+            for ( var c : getChildren2() )
+                toDistribute += extent( c.getParentIdx() );
+
+            for ( var c : getChildren2() )
+                c.weight( extent( c.getParentIdx() ) / toDistribute );
+        }
 
         /**
          * @return The split's real extent after formatting.
@@ -1001,9 +1000,9 @@ public class MultiSplitLayout
             var lastIdx = getChildren().size() -1;
 
             var lastPosition =
-                    _extentPosition( lastIdx);
+                    extentPosition( lastIdx);
             var lastExtent =
-                    _extent( lastIdx );
+                    extent( lastIdx );
             return
                     lastPosition +
                     lastExtent;
@@ -1014,13 +1013,13 @@ public class MultiSplitLayout
         /**
          * @return The split's dynamic extent.
          */
-        protected abstract int _extent();
+        protected abstract int extent();
 
         /**
          * @param idx child index.
          * @return The dynamic extend of the child.
          */
-        protected abstract int _extent( int idx );
+        protected abstract int extent( int idx );
 
         /**
          * Set the extent of the child.
@@ -1028,14 +1027,14 @@ public class MultiSplitLayout
          * @param p The new extent
          * @return Fluent API.
          */
-        protected abstract SplitImpl _extent( int idx, int p );
+        protected abstract SplitImpl extent( int idx, int p );
 
         /**
          * @return The static (common) extent of this split.
          */
-        protected abstract int _staticExtent();
+        protected abstract int staticExtent();
 
-        protected abstract int _staticPosition();
+        protected abstract int staticPosition();
 
         /**
          * Get the distributable extent.  This is the total
@@ -1043,7 +1042,7 @@ public class MultiSplitLayout
          */
         protected final int distributableExtent()
         {
-            var result = _extent();
+            var result = extent();
 
             int dividerCount =
                     getChildren().size() / 2;
@@ -1057,7 +1056,7 @@ public class MultiSplitLayout
          * @param idx The child index.
          * @return The dynamic position of the child.
          */
-        protected abstract int _extentPosition( int idx );
+        protected abstract int extentPosition( int idx );
 
         /**
          * Set the static position of a child.  That is, the position that is
@@ -1067,7 +1066,7 @@ public class MultiSplitLayout
          * @param p The new position to set.
          * @return Fluent API.
          */
-        protected abstract SplitImpl _staticPosition( int idx, int p );
+        protected abstract SplitImpl staticPosition( int idx, int p );
 
         /**
          * Set the position of the dynamic extent.
@@ -1075,7 +1074,7 @@ public class MultiSplitLayout
          * @param p The new position.
          * @return Fluent API.
          */
-        protected abstract SplitImpl _position( int idx, int p );
+        protected abstract SplitImpl position( int idx, int p );
 
         /**
          * Two drag points.
@@ -1083,7 +1082,7 @@ public class MultiSplitLayout
          * @param to The target point.
          * @return The significant delta depending on the Split type.
          */
-        protected abstract int _pointDelta( Point from, Point to );
+        protected abstract int pointDelta( Point from, Point to );
 
         /**
          * Set the static extent.  That is, the extent that is the same for
@@ -1093,7 +1092,7 @@ public class MultiSplitLayout
          * @param extent The new extent to set.
          * @return Fluent API.
          */
-        protected abstract SplitImpl _staticExtent( int idx, int extent );
+        protected abstract SplitImpl staticExtent( int idx, int extent );
 
         /**
          * @return true if the this Split's children are to be
@@ -1149,7 +1148,7 @@ public class MultiSplitLayout
                 c.setParentIdx( idx++ );
             }
 
-            _completeWeights( _children );
+            completeWeights( _children );
         }
 
         /**
@@ -1210,10 +1209,10 @@ public class MultiSplitLayout
             {
                 var c = getChildren().get( i );
 
-                _position( i, MathUtil.round( currentPosition ) );
-                _staticPosition( i, _staticPosition() );
+                position( i, MathUtil.round( currentPosition ) );
+                staticPosition( i, staticPosition() );
 
-                _staticExtent( i, _staticExtent() );
+                staticExtent( i, staticExtent() );
 
                 // For the computation of the extent we have
                 // to toggle between splits and dividers.
@@ -1222,11 +1221,11 @@ public class MultiSplitLayout
                     double w =
                             (c.getWeight() * distributableExtent) -
                             _error;
-                    _extent(
+                    extent(
                             i,
                             MathUtil.round( w ) );
                     _error =
-                            _extent( i ) -
+                            extent( i ) -
                             w;
 
                     c.layout(
@@ -1234,16 +1233,16 @@ public class MultiSplitLayout
                 }
                 else
                 {
-                    _extent( i, MultiSplitLayout.this.getDividerSize() );
+                    extent( i, MultiSplitLayout.this.getDividerSize() );
                 }
 
-                currentPosition += _extent( i );
+                currentPosition += extent( i );
             }
 
-            if ( realExtent() != _extent() )
+            if ( realExtent() != extent() )
             {
                 LOG.severe( String.format(
-                        "Corrected extent %d not %d.", realExtent(), _extent() ) );
+                        "Corrected extent %d not %d.", realExtent(), extent() ) );
                 throw new AssertionError();
             }
         }
@@ -1325,6 +1324,11 @@ public class MultiSplitLayout
      */
     public class DividerImpl extends NodeImpl
     {
+        public DividerImpl()
+        {
+            super.weight( -1.0 );
+        }
+
         /**
          * Convenience method, returns true if the Divider's parent
          * is a Split row (a Split with isRowLayout() true), false
@@ -1335,24 +1339,11 @@ public class MultiSplitLayout
          */
         public final boolean isVertical()
         {
-            SplitImpl parent = getParent();
-            return (parent != null) ? parent.isRowLayout() : false;
-        }
-
-        /**
-         * Dividers can't have a weight, they don't grow or shrink.
-         * @throws UnsupportedOperationException
-         */
-        @Override
-        public NodeImpl weight( double weight )
-        {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public double getWeight()
-        {
-            return -1.0;
+            SplitImpl parent =
+                    getParent();
+            return (parent != null) ?
+                    parent.isRowLayout() :
+                    false;
         }
 
         @Override
@@ -1386,26 +1377,26 @@ public class MultiSplitLayout
             final var prevIdx = ownIdx-1;
             final var nextIdx = ownIdx+1;
 
-            var delta = parent._pointDelta(
+            var delta = parent.pointDelta(
                     from,
                     to );
 
             var prevWidth =
-                    parent._extent( prevIdx ) +
+                    parent.extent( prevIdx ) +
                     delta;
             if ( prevWidth <= minimumExtent )
                 return from;
 
             var nextWidth =
-                    parent._extent( nextIdx ) -
+                    parent.extent( nextIdx ) -
                     delta;
             if ( nextWidth <= minimumExtent )
                 return from;
 
-            parent._extent(
+            parent.extent(
                     prevIdx,
                     prevWidth );
-            parent._extent(
+            parent.extent(
                     nextIdx,
                     nextWidth );
 
@@ -1419,5 +1410,25 @@ public class MultiSplitLayout
         {
             throw new AssertionError();
         }
+    }
+
+    /**
+     * Checks if the passed weight is in range [0.0 .. 1.0].
+     *
+     * @param weight The weight to check.
+     * @return The passed weight.
+     * @throws IllegalArgumentException If the passed weight is
+     * not in the required range.
+     */
+    private static double weightInRange( double weight )
+    {
+        if ( weight < .0 )
+            new IllegalArgumentException(
+                    "Weight is negative: " + weight );
+        if ( weight > 1. )
+            new IllegalArgumentException(
+                    "Weight greater 1.0: " + weight );
+
+        return weight;
     }
 }
