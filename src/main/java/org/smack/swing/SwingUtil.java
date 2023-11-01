@@ -1,11 +1,12 @@
 /*
  * smack_swing @ https://github.com/smacklib/dev_smack_swing
  *
- * Copyright © 2001-2022 Michael Binz
+ * Copyright © 2001-2023 Michael Binz
  */
 package org.smack.swing;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
@@ -20,6 +21,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Objects;
 import java.util.Random;
 
 import javax.swing.Action;
@@ -89,7 +91,7 @@ public class SwingUtil
     }
 
     /**
-     * Shows a modal dialog for asking the user about the given message.
+     * Shows a modal dialog asking the user about the given message.
      *
      * Provides YES and NO options. The dialog has the title "Confirm".
      *
@@ -381,6 +383,32 @@ public class SwingUtil
         if (window instanceof JFrame) {
             ((JFrame) window).getRootPane().putClientProperty(WINDOW_STATE_NORMAL_BOUNDS, bounds);
         }
+    }
+
+    /**
+     * Returns position and size of the inner painting area of a component.
+     * Differs from
+     * {@link SwingUtilities#calculateInnerArea(JComponent, Rectangle)}
+     * by offering a Container-typed argument.
+     *
+     * @param c The component.
+     * @return The inner area.
+     */
+    public static Rectangle calculateInnerArea( Container c )
+    {
+        Objects.requireNonNull( c );
+
+        Insets insets =
+                c.getInsets();
+        Rectangle result =
+                new Rectangle();
+
+        result.x = insets.left;
+        result.y = insets.top;
+        result.width = c.getWidth() - insets.left - insets.right;
+        result.height = c.getHeight() - insets.top - insets.bottom;
+
+        return result;
     }
 
     /**

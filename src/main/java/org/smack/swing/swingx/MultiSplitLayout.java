@@ -8,7 +8,6 @@ package org.smack.swing.swingx;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.JSplitPane;
 
+import org.smack.swing.SwingUtil;
 import org.smack.swing.beans.AbstractBean;
 import org.smack.swing.beans.JavaBeanProperty;
 import org.smack.util.JavaUtil;
@@ -42,23 +42,15 @@ import org.smack.util.StringUtil;
  * allocated to a component that was added with a constraint that
  * matches the Leaf's name.  Extra space is distributed
  * among row/column siblings according to their 0.0 to 1.0 weight.
- * If no weights are specified then the last sibling always gets
- * all of the extra space, or space reduction.
- *
  * <p>
  * Although MultiSplitLayout can be used with any Container, it's
  * the default layout manager for MultiSplitPane.  MultiSplitPane
  * supports interactively dragging the Dividers, accessibility,
  * and other features associated with split panes.
  *
- * <p>
- * All properties in this class are bound: when a properties value
- * is changed, all PropertyChangeListeners are fired.
- *
  * @author Michael Binz
  * @see JXMultiSplitPane
  */
-
 @SuppressWarnings("serial")
 public class MultiSplitLayout
     extends
@@ -74,6 +66,12 @@ public class MultiSplitLayout
      */
     private final Map<String, Component> _childMap =
             new HashMap<String, Component>();
+
+    /**
+     * Holds the leaf names.
+     */
+    private final Set<String> _leafNames =
+            new HashSet<>();
 
     private JavaBeanProperty<SplitImpl, MultiSplitLayout> _model =
             new JavaBeanProperty<>(
@@ -128,7 +126,7 @@ public class MultiSplitLayout
      */
     private Component getComponentForNode( NodeImpl n )
     {
-        String name = ((LeafImpl)n).getName();
+        String name = ((LeafImpl)n).name();
         return (name != null) ? (Component)_childMap.get(name) : null;
     }
 
@@ -291,10 +289,8 @@ public class MultiSplitLayout
      * incorrectly.
      */
     private static class InvalidLayoutException extends RuntimeException {
-        private final NodeImpl node;
         public InvalidLayoutException(String msg, NodeImpl node) {
-            super(msg);
-            this.node = node;
+            super(msg + ":" + node );
         }
     }
 
@@ -369,30 +365,12 @@ public class MultiSplitLayout
         return children;
     }
 
-    // TODO utility candidate.
-    private static Rectangle calculateInnerArea( Container c )
-    {
-        Objects.requireNonNull( c );
-
-        Insets insets =
-                c.getInsets();
-        Rectangle result =
-                new Rectangle();
-
-        result.x = insets.left;
-        result.y = insets.top;
-        result.width = c.getWidth() - insets.left - insets.right;
-        result.height = c.getHeight() - insets.top - insets.bottom;
-
-        return result;
-    }
-
     @Override
     public void layoutContainer(Container parent)
     {
         performLayout(
                 _model.get(),
-                calculateInnerArea( parent ) );
+                SwingUtil.calculateInnerArea( parent ) );
     }
 
     private DividerImpl dividerAt(NodeImpl root, int x, int y) {
@@ -1257,11 +1235,9 @@ public class MultiSplitLayout
         /**
          * Create a Leaf node.
          */
-        public LeafImpl( Leaf leaf )
+        LeafImpl( Leaf leaf )
         {
-            weight( leaf.weight() );
-
-            _name = Objects.requireNonNull( leaf.name() );
+            this( leaf.weight(), leaf.name() );
         }
 
         /**
@@ -1271,9 +1247,24 @@ public class MultiSplitLayout
          * @param name value of the Leaf's name property
          * @throws IllegalArgumentException if name is null
          */
-        public LeafImpl(String name)
+        LeafImpl( double weight, String name)
         {
+            weight( weight );
+
             _name = Objects.requireNonNull( name );
+
+            var leafNames =
+                    MultiSplitLayout.this._leafNames;
+
+            if ( leafNames.contains( _name ) )
+                throw new IllegalArgumentException(
+                        "Duplicate leaf: " + _name );
+
+            leafNames.add( _name );
+        }
+        LeafImpl( String name )
+        {
+            this( .0, name );
         }
 
         /**
@@ -1282,13 +1273,16 @@ public class MultiSplitLayout
          * @return the value of the name property.
          * @see #setName
          */
-        public String getName() { return _name; }
+        String name()
+        {
+            return _name;
+        }
 
         @Override
         public String toString() {
             StringBuffer sb = new StringBuffer("MultiSplitLayout.Leaf");
             sb.append(" \"");
-            sb.append(getName());
+            sb.append(name());
             sb.append("\"");
             sb.append(" weight=");
             sb.append(getWeight());
@@ -1300,9 +1294,9 @@ public class MultiSplitLayout
         @Override
         void validate( Set<String> nameCollector )
         {
-            if ( nameCollector.contains( _name ) )
-               throw new InvalidLayoutException( "Duplicate name: " + _name, this );
-            nameCollector.add( _name );
+//            if ( nameCollector.contains( _name ) )
+//               throw new InvalidLayoutException( "Duplicate name: " + _name, this );
+//            nameCollector.add( _name );
         }
 
         @Override

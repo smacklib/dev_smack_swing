@@ -17,9 +17,36 @@ import org.smack.swing.swingx.MultiSplitLayout.Column;
 import org.smack.swing.swingx.MultiSplitLayout.Leaf;
 import org.smack.swing.swingx.MultiSplitLayout.Row;
 import org.smack.util.Holder;
+import org.smack.util.StringUtil;
 
 public class MultiSplitLayoutTest
 {
+    /**
+     * Support operation.
+     */
+    private static String normalizeLines( String lines )
+    {
+        String[] splitLines = lines.split( StringUtil.EOL );
+
+        for ( int i = 0 ; i < splitLines.length ; i++ )
+            splitLines[i] = splitLines[i].trim();
+
+        return StringUtil.concatenate( " ", splitLines );
+    }
+
+    @Test
+    public void normalizeLinesTest() throws Exception
+    {
+        var actual = "Row( weight=0.5,\n"
+                + "    Leaf( weight=0.5, name=left ),\n"
+                + "    Leaf( weight=0.5, name=right ) )";
+
+        var expected =
+                "Row( weight=0.5, Leaf( weight=0.5, name=left ), Leaf( weight=0.5, name=right ) )";
+
+        assertEquals( expected, normalizeLines( actual ) );
+    }
+
     @Test
     public void Model_toString_Row() throws Exception
     {
@@ -31,7 +58,7 @@ public class MultiSplitLayoutTest
         Row row = new Row( .5, left, right );
         assertEquals(
                 "Row( weight=0.5, Leaf( weight=0.5, name=left ), Leaf( weight=0.5, name=right ) )",
-                row.toString() );
+                normalizeLines( row.toString() ) );
     }
 
     @Test
@@ -45,7 +72,26 @@ public class MultiSplitLayoutTest
         Column col = new Column( .5, left, right );
         assertEquals(
                 "Column( weight=0.5, Leaf( weight=0.5, name=left ), Leaf( weight=0.5, name=right ) )",
-                col.toString() );
+                normalizeLines( col.toString() ) );
+    }
+
+
+    @Test
+    public void modelErr_duplicateLeaf() throws Exception
+    {
+        try
+        {
+            MultiSplitLayout mspl = new MultiSplitLayout();
+
+            mspl.new LeafImpl( "name" );
+            mspl.new LeafImpl( "name" );
+
+            fail();
+        }
+        catch ( IllegalArgumentException e )
+        {
+            assertEquals( "Duplicate leaf: name", e.getMessage() );
+        }
     }
 
     @Test
