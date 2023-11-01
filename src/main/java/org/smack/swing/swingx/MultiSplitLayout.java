@@ -73,6 +73,8 @@ public class MultiSplitLayout
     private final Set<String> _leafNames =
             new HashSet<>();
 
+    private SplitImpl _internalModel;
+
     private JavaBeanProperty<SplitImpl, MultiSplitLayout> _model =
             new JavaBeanProperty<>(
                     this,
@@ -1364,8 +1366,10 @@ public class MultiSplitLayout
          * @param minimumExtent
          * @return The point position the divider was moved to.
          */
-        public Point move( Point from, Point to, int minimumExtent )
+        public Point move( Point from, Point to )
         {
+            final var minimumExtent =
+                    MultiSplitLayout.this.getMinimumExtent();
             final var parent = getParent();
             final var ownIdx = getParentIdx();
             final var prevIdx = ownIdx-1;

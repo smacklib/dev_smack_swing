@@ -15,7 +15,9 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -41,6 +43,7 @@ import javax.swing.border.Border;
 
 import org.smack.swing.application.Application;
 import org.smack.swing.application.SingleFrameApplication;
+import org.smack.util.StringUtil;
 
 /**
  * Tools.
@@ -341,7 +344,7 @@ public class SwingUtil
     /**
      * Finds the nearest RootPaneContainer of the provided Component.
      * Primarily, if a JPopupMenu (such as used by JMenus when they are visible) has no parent,
-     * the search continues with the JPopupMenu's invoker instead. Fixes BSAF-77
+     * the search continues with the JPopupMenu's invoker instead.
      *
      * @return a RootPaneContainer for the provided component
      * @param root the Component
@@ -409,6 +412,34 @@ public class SwingUtil
         result.height = c.getHeight() - insets.top - insets.bottom;
 
         return result;
+    }
+
+    /**
+     * Access the text that is currently in the clipboard.
+     *
+     * @return The text currently in the clipboard.  If the clipboard
+     * does not contain text, the empty string is returned.
+     */
+    public static String getClipboardText()
+    {
+        try
+        {
+            String result = (String)
+                    Toolkit.
+                    getDefaultToolkit().
+                    getSystemClipboard().
+                    getData(
+                            DataFlavor.stringFlavor);
+
+            if ( result == null )
+                return StringUtil.EMPTY_STRING;
+
+            return result;
+        }
+        catch ( Exception ignore )
+        {
+            return StringUtil.EMPTY_STRING;
+        }
     }
 
     /**

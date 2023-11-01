@@ -7,7 +7,6 @@ package org.smack.swing.swingx;
 
 import java.awt.Cursor;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -16,15 +15,19 @@ import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputAdapter;
 
-import org.smack.swing.swingx.MultiSplitLayout.DividerImpl;
-import org.smack.swing.swingx.MultiSplitLayout.SplitImpl;
+import org.smack.swing.swingx.MultiSplitLayout.Split;
 
 /**
- * Properties in this class are bound.
+ * A Component that allows multiple splits.
+ * <p>
+ * Define the split structure using the model
+ * described in {@link MultiSplitLayout}.
+ * <p>
+ * The splits can be resized by dragging the divider between the
+ * components.  A drag can be aborted by pressing the ESC key.
  *
  * @author Michael Binz
  */
-@SuppressWarnings("serial")
 public final class JXMultiSplitPane
     extends JPanel
 {
@@ -32,8 +35,8 @@ public final class JXMultiSplitPane
             Logger.getLogger( JXMultiSplitPane.class.getName() );
 
     /**
-     * Creates a MultiSplitPane with it's LayoutManager set to
-     * to an empty MultiSplitLayout.
+     * Creates a MultiSplitPane with its LayoutManager set to
+     * an empty MultiSplitLayout.
      */
     public JXMultiSplitPane()
     {
@@ -42,7 +45,8 @@ public final class JXMultiSplitPane
 
     /**
      * Creates a MultiSplitPane.
-     * @param layout the new split pane's layout
+     *
+     * @param layout The layout to use.
      */
     public JXMultiSplitPane( MultiSplitLayout layout )
     {
@@ -81,18 +85,15 @@ public final class JXMultiSplitPane
      * @see #getMultiSplitLayout
      * @see MultiSplitLayout#setModel
      */
-    public final void setModel( SplitImpl model )
+    public final void setModel( Split model )
     {
-        getMultiSplitLayout().setModel(model);
+        getMultiSplitLayout().setModel2(model);
     }
 
     /**
-     * A convenience method that sets the MultiSplitLayout dividerSize
-     * property. Equivalent to
-     * <code>getMultiSplitLayout().setDividerSize(newDividerSize)</code>.
+     * Sets the MultiSplitLayout's dividerSize.
      *
-     * @param dividerSize the value of the dividerSize property
-     * @see #getMultiSplitLayout
+     * @param dividerSize The dividerSize in pixels.
      * @see MultiSplitLayout#setDividerSize
      */
     public final void setDividerSize(int dividerSize)
@@ -101,11 +102,9 @@ public final class JXMultiSplitPane
     }
 
     /**
-     * A convenience method that returns the MultiSplitLayout dividerSize
-     * property. Equivalent to
-     * <code>getMultiSplitLayout().getDividerSize()</code>.
+     * Get the MultiSplitLayout dividerSize.
      *
-     * @see #getMultiSplitLayout
+     * @return The divider size in pixels.
      * @see MultiSplitLayout#getDividerSize
      */
     public final int getDividerSize()
@@ -113,20 +112,14 @@ public final class JXMultiSplitPane
         return getMultiSplitLayout().getDividerSize();
     }
 
-    /**
-     * Returns the Divider that's currently being moved, typically
-     * because the user is dragging it, or null.
-     *
-     * @return the Divider that's being moved or null.
-     */
-    public DividerImpl activeDivider()
-    {
-        return dragDivider;
-    }
-
     private boolean dragUnderway = false;
+
     private MultiSplitLayout.DividerImpl dragDivider = null;
-    private Rectangle initialDividerBounds = null;
+
+    /**
+     * Fallback bounds if the drag is canceled.
+     */
+    private Point _cancelDragPoint = null;
 
     private Point _dragPoint = null;
 
@@ -142,6 +135,7 @@ public final class JXMultiSplitPane
             return;
         }
 
+        _cancelDragPoint = new Point( p );
         _dragPoint = p;
 
         LOG.info( "Start drag: " + _dragPoint );
@@ -156,35 +150,41 @@ public final class JXMultiSplitPane
             return;
         }
 
-        _dragPoint = dragDivider.move( _dragPoint, p, 20 );
+        _dragPoint = dragDivider.move( _dragPoint, p );
 
         revalidate();
-        repaint();
     }
 
     private void clearDragState()
     {
         dragDivider = null;
         _dragPoint = null;
+        _cancelDragPoint = null;
         dragUnderway = false;
     }
 
     private void finishDrag()
     {
-        if (dragUnderway) {
+        if (dragUnderway)
             clearDragState();
-        }
+
         setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     }
 
-    private void cancelDrag() {
-        if (dragUnderway) {
-            dragDivider.setBounds(initialDividerBounds);
-            setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-            repaint();
-            revalidate();
-            clearDragState();
-        }
+    private void cancelDrag()
+    {
+        if ( ! dragUnderway )
+            return;
+
+        dragDivider.move(
+                _dragPoint,
+                _cancelDragPoint );
+        setCursor(
+                Cursor.getPredefinedCursor(
+                        Cursor.DEFAULT_CURSOR) );
+        clearDragState();
+
+        revalidate();
     }
 
     private void updateCursor( Point p, boolean show )
@@ -193,14 +193,20 @@ public final class JXMultiSplitPane
             return;
 
         int cursorID = Cursor.DEFAULT_CURSOR;
-        if (show) {
-            MultiSplitLayout.DividerImpl divider = getMultiSplitLayout().dividerAt( p );
-            if (divider != null) {
-                cursorID  = (divider.isVertical()) ?
+
+        if ( show )
+        {
+            MultiSplitLayout.DividerImpl divider =
+                    getMultiSplitLayout().dividerAt( p );
+
+            if ( divider != null )
+            {
+                cursorID  = divider.isVertical() ?
                         Cursor.E_RESIZE_CURSOR :
-                            Cursor.N_RESIZE_CURSOR;
+                        Cursor.N_RESIZE_CURSOR;
             }
         }
+
         setCursor(Cursor.getPredefinedCursor(cursorID));
     }
 
@@ -245,4 +251,6 @@ public final class JXMultiSplitPane
         @Override
         public void keyTyped(KeyEvent e) { }
     }
+
+    private static final long serialVersionUID = 4848027846403598426L;
 }
