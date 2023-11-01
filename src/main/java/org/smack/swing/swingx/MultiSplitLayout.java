@@ -62,7 +62,7 @@ public class MultiSplitLayout
             Logger.getLogger( MultiSplitLayout.class.getName() );
 
     /**
-     * A map holding the component-to-name mappings.
+     * Holds the component-to-name mappings.
      */
     private final Map<String, Component> _childMap =
             new HashMap<String, Component>();
@@ -75,7 +75,7 @@ public class MultiSplitLayout
 
     private SplitImpl _internalModel;
 
-    private JavaBeanProperty<SplitImpl, MultiSplitLayout> _model =
+    private JavaBeanProperty<Split, MultiSplitLayout> _model =
             new JavaBeanProperty<>(
                     this,
                     null,
@@ -101,7 +101,7 @@ public class MultiSplitLayout
      */
     public MultiSplitLayout()
     {
-        setModel2( new Row( .0, new Leaf( 0.0, "default" )) );
+        setModel( new Row( .0, new Leaf( 0.0, "default" )) );
     }
 
     /**
@@ -111,14 +111,19 @@ public class MultiSplitLayout
      */
     public MultiSplitLayout( Split model  )
     {
-        setModel( model.convert( this ) );
+        setModel( model );
 
         LOG.info( StringUtil.EOL + model.toString() );
     }
 
+    /**
+     * TODO needed?
+     *
+     * @param model
+     */
     MultiSplitLayout( SplitImpl model )
     {
-        setModel( model );
+        setModel( model.convert() );
     }
 
     /**
@@ -155,7 +160,7 @@ public class MultiSplitLayout
      * @return the value of the model property
      * @see #setModel
      */
-    public SplitImpl getModel()
+    public Split getModel()
     {
         return _model.get();
     }
@@ -166,23 +171,28 @@ public class MultiSplitLayout
      * @param model The model root.
      * @see #getModel
      */
-    public void setModel(SplitImpl model)
+    public void setModel(Split model)
     {
-        Objects.requireNonNull( model );
+        var internalModel =
+                Objects.requireNonNull( model ).convert( this );
 
-        validateLayout( model );
+        validateLayout( internalModel );
 
         _model.set( model );
+
+        _internalModel = internalModel;
     }
 
-    void setModel2(Split model)
+    void setModel2(SplitImpl model)
     {
-        _model.set( model.convert( this ) );
+        _internalModel = Objects.requireNonNull( model );
+
+        _model.set( _internalModel.convert() );
     }
 
     Split getModel2()
     {
-        return (Split)_model.get().convert();
+        return _internalModel.convert();
     }
 
     /**
@@ -371,7 +381,7 @@ public class MultiSplitLayout
     public void layoutContainer(Container parent)
     {
         performLayout(
-                _model.get(),
+                _internalModel,
                 SwingUtil.calculateInnerArea( parent ) );
     }
 
@@ -395,12 +405,12 @@ public class MultiSplitLayout
      * Return the Divider whose bounds contain the specified
      * point, or null if there isn't one.
      *
-     * @param x x coordinate
-     * @param y y coordinate
-     * @return the Divider at x,y
+     * @param p The point to check.
+     * @return The Divider at the passed point.
      */
-    public DividerImpl dividerAt( Point p ) {
-        return dividerAt(getModel(), p.x, p.y );
+    public DividerImpl dividerAt( Point p )
+    {
+        return dividerAt(_internalModel, p.x, p.y );
     }
 
     public static abstract class Node
@@ -956,6 +966,9 @@ public class MultiSplitLayout
 
             setChildren( Arrays.asList( children ) );
         }
+
+        @Override
+        abstract protected Split convert();
 
         /**
          * Adjust the weights to the node sizes.

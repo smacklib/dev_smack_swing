@@ -87,7 +87,7 @@ public final class JXMultiSplitPane
      */
     public final void setModel( Split model )
     {
-        getMultiSplitLayout().setModel2(model);
+        getMultiSplitLayout().setModel(model);
     }
 
     /**
