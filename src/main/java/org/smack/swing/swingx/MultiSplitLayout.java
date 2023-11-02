@@ -1167,7 +1167,7 @@ public class MultiSplitLayout
         @Override
         protected void validate()
         {
-            double totalWeight = 0.0;
+            double totalWeight = .0;
             for ( var c : getChildren2() )
             {
                 c.validate();
@@ -1292,15 +1292,6 @@ public class MultiSplitLayout
                     name(),
                     getWeight(),
                     bounds() );
-//            StringBuffer sb = new StringBuffer("MultiSplitLayout.Leaf");
-//            sb.append(" \"");
-//            sb.append(name());
-//            sb.append("\"");
-//            sb.append(" weight=");
-//            sb.append(getWeight());
-//            sb.append(" ");
-//            sb.append(bounds());
-//            return sb.toString();
         }
 
         @Override
