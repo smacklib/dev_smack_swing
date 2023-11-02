@@ -112,8 +112,17 @@ public final class JXMultiSplitPane
         return getMultiSplitLayout().getDividerSize();
     }
 
-    private boolean dragUnderway = false;
+    /**
+     * @return {@code true} if a drag is active.
+     */
+    private boolean inDrag()
+    {
+        return _dragPoint != null;
+    }
 
+    /**
+     * The drag divider that is currently dragged.
+     */
     private MultiSplitLayout.DividerImpl dragDivider = null;
 
     /**
@@ -121,17 +130,21 @@ public final class JXMultiSplitPane
      */
     private Point _cancelDragPoint = null;
 
+    /**
+     * The point that is the start of a drag increment.
+     */
     private Point _dragPoint = null;
 
     private void startDrag( Point p )
     {
         requestFocusInWindow();
+
         MultiSplitLayout msl = getMultiSplitLayout();
+
         dragDivider = msl.dividerAt( p );
 
         if ( dragDivider == null ) {
             LOG.warning( "No divider." );
-            dragUnderway = false;
             return;
         }
 
@@ -139,14 +152,11 @@ public final class JXMultiSplitPane
         _dragPoint = p;
 
         LOG.info( "Start drag: " + _dragPoint );
-
-        dragUnderway = true;
-
     }
 
     private void updateDrag( Point p )
     {
-        if (!dragUnderway) {
+        if (!inDrag()) {
             return;
         }
 
@@ -155,25 +165,17 @@ public final class JXMultiSplitPane
         revalidate();
     }
 
-    private void clearDragState()
-    {
-        dragDivider = null;
-        _dragPoint = null;
-        _cancelDragPoint = null;
-        dragUnderway = false;
-    }
-
     private void finishDrag()
     {
-        if (dragUnderway)
+        if ( inDrag() )
             clearDragState();
 
-        setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        setCursor(Cursor.getPredefinedCursor( Cursor.DEFAULT_CURSOR ) );
     }
 
     private void cancelDrag()
     {
-        if ( ! dragUnderway )
+        if ( ! inDrag() )
             return;
 
         dragDivider.move(
@@ -187,9 +189,16 @@ public final class JXMultiSplitPane
         revalidate();
     }
 
+    private void clearDragState()
+    {
+        dragDivider = null;
+        _dragPoint = null;
+        _cancelDragPoint = null;
+    }
+
     private void updateCursor( Point p, boolean show )
     {
-        if (dragUnderway)
+        if ( inDrag() )
             return;
 
         int cursorID = Cursor.DEFAULT_CURSOR;

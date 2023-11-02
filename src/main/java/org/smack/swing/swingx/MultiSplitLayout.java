@@ -190,11 +190,6 @@ public class MultiSplitLayout
         _model.set( _internalModel.convert() );
     }
 
-    Split getModel2()
-    {
-        return _internalModel.convert();
-    }
-
     /**
      * Returns the width of Dividers in Split rows, and the height of
      * Dividers in Split columns.
@@ -208,42 +203,39 @@ public class MultiSplitLayout
     }
 
     /**
-     * Sets the width of Dividers in Split rows, and the height of
-     * Dividers in Split columns.
+     * Sets the size of Dividers.
      *
-     * @param dividerSize the size of dividers (pixels)
+     * @param size the size of dividers (pixels)
      * @throws IllegalArgumentException if dividerSize < 0
      * @see #getDividerSize
      */
-    public void setDividerSize(int dividerSize)
+    public void setDividerSize(int size)
     {
-        if (dividerSize <= 0)
+        if (size <= 0)
             throw new IllegalArgumentException("invalid dividerSize");
 
-        _dividerSize.set( dividerSize );
+        _dividerSize.set( size );
     }
 
     /**
      * Add a component to this MultiSplitLayout.  The
      * <code>name</code> should match the name property of the Leaf
-     * node that represents the bounds of <code>child</code>.  After
-     * layoutContainer() recomputes the bounds of all of the nodes in
-     * the model, it will set this child's bounds to the bounds of the
-     * Leaf node with <code>name</code>.  Note: if a component was already
-     * added with the same name, this method does not remove it from
-     * its parent.
+     * node that represents the bounds of <code>child</code>.
      *
-     * @param name identifies the Leaf node that defines the child's bounds
-     * @param child the component to be added
+     * @param name The name of the Leaf node that defines the child's bounds.
+     * @param child The component to be added.
      * @see #removeLayoutComponent
      */
     @Override
     public void addLayoutComponent(String name, Component child)
     {
         if ( StringUtil.isEmpty( name ) )
-            throw new IllegalArgumentException("Name not specified.");
+            throw new IllegalArgumentException( "Empty name." );
 
-        _childMap.put(name, child);
+        if ( ! _leafNames.contains( name ) )
+            throw new IllegalArgumentException( "Unknown leaf: " + name );
+
+        _childMap.put( name, child );
     }
 
     /**
@@ -300,7 +292,7 @@ public class MultiSplitLayout
      * The specified Node is either the wrong type or was configured
      * incorrectly.
      */
-    private static class InvalidLayoutException extends RuntimeException {
+    private static class InvalidLayoutException extends IllegalArgumentException {
         public InvalidLayoutException(String msg, NodeImpl node) {
             super(msg + ":" + node );
         }
@@ -312,7 +304,7 @@ public class MultiSplitLayout
 
     private void validateLayout( NodeImpl root )
     {
-        root.validate( new HashSet<>() );
+        root.validate();
     }
 
     /**
@@ -594,7 +586,7 @@ public class MultiSplitLayout
 
         private final Rectangle _bounds = new Rectangle();
 
-        private double _weight = 0.0;
+        private double _weight = .0;
 
         protected final void setParentIdx( int idx )
         {
@@ -728,7 +720,12 @@ public class MultiSplitLayout
             return this;
         }
 
-        abstract void validate( Set<String> nameCollector );
+        /**
+         * Validate the node.  The default implementation is empty.
+         */
+        protected void validate()
+        {
+        }
 
         abstract void layout(
                 Rectangle bounds );
@@ -1134,7 +1131,7 @@ public class MultiSplitLayout
 
             int idx = 0;
 
-            for(NodeImpl c : _children)
+            for( NodeImpl c : _children )
             {
                 c.setParent(this);
                 c.setParentIdx( idx++ );
@@ -1144,9 +1141,7 @@ public class MultiSplitLayout
         }
 
         /**
-         * Convenience method for setting the children of this Split node.  The parent
-         * of each new child is set to this Split node, and the parent
-         * of each old child (if any) is set to null.
+         * Convenience method for setting the children of this Split node.
          *
          * @param children array of children
          * @see #getChildren
@@ -1170,22 +1165,19 @@ public class MultiSplitLayout
         }
 
         @Override
-        final void validate( Set<String> nameCollector )
+        protected void validate()
         {
-            if (getChildren().size() <= 2) {
+            if (getChildren().size() <= 2)
                 throwInvalidLayout("Split must have > 2 children", this);
-            }
 
+            double totalWeight = 0.0;
+            for ( var c : getChildren2() )
             {
-                double totalWeight = 0.0;
-                for ( var c : getChildren2() )
-                {
-                    c.validate( nameCollector );
-                    totalWeight += c._weight;
-                }
-                if ( totalWeight > 1.0 )
-                    throwInvalidLayout("Split children's total weight > 1.0", this);
+                c.validate();
+                totalWeight += c._weight;
             }
+            if ( totalWeight > 1.0 )
+                throwInvalidLayout("Split children's total weight > 1.0", this);
         }
 
         @Override
@@ -1262,11 +1254,14 @@ public class MultiSplitLayout
          * @param name value of the Leaf's name property
          * @throws IllegalArgumentException if name is null
          */
-        LeafImpl( double weight, String name)
+        LeafImpl( double weight, String name )
         {
             weight( weight );
 
-            _name = Objects.requireNonNull( name );
+            if ( StringUtil.isEmpty( name ) )
+                throw new IllegalArgumentException( "Name is empty." );
+
+            _name = name;
 
             var leafNames =
                     MultiSplitLayout.this._leafNames;
@@ -1277,16 +1272,14 @@ public class MultiSplitLayout
 
             leafNames.add( _name );
         }
+
         LeafImpl( String name )
         {
             this( .0, name );
         }
 
         /**
-         * Return the Leaf's name.
-         *
-         * @return the value of the name property.
-         * @see #setName
+         * @return the Leaf's name.
          */
         String name()
         {
@@ -1304,14 +1297,6 @@ public class MultiSplitLayout
             sb.append(" ");
             sb.append(bounds());
             return sb.toString();
-        }
-
-        @Override
-        void validate( Set<String> nameCollector )
-        {
-//            if ( nameCollector.contains( _name ) )
-//               throw new InvalidLayoutException( "Duplicate name: " + _name, this );
-//            nameCollector.add( _name );
         }
 
         @Override
@@ -1358,11 +1343,6 @@ public class MultiSplitLayout
         @Override
         public String toString() {
             return "MultiSplitLayout.Divider " + bounds().toString();
-        }
-
-        @Override
-        void validate( Set<String> nameCollector )
-        {
         }
 
         @Override
