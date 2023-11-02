@@ -968,11 +968,11 @@ public class MultiSplitLayout
         abstract protected Split convert();
 
         /**
-         * Adjust the weights to the node sizes.
+         * Update the weights from the node sizes.  Used in dragging.
          */
         final void adjustWeights()
         {
-            double toDistribute = 0.0;
+            double toDistribute = .0;
 
             for ( var c : getChildren2() )
                 toDistribute += extent( c.getParentIdx() );
@@ -1167,9 +1167,6 @@ public class MultiSplitLayout
         @Override
         protected void validate()
         {
-            if (getChildren().size() <= 2)
-                throwInvalidLayout("Split must have > 2 children", this);
-
             double totalWeight = 0.0;
             for ( var c : getChildren2() )
             {
@@ -1233,7 +1230,7 @@ public class MultiSplitLayout
     }
 
     /**
-     * Models a java.awt Component child.
+     * Models a java.awt.Component child.
      */
     public class LeafImpl extends NodeImpl
     {
@@ -1287,16 +1284,23 @@ public class MultiSplitLayout
         }
 
         @Override
-        public String toString() {
-            StringBuffer sb = new StringBuffer("MultiSplitLayout.Leaf");
-            sb.append(" \"");
-            sb.append(name());
-            sb.append("\"");
-            sb.append(" weight=");
-            sb.append(getWeight());
-            sb.append(" ");
-            sb.append(bounds());
-            return sb.toString();
+        public String toString()
+        {
+            return String.format(
+                    "%s( name=\"%s\" weight=%f bounds=%s )",
+                    getClass().getSimpleName(),
+                    name(),
+                    getWeight(),
+                    bounds() );
+//            StringBuffer sb = new StringBuffer("MultiSplitLayout.Leaf");
+//            sb.append(" \"");
+//            sb.append(name());
+//            sb.append("\"");
+//            sb.append(" weight=");
+//            sb.append(getWeight());
+//            sb.append(" ");
+//            sb.append(bounds());
+//            return sb.toString();
         }
 
         @Override
@@ -1324,7 +1328,7 @@ public class MultiSplitLayout
         }
 
         /**
-         * Convenience method, returns true if the Divider's parent
+         * Returns true if the Divider's parent
          * is a Split row (a Split with isRowLayout() true), false
          * otherwise. In other words if this Divider's major axis
          * is vertical, return true.

@@ -48,6 +48,13 @@ public class MultiSplitLayoutTest
     }
 
     @Test
+    public void Model_toString_Leaf() throws Exception
+    {
+        Leaf left = new Leaf( .5, "left" );
+        assertEquals( "Leaf( weight=0.5, name=left )", left.toString() );
+    }
+
+    @Test
     public void Model_toString_Row() throws Exception
     {
         Leaf left = new Leaf( .5, "left" );
@@ -77,7 +84,21 @@ public class MultiSplitLayoutTest
 
 
     @Test
-    public void modelErr_duplicateLeaf() throws Exception
+    public void ModelImpl_toString_LeafImpl() throws Exception
+    {
+        MultiSplitLayout mspl = new MultiSplitLayout();
+
+        var leaf = mspl.new LeafImpl( "middle" );
+
+        assertEquals(
+                "LeafImpl( name=\"middle\""
+                + " weight=0,000000"
+                + " bounds=java.awt.Rectangle[x=0,y=0,width=0,height=0]"
+                + " )", leaf.toString() );
+    }
+
+    @Test
+    public void ModelImpl_Err_duplicateLeaf() throws Exception
     {
         try
         {
