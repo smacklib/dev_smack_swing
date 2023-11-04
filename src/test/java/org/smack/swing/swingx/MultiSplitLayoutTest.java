@@ -497,4 +497,34 @@ public class MultiSplitLayoutTest
         {
         }
     }
+
+    @Test
+    public void parseTest() throws Exception
+    {
+        var inputModel =
+                new Column(
+                        .0,
+                        new Row(
+                                .0,
+                                new Leaf( .5, "left" ),
+                                new Leaf( .5, "right" ) ),
+                        new Leaf( .5, "bottom" ) );
+
+        var modelString =
+                inputModel.toString();
+
+        var modelFromString =
+                MultiSplitLayout.parseModel( modelString );
+
+        assertEquals(
+                inputModel.toString(),
+                modelFromString.toString() );
+
+//"Column( weight=0.0,\n"
+//+ "        Row( weight=0.0,\n"
+//+ "            Leaf( weight=0.5, name=left ),\n"
+//+ "            Leaf( weight=0.0, name=right ) ),\n"
+//+ "        Leaf( weight=0.5, name=bottom ) )"
+
+    }
 }

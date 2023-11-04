@@ -11,6 +11,10 @@ import java.awt.Dimension;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.io.Reader;
+import java.io.StreamTokenizer;
+import java.io.StringReader;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -1416,5 +1421,210 @@ public class MultiSplitLayout
                     "Weight greater 1.0: " + weight );
 
         return weight;
+    }
+
+    //
+    // Parser.
+    //
+
+    static double parseNumberAssignment( StreamTokenizer st, String name )
+            throws Exception
+    {
+        if ( st.nextToken() != StreamTokenizer.TT_WORD )
+            throw new ParseException( "Expected name.", st.lineno() );
+
+        if ( ! name.equals( st.sval ) )
+            throw new ParseException( "Expected " + name, st.lineno() );
+
+        if ( st.nextToken() != '=' )
+            throw new ParseException( "Expected =", st.lineno() );
+
+        if ( st.nextToken() != StreamTokenizer.TT_NUMBER )
+            throw new ParseException( "Expected number.", st.lineno() );
+
+        return st.nval;
+    }
+
+    static String parseStringAssignment( StreamTokenizer st, String name )
+            throws Exception
+    {
+        if ( st.nextToken() != StreamTokenizer.TT_WORD )
+            throw new ParseException( "Expected name.", st.lineno() );
+
+        if ( ! name.equals( st.sval ) )
+            throw new ParseException( "Expected " + name, st.lineno() );
+
+        if ( st.nextToken() != '=' )
+            throw new ParseException( "Expected =", st.lineno() );
+
+        if ( st.nextToken() != StreamTokenizer.TT_WORD )
+            throw new ParseException( "Expected symbol.", st.lineno() );
+
+        return st.sval;
+    }
+
+    /**
+     *
+     * @param st
+     * @param nodes
+     * @return true if the list continues.
+     * @throws Exception
+     */
+    static private boolean parseSplitArgumentsRestElement( StreamTokenizer st, List<Node> nodesOut )
+            throws Exception
+    {
+        nodesOut.add( parseNode( st ) );
+
+        if ( st.nextToken() == ',' )
+            return true;
+
+        st.pushBack();
+
+        return false;
+    }
+
+    /**
+     *
+     * @param st
+     * @param nodes
+     * @return weight of the node
+     * @throws Exception
+     */
+    static private double parseSplitArgumentsPrefix( StreamTokenizer st )
+            throws Exception
+    {
+        // ... weight=0.0, node, node )
+        var result = parseNumberAssignment( st, "weight" );
+
+        if ( st.nextToken() != ',' )
+            throw new ParseException( "Expected ,.", st.lineno() );
+
+        return result;
+    }
+
+    static private double parseSplitArguments( StreamTokenizer st, List<Node> nodes )
+            throws Exception
+    {
+        var result = parseSplitArgumentsPrefix( st );
+
+        while ( parseSplitArgumentsRestElement( st, nodes ) )
+            ;
+
+        if ( st.nextToken() != ')' )
+            throw new ParseException( "Expected ')'.", st.lineno() );
+
+        return result;
+    }
+
+
+    private final static Node[] EMPTY_NODES = new Node[0];
+
+    /**
+     * Leaf( weight=0.0, name="left" )
+     *     ^
+     *
+     * @param st The tokenizer.
+     * @return A Leaf.
+     * @throws Exception In case of IO error or parser failure.
+     */
+    static private Leaf parseLeaf( StreamTokenizer st ) throws Exception
+    {
+        if ( st.nextToken() != '(' )
+            throw new ParseException( "Expected (.", st.lineno() );
+
+        var weight = parseNumberAssignment( st, "weight" );
+
+        if ( st.nextToken() != ',' )
+            throw new ParseException( "Expected ,.", st.lineno() );
+
+        var name = parseStringAssignment( st, "name" );
+
+        if ( st.nextToken() != ')' )
+            throw new ParseException( "Expected ).", st.lineno() );
+
+        return new Leaf( weight, name );
+    }
+
+    static private <R> R parsex(
+            StreamTokenizer st,
+            BiFunction<Double,Node[],R> maker )
+                    throws Exception
+    {
+        if ( st.nextToken() != '(' )
+            throw new ParseException( "Expected '('", st.lineno() );
+
+        List<Node> nodes = new ArrayList<>();
+
+        double weight = parseSplitArguments( st, nodes );
+
+        return maker.apply(
+                weight,
+                nodes.toArray( EMPTY_NODES ) );
+    }
+
+    static private Node parseNode( StreamTokenizer st ) throws Exception
+    {
+        if ( st.nextToken() != StreamTokenizer.TT_WORD )
+            throw new ParseException( "Expected symbol.", st.lineno() );
+
+        if ( st.sval.equals( "Leaf" ) )
+            return parseLeaf( st );
+
+        st.pushBack();
+
+        return parseSplit( st );
+    }
+
+    private static Split parseSplit(StreamTokenizer st)
+            throws Exception
+    {
+        if  ( st.nextToken() != StreamTokenizer.TT_WORD )
+            throw new ParseException( "Expected symbol.", st.lineno() );
+
+        if ( st.sval.equals( Row.class.getSimpleName() ) )
+            return parsex( st, Row::new );
+        if ( st.sval.equals( Column.class.getSimpleName() ) )
+            return parsex( st, Column::new );
+
+        throw new ParseException( "Expected Row or Column.", st.lineno() );
+    }
+
+    private static Split parseModel(Reader r)
+    {
+        try {
+            return parseSplit(
+                    new StreamTokenizer(r) );
+        }
+        catch (Exception e) {
+
+            System.err.println(e);
+        }
+
+        return null;
+    }
+
+    /**
+     * Example input:
+     * <pre>
+     *  {@code
+     *  Column( weight=0.0,
+     *      Row( weight=0.0,
+     *          Leaf( weight=0.5, name=left ),
+     *          Leaf( weight=0.0, name=right ) ),
+     *      Leaf( weight=0.5, name=bottom ) )
+     * }
+     * <pre/>
+     *
+     * @return the Node root of a tree based on s.
+     */
+    public static Split parseModel(String s)
+    {
+        if ( StringUtil.isEmpty( s ) )
+            return null;
+
+        try ( var reader = new StringReader( s )  )
+        {
+            return parseModel( reader );
+        }
     }
 }
