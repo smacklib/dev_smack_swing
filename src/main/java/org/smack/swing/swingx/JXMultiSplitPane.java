@@ -65,12 +65,7 @@ public final class JXMultiSplitPane
     }
 
     /**
-     * A convenience method that returns the layout manager cast
-     * to MultiSplitLayout.
-     *
-     * @return this MultiSplitPane's layout manager
-     * @see java.awt.Container#getLayout
-     * @see #setModel
+     * @return The layout manager cast to MultiSplitLayout.
      */
     private final MultiSplitLayout getMultiSplitLayout()
     {
@@ -78,16 +73,24 @@ public final class JXMultiSplitPane
     }
 
     /**
-     * A convenience method that sets the MultiSplitLayout model.
-     * Equivalent to <code>getMultiSplitLayout.setModel(model)</code>
+     * Sets the model.
      *
-     * @param model the root of the MultiSplitLayout model
-     * @see #getMultiSplitLayout
+     * @param model The new model.
      * @see MultiSplitLayout#setModel
      */
     public final void setModel( Split model )
     {
         getMultiSplitLayout().setModel(model);
+    }
+
+    /**
+     * Get the model.
+     *
+     * @return The model.
+     */
+    public Split getModel()
+    {
+        return getMultiSplitLayout().getModel();
     }
 
     /**

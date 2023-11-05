@@ -167,7 +167,7 @@ public class MultiSplitLayout
      */
     public Split getModel()
     {
-        return _model.get();
+        return _internalModel.convert();
     }
 
     /**
@@ -1545,23 +1545,6 @@ public class MultiSplitLayout
         return new Leaf( weight, name );
     }
 
-    static private <R> R parsex(
-            StreamTokenizer st,
-            BiFunction<Double,Node[],R> maker )
-                    throws Exception
-    {
-        if ( st.nextToken() != '(' )
-            throw new ParseException( "Expected '('", st.lineno() );
-
-        List<Node> nodes = new ArrayList<>();
-
-        double weight = parseSplitArguments( st, nodes );
-
-        return maker.apply(
-                weight,
-                nodes.toArray( EMPTY_NODES ) );
-    }
-
     static private Node parseNode( StreamTokenizer st ) throws Exception
     {
         if ( st.nextToken() != StreamTokenizer.TT_WORD )
@@ -1575,6 +1558,25 @@ public class MultiSplitLayout
         return parseSplit( st );
     }
 
+    static private <R> R parseSplit(
+            StreamTokenizer st,
+            BiFunction<Double,Node[],R> maker )
+                    throws Exception
+    {
+        if ( st.nextToken() != '(' )
+            throw new ParseException( "Expected '('", st.lineno() );
+
+        List<Node> nodeCollector =
+                new ArrayList<>();
+
+        double weight =
+                parseSplitArguments( st, nodeCollector );
+
+        return maker.apply(
+                weight,
+                nodeCollector.toArray( EMPTY_NODES ) );
+    }
+
     private static Split parseSplit(StreamTokenizer st)
             throws Exception
     {
@@ -1582,9 +1584,9 @@ public class MultiSplitLayout
             throw new ParseException( "Expected symbol.", st.lineno() );
 
         if ( st.sval.equals( Row.class.getSimpleName() ) )
-            return parsex( st, Row::new );
+            return parseSplit( st, Row::new );
         if ( st.sval.equals( Column.class.getSimpleName() ) )
-            return parsex( st, Column::new );
+            return parseSplit( st, Column::new );
 
         throw new ParseException( "Expected Row or Column.", st.lineno() );
     }
