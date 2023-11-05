@@ -1,7 +1,7 @@
 /*
  * Copyright © 2023 Michael G. Binz
  */
-package org.smack.swing.swingx;
+package org.smack.swing.swingx.multisplitpane;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -13,9 +13,12 @@ import java.beans.PropertyChangeEvent;
 import javax.swing.JSplitPane;
 
 import org.junit.jupiter.api.Test;
-import org.smack.swing.swingx.MultiSplitLayout.Column;
-import org.smack.swing.swingx.MultiSplitLayout.Leaf;
-import org.smack.swing.swingx.MultiSplitLayout.Row;
+import org.smack.swing.swingx.multisplitpane.MultiSplitLayout;
+import org.smack.swing.swingx.multisplitpane.MultiSplitLayout.Column;
+import org.smack.swing.swingx.multisplitpane.MultiSplitLayout.Leaf;
+import org.smack.swing.swingx.multisplitpane.MultiSplitLayout.LeafImpl;
+import org.smack.swing.swingx.multisplitpane.MultiSplitLayout.Row;
+import org.smack.swing.swingx.multisplitpane.MultiSplitLayout.Split;
 import org.smack.util.Holder;
 import org.smack.util.StringUtil;
 

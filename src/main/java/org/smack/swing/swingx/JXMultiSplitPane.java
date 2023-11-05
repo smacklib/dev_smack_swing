@@ -15,7 +15,8 @@ import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.event.MouseInputAdapter;
 
-import org.smack.swing.swingx.MultiSplitLayout.Split;
+import org.smack.swing.swingx.multisplitpane.MultiSplitLayout;
+import org.smack.swing.swingx.multisplitpane.MultiSplitLayout.Split;
 
 /**
  * A Component that allows multiple splits.

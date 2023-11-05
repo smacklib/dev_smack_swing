@@ -25,7 +25,7 @@ module framework.smack_swing
     exports org.smack.swing.application.util;
     exports org.smack.swing.swingx.icon;
     exports org.smack.swing.swingx.painter.effects;
-//    exports org.smack.swing.swingx.multisplitpane;
+    exports org.smack.swing.swingx.multisplitpane;
     exports org.smack.swing.swingx.combobox;
     exports org.smack.swing.beans;
     exports org.smack.swing.swingx.error;

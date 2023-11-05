@@ -3,7 +3,7 @@
  *
  * Copyright © 2003-2023 Michael Binz
  */
-package org.smack.swing.swingx;
+package org.smack.swing.swingx.multisplitpane;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -33,6 +33,7 @@ import javax.swing.JSplitPane;
 import org.smack.swing.SwingUtil;
 import org.smack.swing.beans.AbstractBean;
 import org.smack.swing.beans.JavaBeanProperty;
+import org.smack.swing.swingx.JXMultiSplitPane;
 import org.smack.util.JavaUtil;
 import org.smack.util.MathUtil;
 import org.smack.util.StringUtil;
@@ -106,6 +107,7 @@ public class MultiSplitLayout
      */
     public MultiSplitLayout()
     {
+
         setModel( new Row( .0, new Leaf( 0.0, "default" )) );
     }
 
