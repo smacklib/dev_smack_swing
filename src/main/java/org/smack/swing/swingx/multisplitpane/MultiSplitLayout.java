@@ -309,7 +309,7 @@ public class MultiSplitLayout
         for ( int i = 0 ; i < weights.length ; i++ )
         {
             var c = children.get( i );
-                weights[i] = c.getWeight();
+                weights[i] = c.weight();
         }
 
         double unsetCount = 0.0;
@@ -688,13 +688,9 @@ public class MultiSplitLayout
         }
 
         /**
-         * Value between 0.0 and 1.0 used to compute how much space
-         * to add to this sibling when the layout grows or how
-         * much to reduce when the layout shrinks.
-         *
-         * @return the value of the weight property
+         * @return The node's weight.
          */
-        final double getWeight()
+        final double weight()
         {
             return _weight;
         }
@@ -817,7 +813,7 @@ public class MultiSplitLayout
             for ( var c : getChildren2() )
                 nodes.add( c.convert() );
 
-            return new Row( nodes.toArray( new Node[0] ) );
+            return new Row( weight(), nodes.toArray( new Node[0] ) );
         }
     }
 
@@ -1190,7 +1186,7 @@ public class MultiSplitLayout
                 if ( MathUtil.isEven( i ) )
                 {
                     double w =
-                            (c.getWeight() * distributableExtent) -
+                            (c.weight() * distributableExtent) -
                             _error;
                     extent(
                             i,
@@ -1280,7 +1276,7 @@ public class MultiSplitLayout
                     "%s( name=\"%s\" weight=%f bounds=%s )",
                     getClass().getSimpleName(),
                     name(),
-                    getWeight(),
+                    weight(),
                     bounds() );
         }
 
@@ -1294,7 +1290,7 @@ public class MultiSplitLayout
         @Override
         protected Node convert()
         {
-            return new Leaf( getWeight(), _name );
+            return new Leaf( weight(), _name );
         }
     }
 
