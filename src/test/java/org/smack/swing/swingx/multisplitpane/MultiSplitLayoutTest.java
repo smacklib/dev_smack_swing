@@ -569,4 +569,80 @@ public class MultiSplitLayoutTest
                     expectedMessage( e ));
         }
     }
+
+    @Test
+    public void parseError_TopSplitIncomplete_1() throws Exception
+    {
+        try
+        {
+            var modelString =
+                    "Row(";
+
+            MultiSplitLayout.parseModel( modelString );
+
+            fail();
+        }
+        catch (ParseException e) {
+            assertEquals(
+                    "TT_WORD",
+                    expectedMessage( e ));
+        }
+    }
+
+    @Test
+    public void parseError_TopSplitIncomplete_2() throws Exception
+    {
+        try
+        {
+            var modelString =
+                    "Row( 0.0";
+
+            MultiSplitLayout.parseModel( modelString );
+
+            fail();
+        }
+        catch (ParseException e) {
+            assertEquals(
+                    "TT_WORD",
+                    expectedMessage( e ));
+        }
+    }
+
+    @Test
+    public void parseError_TopSplitIncomplete_3() throws Exception
+    {
+        try
+        {
+            var modelString =
+                    "Row( wrong";
+
+            MultiSplitLayout.parseModel( modelString );
+
+            fail();
+        }
+        catch (ParseException e) {
+            assertEquals(
+                    "weight",
+                    expectedMessage( e ));
+        }
+    }
+
+    @Test
+    public void parseError_TopSplitIncomplete_5() throws Exception
+    {
+        try
+        {
+            var modelString =
+                    "Row( weight =";
+
+            MultiSplitLayout.parseModel( modelString );
+
+            fail();
+        }
+        catch (ParseException e) {
+            assertEquals(
+                    "TT_NUMBER",
+                    expectedMessage( e ));
+        }
+    }
 }
