@@ -1136,9 +1136,8 @@ public class MultiSplitLayout
          *
          * @param children array of children
          * @see #getChildren
-         * @throws IllegalArgumentException if children is null
          */
-        void setChildren( NodeImpl... children )
+        private void setChildren( NodeImpl... children )
         {
             setChildren( Arrays.asList(
                     Objects.requireNonNull( children ) ) );
