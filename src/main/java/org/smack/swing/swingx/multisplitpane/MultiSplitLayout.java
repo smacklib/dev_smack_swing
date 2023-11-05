@@ -1408,20 +1408,37 @@ public class MultiSplitLayout
     // Parser.
     //
 
+    static private class ParseX extends ParseException
+    {
+        public ParseX( String expected, StreamTokenizer st )
+        {
+            super( String.format(
+                    "Expected: %s",
+                    expected ),
+                    st.lineno() );
+        }
+    }
+
+    static private void consume( StreamTokenizer st, char token )
+            throws Exception
+    {
+        if ( st.nextToken() != token )
+            throw new ParseX( Character.toString( token ), st );
+    }
+
     static double parseNumberAssignment( StreamTokenizer st, String name )
             throws Exception
     {
         if ( st.nextToken() != StreamTokenizer.TT_WORD )
-            throw new ParseException( "Expected name.", st.lineno() );
+            throw new ParseX( "TT_WORD", st );
 
         if ( ! name.equals( st.sval ) )
-            throw new ParseException( "Expected " + name, st.lineno() );
+            throw new ParseX( name, st );
 
-        if ( st.nextToken() != '=' )
-            throw new ParseException( "Expected =", st.lineno() );
+        consume( st, '=' );
 
         if ( st.nextToken() != StreamTokenizer.TT_NUMBER )
-            throw new ParseException( "Expected number.", st.lineno() );
+            throw new ParseX( "TT_NUMBER", st );
 
         return st.nval;
     }
@@ -1430,16 +1447,15 @@ public class MultiSplitLayout
             throws Exception
     {
         if ( st.nextToken() != StreamTokenizer.TT_WORD )
-            throw new ParseException( "Expected name.", st.lineno() );
+            throw new ParseX( "TT_WORD", st );
 
         if ( ! name.equals( st.sval ) )
-            throw new ParseException( "Expected " + name, st.lineno() );
+            throw new ParseX( name, st );
 
-        if ( st.nextToken() != '=' )
-            throw new ParseException( "Expected =", st.lineno() );
+        consume( st, '=' );
 
         if ( st.nextToken() != StreamTokenizer.TT_WORD )
-            throw new ParseException( "Expected symbol.", st.lineno() );
+            throw new ParseX( "TT_WORD", st );
 
         return st.sval;
     }
@@ -1451,7 +1467,9 @@ public class MultiSplitLayout
      * @return true if the list continues.
      * @throws Exception
      */
-    static private boolean parseSplitArgumentsRestElement( StreamTokenizer st, List<Node> nodesOut )
+    static private boolean parseSplitArgumentsRestElement(
+        StreamTokenizer st,
+        List<Node> nodesOut )
             throws Exception
     {
         nodesOut.add( parseNode( st ) );
@@ -1477,8 +1495,7 @@ public class MultiSplitLayout
         // ... weight=0.0, node, node )
         var result = parseNumberAssignment( st, "weight" );
 
-        if ( st.nextToken() != ',' )
-            throw new ParseException( "Expected ,.", st.lineno() );
+        consume( st, ',' );
 
         return result;
     }
@@ -1491,8 +1508,7 @@ public class MultiSplitLayout
         while ( parseSplitArgumentsRestElement( st, nodes ) )
             ;
 
-        if ( st.nextToken() != ')' )
-            throw new ParseException( "Expected ')'.", st.lineno() );
+        consume( st, ')' );
 
         return result;
     }
@@ -1510,18 +1526,15 @@ public class MultiSplitLayout
      */
     static private Leaf parseLeaf( StreamTokenizer st ) throws Exception
     {
-        if ( st.nextToken() != '(' )
-            throw new ParseException( "Expected (.", st.lineno() );
+        consume( st, '(' );
 
         var weight = parseNumberAssignment( st, "weight" );
 
-        if ( st.nextToken() != ',' )
-            throw new ParseException( "Expected ,.", st.lineno() );
+        consume( st, ',' );
 
         var name = parseStringAssignment( st, "name" );
 
-        if ( st.nextToken() != ')' )
-            throw new ParseException( "Expected ).", st.lineno() );
+        consume( st, ')' );
 
         return new Leaf( weight, name );
     }
@@ -1529,7 +1542,7 @@ public class MultiSplitLayout
     static private Node parseNode( StreamTokenizer st ) throws Exception
     {
         if ( st.nextToken() != StreamTokenizer.TT_WORD )
-            throw new ParseException( "Expected symbol.", st.lineno() );
+            throw new ParseX( "TT_WORD", st );
 
         if ( st.sval.equals( "Leaf" ) )
             return parseLeaf( st );
@@ -1544,8 +1557,7 @@ public class MultiSplitLayout
             BiFunction<Double,Node[],R> maker )
                     throws Exception
     {
-        if ( st.nextToken() != '(' )
-            throw new ParseException( "Expected '('", st.lineno() );
+        consume( st, '(' );
 
         List<Node> nodeCollector =
                 new ArrayList<>();
@@ -1562,28 +1574,20 @@ public class MultiSplitLayout
             throws Exception
     {
         if  ( st.nextToken() != StreamTokenizer.TT_WORD )
-            throw new ParseException( "Expected symbol.", st.lineno() );
+            throw new ParseX( "TT_WORD", st );
 
         if ( st.sval.equals( Row.class.getSimpleName() ) )
             return parseSplit( st, Row::new );
         if ( st.sval.equals( Column.class.getSimpleName() ) )
             return parseSplit( st, Column::new );
 
-        throw new ParseException( "Expected Row or Column.", st.lineno() );
+        throw new ParseX( "Row|Column", st );
     }
 
-    private static Split parseModel(Reader r)
+    private static Split parseModel(Reader r) throws Exception
     {
-        try {
-            return parseSplit(
-                    new StreamTokenizer(r) );
-        }
-        catch (Exception e) {
-
-            System.err.println(e);
-        }
-
-        return null;
+        return parseSplit(
+                new StreamTokenizer(r) );
     }
 
     /**
@@ -1599,8 +1603,9 @@ public class MultiSplitLayout
      * <pre/>
      *
      * @return the Node root of a tree based on s.
+     * @throws ParseException
      */
-    public static Split parseModel(String s)
+    public static Split parseModel(String s) throws ParseException
     {
         if ( StringUtil.isEmpty( s ) )
             return null;
@@ -1608,6 +1613,14 @@ public class MultiSplitLayout
         try ( var reader = new StringReader( s )  )
         {
             return parseModel( reader );
+        }
+        catch ( ParseException e )
+        {
+            throw e;
+        }
+        catch ( Exception e )
+        {
+            throw new InternalError( e );
         }
     }
 }
