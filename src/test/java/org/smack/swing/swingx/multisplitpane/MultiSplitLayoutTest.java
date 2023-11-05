@@ -6,19 +6,18 @@ package org.smack.swing.swingx.multisplitpane;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.beans.PropertyChangeEvent;
+import java.text.ParseException;
 
 import javax.swing.JSplitPane;
 
 import org.junit.jupiter.api.Test;
-import org.smack.swing.swingx.multisplitpane.MultiSplitLayout;
 import org.smack.swing.swingx.multisplitpane.MultiSplitLayout.Column;
 import org.smack.swing.swingx.multisplitpane.MultiSplitLayout.Leaf;
-import org.smack.swing.swingx.multisplitpane.MultiSplitLayout.LeafImpl;
 import org.smack.swing.swingx.multisplitpane.MultiSplitLayout.Row;
-import org.smack.swing.swingx.multisplitpane.MultiSplitLayout.Split;
 import org.smack.util.Holder;
 import org.smack.util.StringUtil;
 
@@ -522,12 +521,52 @@ public class MultiSplitLayoutTest
         assertEquals(
                 inputModel.toString(),
                 modelFromString.toString() );
+    }
 
-//"Column( weight=0.0,\n"
-//+ "        Row( weight=0.0,\n"
-//+ "            Leaf( weight=0.5, name=left ),\n"
-//+ "            Leaf( weight=0.0, name=right ) ),\n"
-//+ "        Leaf( weight=0.5, name=bottom ) )"
+    @Test
+    public void parseTestFromString() throws Exception
+    {
+        var modelString =
+                "Column( weight=0.0,\n"
+                        + "        Row( weight=0.0,\n"
+                        + "            Leaf( weight=0.5, name=left ),\n"
+                        + "            Leaf( weight=0.0, name=right ) ),\n"
+                        + "        Leaf( weight=0.5, name=bottom ) )";
+        var modelFromString =
+                MultiSplitLayout.parseModel( modelString );
 
+        assertEquals(
+                normalizeLines( modelString ),
+                normalizeLines( modelFromString.toString() ) );
+    }
+
+    private String expectedMessage( ParseException pe )
+    {
+        var msg = pe.getMessage();
+
+        final var prefix = "Expected: ";
+
+        assertTrue( msg.startsWith( prefix ) );
+
+        return msg.substring( prefix.length() );
+    }
+
+    @Test
+    public void parseError_NoTopSplit() throws Exception
+    {
+        try
+        {
+        var modelString =
+                "Leaf( weight=0.5, name=left )";
+
+        MultiSplitLayout.parseModel( modelString );
+
+        fail();
+        }
+        catch (ParseException e) {
+            assertEquals(
+                    "Row|Column",
+                    expectedMessage( e ));
+        }
     }
 }
