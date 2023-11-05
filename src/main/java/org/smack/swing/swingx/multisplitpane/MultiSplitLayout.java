@@ -41,13 +41,7 @@ import org.smack.util.StringUtil;
 /**
  * The MultiSplitLayout layout manager recursively arranges its
  * components in row and column groups called "Splits".  Elements of
- * the layout are separated by gaps called "Dividers".  The overall
- * layout is defined with a simple tree model whose nodes are
- * instances of MultiSplitLayout.Split, MultiSplitLayout.Divider,
- * and MultiSplitLayout.Leaf. Named Leaf nodes represent the space
- * allocated to a component that was added with a constraint that
- * matches the Leaf's name.  Extra space is distributed
- * among row/column siblings according to their 0.0 to 1.0 weight.
+ * the layout are separated by gaps called "Dividers".
  * <p>
  * Although MultiSplitLayout can be used with any Container, it's
  * the default layout manager for MultiSplitPane.  MultiSplitPane
@@ -107,8 +101,7 @@ public class MultiSplitLayout
      */
     public MultiSplitLayout()
     {
-
-        setModel( new Row( .0, new Leaf( 0.0, "default" )) );
+        _internalModel = null;
     }
 
     /**
@@ -119,18 +112,6 @@ public class MultiSplitLayout
     public MultiSplitLayout( Split model  )
     {
         setModel( model );
-
-        LOG.info( StringUtil.EOL + model.toString() );
-    }
-
-    /**
-     * TODO needed?
-     *
-     * @param model
-     */
-    MultiSplitLayout( SplitImpl model )
-    {
-        setModel( model.convert() );
     }
 
     /**
@@ -169,7 +150,9 @@ public class MultiSplitLayout
      */
     public Split getModel()
     {
-        return _internalModel.convert();
+        return _internalModel == null ?
+                null :
+                _internalModel.convert();
     }
 
     /**
@@ -188,13 +171,6 @@ public class MultiSplitLayout
         _model.set( model );
 
         _internalModel = internalModel;
-    }
-
-    void setModel2(SplitImpl model)
-    {
-        _internalModel = Objects.requireNonNull( model );
-
-        _model.set( _internalModel.convert() );
     }
 
     /**
@@ -585,49 +561,57 @@ public class MultiSplitLayout
     abstract class NodeImpl
     {
         /**
-         * This node's index in its parent.
+         * The parent node or null if the node is the root of the
+         * hierarchy.
+         */
+        private SplitImpl _parent = null;
+
+        /**
+         * The node's index in its parent.
          */
         private int _parentIdx;
 
-        private SplitImpl _parent = null;
-
+        /**
+         * The node's bounds.
+         */
         private final Rectangle _bounds = new Rectangle();
 
+        /**
+         * The node's weight.
+         */
         private double _weight = .0;
 
-        protected final void setParentIdx( int idx )
+        protected final NodeImpl parentIdx( int idx )
         {
             _parentIdx = idx;
+            return this;
         }
 
-        protected final int getParentIdx()
+        protected final int parentIdx()
         {
             return _parentIdx;
         }
 
         /**
-         * Returns the Split parent of this Node, or null.
-         *
-         * @return the value of the parent property.
-         * @see #setParent
+         * @return The parent of this Node, or null.
+         * @see NodeImpl#parent(SplitImpl))
          */
-        protected SplitImpl getParent()
+        protected SplitImpl parent()
         {
             return _parent;
         }
 
         /**
-         * Set the value of this Node's parent property.  The default
-         * value of this property is null.
+         * Set the parent.
          *
          * @param parent a Split or null
-         * @see #getParent
+         * @see NodeImpl#parent()
          */
-        // TODO: fluent api
-        protected void setParent(SplitImpl parent)
+        protected NodeImpl parent(SplitImpl parent)
         {
             JavaUtil.Assert( _parent == null );
             _parent = parent;
+            return this;
         }
 
         final NodeImpl width( int width )
@@ -982,10 +966,10 @@ public class MultiSplitLayout
             double toDistribute = .0;
 
             for ( var c : getChildren2() )
-                toDistribute += extent( c.getParentIdx() );
+                toDistribute += extent( c.parentIdx() );
 
             for ( var c : getChildren2() )
-                c.weight( extent( c.getParentIdx() ) / toDistribute );
+                c.weight( extent( c.parentIdx() ) / toDistribute );
         }
 
         /**
@@ -1140,8 +1124,8 @@ public class MultiSplitLayout
 
             for( NodeImpl c : _children )
             {
-                c.setParent(this);
-                c.setParentIdx( idx++ );
+                c.parent(this);
+                c.parentIdx( idx++ );
             }
 
             completeWeights( _children );
@@ -1336,7 +1320,7 @@ public class MultiSplitLayout
         public final boolean isVertical()
         {
             SplitImpl parent =
-                    getParent();
+                    parent();
             return (parent != null) ?
                     parent.isRowLayout() :
                     false;
@@ -1365,8 +1349,8 @@ public class MultiSplitLayout
         {
             final var minimumExtent =
                     MultiSplitLayout.this.getMinimumExtent();
-            final var parent = getParent();
-            final var ownIdx = getParentIdx();
+            final var parent = parent();
+            final var ownIdx = parentIdx();
             final var prevIdx = ownIdx-1;
             final var nextIdx = ownIdx+1;
 
@@ -1393,7 +1377,7 @@ public class MultiSplitLayout
                     nextIdx,
                     nextWidth );
 
-            getParent().adjustWeights();
+            parent().adjustWeights();
 
             return to;
         }
