@@ -19,11 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -40,13 +38,11 @@ import org.smack.util.StringUtil;
 
 /**
  * The MultiSplitLayout layout manager recursively arranges its
- * components in row and column groups called "Splits".  Elements of
- * the layout are separated by gaps called "Dividers".
+ * components in row and column groups called "Splits".
  * <p>
  * Although MultiSplitLayout can be used with any Container, it's
  * the default layout manager for MultiSplitPane.  MultiSplitPane
- * supports interactively dragging the Dividers, accessibility,
- * and other features associated with split panes.
+ * supports interactively dragging the Dividers.
  *
  * @author Michael Binz
  * @see JXMultiSplitPane
@@ -62,16 +58,16 @@ public class MultiSplitLayout
             Logger.getLogger( MultiSplitLayout.class.getName() );
 
     /**
-     * Holds the component-to-name mappings.
+     * Holds the name to component mappings.
      */
     private final Map<String, Component> _childMap =
             new HashMap<String, Component>();
 
     /**
-     * Holds the leaf names.
+     * Holds the name to Leaf mappings.
      */
-    private final Set<String> _leafNames =
-            new HashSet<>();
+    private final Map<String, LeafImpl> _leafMap =
+            new HashMap<>();
 
     private SplitImpl _internalModel;
 
@@ -112,6 +108,22 @@ public class MultiSplitLayout
     public MultiSplitLayout( Split model  )
     {
         setModel( model );
+    }
+
+    /**
+     * Get the Leaf for the passed name.  This is for
+     * testing purposes.
+     *
+     * @param name The leaf's name.
+     * @return The leaf.
+     * @throws IllegalArgumentException If the leaf is not found.
+     */
+    LeafImpl getLeafForName( String name )
+    {
+        if ( ! _leafMap.containsKey( name ) )
+            throw new IllegalArgumentException( "Unknown name: " + name );
+
+        return _leafMap.get( name );
     }
 
     /**
@@ -215,7 +227,7 @@ public class MultiSplitLayout
         if ( StringUtil.isEmpty( name ) )
             throw new IllegalArgumentException( "Empty name." );
 
-        if ( ! _leafNames.contains( name ) )
+        if ( ! _leafMap.containsKey( name ) )
             throw new IllegalArgumentException( "Unknown leaf: " + name );
 
         _childMap.put( name, child );
@@ -1247,13 +1259,13 @@ public class MultiSplitLayout
             _name = name;
 
             var leafNames =
-                    MultiSplitLayout.this._leafNames;
+                    MultiSplitLayout.this._leafMap;
 
-            if ( leafNames.contains( _name ) )
+            if ( leafNames.containsKey( _name ) )
                 throw new IllegalArgumentException(
                         "Duplicate leaf: " + _name );
 
-            leafNames.add( _name );
+            leafNames.put( _name, this );
         }
 
         LeafImpl( String name )
@@ -1283,8 +1295,13 @@ public class MultiSplitLayout
         @Override
         void layout( Rectangle bounds )
         {
-            MultiSplitLayout.this.
-                getComponentForNode( this ).setBounds( bounds );
+            var node = MultiSplitLayout.this.
+                getComponentForNode( this );
+
+            if ( node == null )
+                return;
+
+            node.setBounds( bounds );
         }
 
         @Override
