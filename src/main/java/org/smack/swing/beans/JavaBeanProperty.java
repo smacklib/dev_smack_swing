@@ -94,7 +94,7 @@ public class JavaBeanProperty<T,B> implements PropertyType<T,B>
     }
 
     /**
-     * @return The property change listeners listeners to call.
+     * @return The property change listeners to call.
      */
     private List<PropertyChangeListener> getPcls()
     {

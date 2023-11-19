@@ -1,11 +1,12 @@
 /*
  * smack_swing @ https://github.com/smacklib/dev_smack_swing
  *
- * Copyright © 2001-2022 Michael Binz
+ * Copyright © 2001-2023 Michael Binz
  */
 package org.smack.swing;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.awt.GraphicsConfiguration;
@@ -14,12 +15,15 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.Window;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Objects;
 import java.util.Random;
 
 import javax.swing.Action;
@@ -39,6 +43,7 @@ import javax.swing.border.Border;
 
 import org.smack.swing.application.Application;
 import org.smack.swing.application.SingleFrameApplication;
+import org.smack.util.StringUtil;
 
 /**
  * Tools.
@@ -89,7 +94,7 @@ public class SwingUtil
     }
 
     /**
-     * Shows a modal dialog for asking the user about the given message.
+     * Shows a modal dialog asking the user about the given message.
      *
      * Provides YES and NO options. The dialog has the title "Confirm".
      *
@@ -339,7 +344,7 @@ public class SwingUtil
     /**
      * Finds the nearest RootPaneContainer of the provided Component.
      * Primarily, if a JPopupMenu (such as used by JMenus when they are visible) has no parent,
-     * the search continues with the JPopupMenu's invoker instead. Fixes BSAF-77
+     * the search continues with the JPopupMenu's invoker instead.
      *
      * @return a RootPaneContainer for the provided component
      * @param root the Component
@@ -380,6 +385,60 @@ public class SwingUtil
     public static void putWindowNormalBounds(Window window, Rectangle bounds) {
         if (window instanceof JFrame) {
             ((JFrame) window).getRootPane().putClientProperty(WINDOW_STATE_NORMAL_BOUNDS, bounds);
+        }
+    }
+
+    /**
+     * Returns position and size of the inner painting area of a component.
+     * Differs from
+     * {@link SwingUtilities#calculateInnerArea(JComponent, Rectangle)}
+     * by offering a Container-typed argument.
+     *
+     * @param c The component.
+     * @return The inner area.
+     */
+    public static Rectangle calculateInnerArea( Container c )
+    {
+        Objects.requireNonNull( c );
+
+        Insets insets =
+                c.getInsets();
+        Rectangle result =
+                new Rectangle();
+
+        result.x = insets.left;
+        result.y = insets.top;
+        result.width = c.getWidth() - insets.left - insets.right;
+        result.height = c.getHeight() - insets.top - insets.bottom;
+
+        return result;
+    }
+
+    /**
+     * Access the text that is currently in the clipboard.
+     *
+     * @return The text currently in the clipboard.  If the clipboard
+     * does not contain text, the empty string is returned.
+     */
+    public static String getClipboardText()
+    {
+        try
+        {
+            String result = (String)
+                    Toolkit.
+                    getDefaultToolkit().
+                    getSystemClipboard().
+                    getData(
+                            DataFlavor.stringFlavor);
+
+            if ( result == null )
+                return StringUtil.EMPTY_STRING;
+
+            return result;
+        }
+        catch ( Exception ignore )
+        {
+            return StringUtil.EMPTY_STRING;
         }
     }
 

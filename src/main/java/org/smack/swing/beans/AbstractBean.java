@@ -134,7 +134,6 @@ import java.beans.VetoableChangeSupport;
  * </p>
  *
  * @see AbstractSerializableBean
- * @version $Rev$
  * @author rbair
  */
 public abstract class AbstractBean {

@@ -197,7 +197,7 @@ public class PropertyAdapter
     public PropertyChangeListener[] getPropertyChangeListeners( String propertyName )
     {
         if ( _getPclsNamed == null )
-            throw new NoSuchMethodError();
+            return new PropertyChangeListener[0];
 
         return (PropertyChangeListener[])ReflectionUtil.invokeQuiet(
                 _getPclsNamed,
