@@ -12,7 +12,7 @@
 		<repository>
 			<id>github</id>
 			<name>GitHub Apache Maven Packages</name>
-			<url>https://maven.pkg.github.com/smacklib/dev_smack</url>
+			<url>https://maven.pkg.github.com/smacklib/dev_smack_swing</url>
 		</repository>
 	</repositories>
 

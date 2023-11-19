@@ -1,5 +1,7 @@
 /*
- * Copyright © 2023 Michael G. Binz
+ * smack_swing @ https://github.com/smacklib/dev_smack_swing
+ *
+ * Copyright © 2023 Michael Binz
  */
 package org.smack.swing.swingx.multisplitpane;
 
