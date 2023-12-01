@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>micbinz</groupId>
 	<artifactId>smack_swing</artifactId>
-	<version>${maven.compiler.release}.10</version>
+	<version>${maven.compiler.release}.11-SNAPSHOT</version>
 	<name>SmackSwing</name>
 	<description>Smack Swing-specific parts.</description>
 
