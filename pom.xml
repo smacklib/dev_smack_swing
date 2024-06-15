@@ -4,13 +4,13 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>micbinz</groupId>
 	<artifactId>smack_swing</artifactId>
-	<version>${maven.compiler.release}.11-SNAPSHOT</version>
+	<version>${maven.compiler.release}.11</version>
 	<name>SmackSwing</name>
 	<description>Smack Swing-specific parts.</description>
 
     <properties>
         <!-- Java version -->
-        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <!-- Dependencies versions -->
         <junit.version>5.8.2</junit.version>
@@ -77,7 +77,7 @@
 		<dependency>
 			<groupId>smacklib</groupId>
 			<artifactId>smack</artifactId>
-			<version>17.409</version>
+			<version>${maven.compiler.release}.410</version>
 		</dependency>
 
         <dependency>
