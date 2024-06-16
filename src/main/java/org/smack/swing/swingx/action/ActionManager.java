@@ -182,20 +182,6 @@ public class ActionManager
     }
 
     /**
-     * Convenience method for returning the ServerAction
-     *
-     * @param id value of the action id
-     * @return the TargetableAction referenced by the named id or null
-     */
-    public ServerAction getServerAction(Object id) {
-        Action a = getAction(id);
-        if (a instanceof ServerAction) {
-            return (ServerAction)a;
-        }
-        return null;
-    }
-
-    /**
      * Convenience method for returning the CompositeAction
      *
      * @param id value of the action id
@@ -360,12 +346,5 @@ public class ActionManager
      */
     public boolean isCompositeAction(Object id) {
         return (getCompositeAction(id) != null);
-    }
-
-    /**
-     * Test to determine if the action is a <code>ServerAction</code>
-     */
-    public boolean isServerAction(Object id) {
-        return (getServerAction(id) != null);
     }
 }

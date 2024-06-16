@@ -1,6 +1,4 @@
-/* $Id$
- *
- * MACK
+/* MACK
  *
  * Released under Gnu Public License
  * Copyright (c) 2003-2006 Michael G. Binz
@@ -22,6 +20,7 @@ import javax.swing.table.TableModel;
  * @see de.michab.mack.actions.ActAbout
  * @author Michael G. Binz
  */
+@Deprecated
 final class SystemPropertiesTable implements TableModel
 {
   /**

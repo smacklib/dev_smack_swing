@@ -1,6 +1,4 @@
 /*
- * $Id$
- *
  * Copyright 2004 Sun Microsystems, Inc., 4150 Network Circle,
  * Santa Clara, California 95054, U.S.A. All rights reserved.
  *
@@ -78,18 +76,8 @@ public class ActionFactory
     }
 
 
-    public static ServerAction createServerAction(String id, String name,
-                                                  String mnemonic) {
-        ServerAction action = new ServerAction(name, id);
-        if (mnemonic != null && !mnemonic.equals("")) {
-            action.putValue(Action.MNEMONIC_KEY, new Integer(mnemonic.charAt(0)));
-        }
-        return action;
-    }
-
-
-    /**
-     * These methods are usefull for creating targetable actions
+    /*
+     * These methods are useful for creating targetable actions
      */
     public static TargetableAction createTargetableAction(String id, String name) {
         return createTargetableAction(id, name, null);
