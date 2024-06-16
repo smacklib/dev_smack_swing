@@ -1,5 +1,4 @@
-/* $Id$
- *
+/*
  * Common.
  *
  * Released under Gnu Public License
@@ -20,7 +19,6 @@ import org.smack.util.StringUtil;
 /**
  * Utility class for sorting actions.
  *
- * @version $Rev$
  * @author Michael Binz
  */
 class MackActionSorter

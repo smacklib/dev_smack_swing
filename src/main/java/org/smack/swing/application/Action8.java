@@ -14,7 +14,6 @@ import org.smack.util.ServiceManager;
 /**
 * An action taking a method reference as the action delegate.
 *
-* @version $Rev$
 * @author Michael Binz
 */
 public class Action8 extends AbstractActionExt

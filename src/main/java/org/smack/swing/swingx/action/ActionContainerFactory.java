@@ -1,6 +1,4 @@
 /*
- * $Id$
- *
  * Copyright 2004 Sun Microsystems, Inc., 4150 Network Circle,
  * Santa Clara, California 95054, U.S.A. All rights reserved.
  *
@@ -261,7 +259,7 @@ public final class ActionContainerFactory {
         if (container != null) {
             intCode ^= container.hashCode();
         }
-        Integer hashCode = new Integer(intCode);
+        Integer hashCode = Integer.valueOf(intCode);
 
         ButtonGroup group = groupMap.get(hashCode);
         if (group == null) {
