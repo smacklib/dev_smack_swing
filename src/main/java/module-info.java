@@ -5,6 +5,8 @@
  */
 module framework.smack_swing
 {
+    exports org.smack.swing;
+    exports org.smack.swing.swingx;
     exports org.smack.swing.swingx.border;
     exports org.smack.swing.swingx.image;
     exports org.smack.swing.swingx.geom;
@@ -19,7 +21,6 @@ module framework.smack_swing
     exports org.smack.swing.application.session;
     exports org.smack.swing.swingx.calendar;
     exports org.smack.swing.swingx.search;
-    exports org.smack.swing.swingx;
     exports org.smack.swing.swingx.color;
     exports org.smack.swing.swingx.treetable;
     exports org.smack.swing.application.util;
@@ -43,4 +44,5 @@ module framework.smack_swing
     requires java.prefs;
 
     opens org.smack.swing.application to framework.smack;
+    opens org.smack.swing.swingx to framework.smack;
 }
